@@ -1,5 +1,7 @@
 # Shadcn — a shadcn/ui theme for Kanboard
 
+**English** · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md)
+
 Restyles the whole Kanboard interface with the [shadcn/ui](https://ui.shadcn.com)
 design language and swaps the bundled Font Awesome glyphs for
 [HugeIcons](https://hugeicons.com). Light and dark, following each user's own
@@ -439,13 +441,6 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
   the user menu ended up at the bottom of the *page* rather than the bottom of
   the *screen*. Column one of the grid stays behind as an explicit track,
   which is what keeps the content clear of the fixed column.
-- **Dialogs are capped at 40rem.** `core/modal.js` hands every "medium" dialog
-  1024px, which is far wider than the single-column forms inside them. The cap
-  is a `max-width`, so it out-ranks the inline `width` without `!important`.
-  Dialogs opened at size `large` are laid out in columns and do use the room,
-  so the two width values `modal.js` writes for that size are let through by
-  attribute selector; if those numbers ever change, those dialogs just inherit
-  the cap, which is the safe direction to fail in.
 - **The dialog footer is a real button pair.** `submit-buttons.js` emits
   `[Save] " or " [cancel]` — a button, a text node and a link. The link is
   promoted to an outline Button and moved in front of the action, matching
@@ -486,10 +481,6 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
   there rather than an edit to every component. Core paints a few shadows
   directly (dropdown, tooltip, suggest menu, drag ghost, modal) and those are
   neutralised by name.
-- **Focus is an outline, not a ring.** With box shadows gone the focus
-  indicator had to move off `box-shadow`; interactive controls get
-  `outline: 2px solid var(--ring)` with a 2px offset. Fields still take no
-  focus indicator beyond a border-colour change.
 - **Pretty URLs.** Kanboard registers slug routes either way, but only emits
   them when `ENABLE_URL_REWRITE` is on — see `config.php`. `KANBOARD_URL` has
   to be set alongside it, because `UrlHelper::dir()` otherwise guesses the base
