@@ -18,4 +18,6 @@ $scPrivacyUrl = defined('PRIVACY_POLICY_URL') ? PRIVACY_POLICY_URL : '';
     --sc-new-label: "<?= $this->text->e(t('New')) ?>";
     --sc-brand-title: "<?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?>";
     --sc-brand-url: "<?= $this->text->e($this->shadcnSidebar->getBrandUrl()) ?>";
+    --sc-pw-show: "<?= $this->text->e(t('Show password')) ?>";
+    --sc-pw-hide: "<?= $this->text->e(t('Hide password')) ?>";
 }</style>

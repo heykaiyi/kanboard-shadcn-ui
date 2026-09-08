@@ -43,6 +43,13 @@ class BrandingModel extends Base
      */
     const DEFAULT_COLOR = '#1145af';
     const DEFAULT_SECONDARY = '#f7f7f7';
+
+    /**
+     * The two palettes, named. Kanboard's own Theme preference decides which
+     * one a given request is in — this plugin never picks for the user.
+     */
+    const LIGHT = 'light';
+    const DARK = 'dark';
     const DEFAULT_TITLE = '陳愷翊 Kaiyi Chen';
 
     /**
@@ -209,33 +216,68 @@ class BrandingModel extends Base
         return true;
     }
 
-    public function getColor()
+    /**
+     * The two colours, in the two palettes.
+     *
+     * A colour that reads well on white is not always the one that reads
+     * well at night, so each of them can be answered twice. The dark answer
+     * is optional and falls back to the light one, which is what every
+     * instance had before there were two — so an untouched instance renders
+     * exactly what it did.
+     *
+     * `$scheme` is 'light' or 'dark'; anything else is treated as light,
+     * because a wrong scheme should give a colour rather than an error.
+     */
+    public function getColor($scheme = self::LIGHT)
     {
-        return $this->normalizeColor($this->configModel->get('shadcn_brand_color', '')) ?: self::DEFAULT_COLOR;
-    }
-
-    public function hasCustomColor()
-    {
-        return $this->normalizeColor($this->configModel->get('shadcn_brand_color', '')) !== '';
+        return $this->color('shadcn_brand_color', $scheme, self::DEFAULT_COLOR);
     }
 
     /**
-     * The quiet colour.
-     *
-     * Not a second brand colour competing with the first: it is the plate
-     * under the controls that are not the page's action — the search pill and
-     * the bell in the top bar, and the chips inside a multi-select. Left at
-     * the default it is the near-white shadcn ships, which is why an
-     * untouched instance shows no colour there at all.
+     * The quiet colour. Not a second brand colour competing with the first:
+     * it is the plate under the controls that are not the page's action —
+     * the search pill and the bell in the top bar, and the chips inside a
+     * multi-select. Left at the default it is the near-white shadcn ships,
+     * which is why an untouched instance shows no colour there at all.
      */
-    public function getSecondaryColor()
+    public function getSecondaryColor($scheme = self::LIGHT)
     {
-        return $this->normalizeColor($this->configModel->get('shadcn_brand_secondary', '')) ?: self::DEFAULT_SECONDARY;
+        return $this->color('shadcn_brand_secondary', $scheme, self::DEFAULT_SECONDARY);
     }
 
-    public function hasCustomSecondaryColor()
+    public function hasCustomColor($scheme = self::LIGHT)
     {
-        return $this->normalizeColor($this->configModel->get('shadcn_brand_secondary', '')) !== '';
+        return $this->storedColor('shadcn_brand_color', $scheme) !== '';
+    }
+
+    public function hasCustomSecondaryColor($scheme = self::LIGHT)
+    {
+        return $this->storedColor('shadcn_brand_secondary', $scheme) !== '';
+    }
+
+    /**
+     * What the palette actually resolves to: the scheme's own answer, then
+     * the light one, then the theme's default.
+     */
+    private function color($key, $scheme, $default)
+    {
+        $value = $this->storedColor($key, $scheme);
+
+        if ($value === '' && $scheme === self::DARK) {
+            $value = $this->storedColor($key, self::LIGHT);
+        }
+
+        return $value ?: $default;
+    }
+
+    private function storedColor($key, $scheme)
+    {
+        return $this->normalizeColor($this->configModel->get($this->colorKey($key, $scheme), ''));
+    }
+
+    public function colorKey($key, $scheme)
+    {
+        return $scheme === self::DARK ? $key.'_dark' : $key;
     }
 
     public function getTitle()

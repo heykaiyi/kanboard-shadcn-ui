@@ -45,10 +45,15 @@ foreach ($scCommands as $scCommand) {
                 <div class="sc-command-group" data-group="<?= $this->text->e($scGroupName) ?>">
                     <div class="sc-command-group-label"><?= $this->text->e($scGroupName) ?></div>
                     <?php foreach ($scGroupItems as $scItem): ?>
-                        <a class="sc-command-item" href="<?= $scItem['url'] ?>"
+                        <a class="sc-command-item<?= empty($scItem['current']) ? '' : ' is-current' ?>"
+                           href="<?= $scItem['url'] ?>"
+                           <?= empty($scItem['external']) ? '' : 'target="_blank" rel="noopener noreferrer"' ?>
                            data-label="<?= $this->text->e(mb_strtolower($scItem['label'])) ?>">
                             <i class="fa fa-fw fa-<?= $scItem['icon'] ?>" aria-hidden="true"></i>
                             <span><?= $this->text->e($scItem['label']) ?></span>
+                            <?php if (! empty($scItem['current'])): ?>
+                                <span class="sc-command-item-note"><?= t('Current') ?></span>
+                            <?php endif ?>
                         </a>
                     <?php endforeach ?>
                 </div>

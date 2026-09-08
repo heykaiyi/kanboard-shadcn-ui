@@ -1494,6 +1494,19 @@ body:has(> .sc-sb) .select-dropdown-input-container .select-dropdown-chevron {
     display: none;
 }
 
+/* The project you are already in stays in the list — it is the one entry
+ * that says which of them you are looking at — but it is marked rather
+ * than offered. */
+.sc-command-item-note {
+    margin-left: auto;
+    padding-left: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .sc-command-item .fa {
     flex: 0 0 auto;
     color: var(--muted-foreground);

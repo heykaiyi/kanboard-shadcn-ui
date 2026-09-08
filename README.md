@@ -158,8 +158,8 @@ deliberately only eight:
 |---|---|
 | **Application name** | The sidebar mark's label, the login heading, and the sender name on every email. |
 | **Tagline** | The small line under the name in the sidebar. |
-| **Accent color** | One hex value, picked with a swatch or typed. Buttons, links, the active sidebar item, focus borders and the email header. |
-| **Secondary color** | The plate under the quiet controls: the top bar's search box and bell, and the chips inside a multi-select. |
+| **Accent color** | One hex value, picked with a swatch or typed. Buttons, links, the active sidebar item, focus borders and the email header. Answered once for the light palette and once for the dark. |
+| **Secondary color** | The plate under the quiet controls: the top bar's search box and bell, and the chips inside a multi-select. Also two answers. |
 | **Logo** | PNG, JPG, GIF, WebP or SVG, up to 1 MB. Drawn in the sidebar, on the login screen and at the head of every email. |
 | **Lockup** | How much of it is drawn: the mark alone, the mark and the name, or the mark, the name and the tagline. |
 | **Mark size** | 50–200% of the size the theme draws the mark at. |
@@ -209,6 +209,15 @@ multi-select. Its foreground is computed the same way, and the search box's
 label is mixed from that foreground toward the plate rather than fixed to
 grey, so it stays legible on a strong colour as well as on the near-white the
 theme ships.
+
+Each of the two is answered twice — once for the light palette, once for the
+dark — because a colour that reads well on white is not always the one that
+reads well at night. A dark field left empty means "the same colour at night",
+which is what every instance had before there were two. Which palette a person
+sees is their own **Settings → My profile → Theme**; this only decides what
+each one looks like. The dark answers are emitted exactly where the theme's own
+dark tokens are: flat for "Dark", behind `prefers-color-scheme` for "Auto", not
+at all for "Light".
 
 The rest of the palette stays derived. A settings screen with a picker for
 every token is a way to build an ugly instance, not a branded one.
@@ -277,7 +286,8 @@ Shadcn/
     │   └── theme-auto.css            dark tokens behind prefers-color-scheme
     ├── js/
     │   ├── sidebar.js                collapse, drawer, Cmd/Ctrl-B
-    │   ├── modal.js                  marks the notification sheet
+    │   ├── modal.js                  the notification sheet, and dismissal
+    │   ├── password.js               the show/hide control on a password field
     │   ├── command.js                the command palette
     │   ├── navigation.js             page-load progress, one title format
     │   ├── auth.js                   the auth screens' legal footer
@@ -346,7 +356,7 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 | Empty | "There is nothing assigned to you." | ◐ rendered as Alert |
 | Field | `label` + input + `.form-help` + `.form-errors` | ✅ |
 | Hover Card | `#tooltip-container` | ✅ |
-| Input | `input[type=text\|email\|password\|number\|date]` | ✅ |
+| Input | `input[type=text\|email\|password\|number\|date]` — a password field carries a show/hide control | ✅ |
 | Input Group | `.input-addon`, `.input-addon-item` | ✅ |
 | Input OTP | the 2FA code field | ◐ plain Input |
 | Item | `.table-list-row`, `.sidebar > ul li`, sub-task rows | ✅ |
@@ -509,7 +519,22 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
   notification one — matched on the `.notification` wrapper rather than the
   href, which carries no controller name once URL rewriting is on.
 - **The scrim is 80% black in both palettes.** A sheet takes the page out of
-  play; a 10% wash did not say so.
+  play; a 10% wash did not say so. Clicking it closes the sheet, always:
+  core binds that too, but refuses once anything in the form has fired a
+  change event — `isFormDirty` is set on the first keystroke and never
+  cleared, so from then on the only way out was the X.
+- **Every password field carries a show/hide control.** `Assets/js/password.js`
+  wraps the input where it stands, so no template is overridden and a field
+  a sheet loads later is picked up by an observer. The field goes back to
+  `type="password"` on submit — a browser will not offer to save a password
+  it can see as plain text.
+- **The documentation link leaves the instance.** It points at
+  docs.kanboard.org in a tab of its own; the copy bundled with the
+  application is a snapshot of the same site, and always older than it.
+- **Switching project keeps the view you were reading.** Kanboard's own
+  switcher always landed on the board, so leaving the Gantt chart of one
+  project put you on the board of the next. The palette's project entries
+  carry the current view across, and mark the project you are already in.
 - **Nothing takes a focus ring.** Kanboard puts `autofocus` on the first
   input of most dialogs, so an offset halo fired the moment a dialog opened,
   before anyone had touched anything. What marks focus is the element's own

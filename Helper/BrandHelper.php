@@ -157,14 +157,14 @@ class BrandHelper extends Base
         ));
     }
 
-    public function getColor()
+    public function getColor($scheme = BrandingModel::LIGHT)
     {
-        return $this->brandingModel()->getColor();
+        return $this->brandingModel()->getColor($scheme);
     }
 
-    public function getSecondaryColor()
+    public function getSecondaryColor($scheme = BrandingModel::LIGHT)
     {
-        return $this->brandingModel()->getSecondaryColor();
+        return $this->brandingModel()->getSecondaryColor($scheme);
     }
 
     public function getDisplay()
@@ -205,28 +205,10 @@ class BrandHelper extends Base
      * leave the sidebar's active item and the badge fills on the old blue,
      * because tokens.css gave those their own names.
      */
-    public function getThemeCss()
+    public function getThemeCss($theme = BrandingModel::LIGHT)
     {
         $model = $this->brandingModel();
-        $rules = array();
-
-        if ($model->hasCustomColor()) {
-            $color = $model->getColor();
-            $foreground = $model->getForegroundColor($color);
-
-            $rules[] = '--primary: '.$color;
-            $rules[] = '--primary-foreground: '.$foreground;
-            $rules[] = '--sidebar-primary: '.$color;
-            $rules[] = '--sidebar-primary-foreground: '.$foreground;
-            $rules[] = '--badge-primary-foreground: '.$foreground;
-        }
-
-        if ($model->hasCustomSecondaryColor()) {
-            $secondary = $model->getSecondaryColor();
-
-            $rules[] = '--secondary: '.$secondary;
-            $rules[] = '--secondary-foreground: '.$model->getForegroundColor($secondary);
-        }
+        $rules = $this->getColorRules(BrandingModel::LIGHT);
 
         if ($this->hasCustomLogo()) {
             $rules[] = '--sc-logo: url("'.$this->getLogoCssUrl().'")';
@@ -242,7 +224,88 @@ class BrandHelper extends Base
 
         $css = $rules === array() ? '' : ':root {'.implode('; ', $rules).'}';
 
-        return $css.$this->getDisplayCss();
+        return $css.$this->getDarkCss($theme).$this->getDisplayCss();
+    }
+
+    /**
+     * The night answer, gated the way the theme's own dark tokens are.
+     *
+     * Kanboard's Theme preference is per user and already decides which of
+     * light / dark / auto this request is; the template hands that answer
+     * here so the dark colours are emitted exactly where theme-dark.css and
+     * theme-auto.css put theirs — flat for "Dark", behind
+     * prefers-color-scheme for "Auto", and not at all for "Light".
+     *
+     * Only the colours that were answered separately are emitted. A dark
+     * field left empty means "the same colour at night", which is what the
+     * block above already says.
+     */
+    private function getDarkCss($theme)
+    {
+        if ($theme !== BrandingModel::DARK && $theme !== 'auto') {
+            return '';
+        }
+
+        $model = $this->brandingModel();
+        $rules = array();
+
+        if ($model->hasCustomColor(BrandingModel::DARK)) {
+            $rules = array_merge($rules, $this->getPrimaryRules($model->getColor(BrandingModel::DARK)));
+        }
+
+        if ($model->hasCustomSecondaryColor(BrandingModel::DARK)) {
+            $rules = array_merge($rules, $this->getSecondaryRules($model->getSecondaryColor(BrandingModel::DARK)));
+        }
+
+        if ($rules === array()) {
+            return '';
+        }
+
+        $block = ':root {'.implode('; ', $rules).'}';
+
+        return $theme === BrandingModel::DARK ? $block : '@media (prefers-color-scheme: dark){'.$block.'}';
+    }
+
+    private function getColorRules($scheme)
+    {
+        $model = $this->brandingModel();
+        $rules = array();
+
+        if ($model->hasCustomColor($scheme)) {
+            $rules = array_merge($rules, $this->getPrimaryRules($model->getColor($scheme)));
+        }
+
+        if ($model->hasCustomSecondaryColor($scheme)) {
+            $rules = array_merge($rules, $this->getSecondaryRules($model->getSecondaryColor($scheme)));
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Only the tokens that carry the brand are touched. --primary alone would
+     * leave the sidebar's active item and the badge fills on the old blue,
+     * because tokens.css gave those their own names.
+     */
+    private function getPrimaryRules($color)
+    {
+        $foreground = $this->brandingModel()->getForegroundColor($color);
+
+        return array(
+            '--primary: '.$color,
+            '--primary-foreground: '.$foreground,
+            '--sidebar-primary: '.$color,
+            '--sidebar-primary-foreground: '.$foreground,
+            '--badge-primary-foreground: '.$foreground,
+        );
+    }
+
+    private function getSecondaryRules($color)
+    {
+        return array(
+            '--secondary: '.$color,
+            '--secondary-foreground: '.$this->brandingModel()->getForegroundColor($color),
+        );
     }
 
     /**

@@ -104,8 +104,11 @@ $sidebarItems = $this->shadcnSidebar->getDashboardItems();
     </nav>
 
     <div class="sc-sb-secondary">
-        <a class="sc-sb-item<?= $this->shadcnSidebar->isDocumentationActive() ? ' is-active' : '' ?>"
+        <?php /* Kanboard's documentation is a website, so it opens in a tab
+                 of its own rather than replacing the board you were on. */ ?>
+        <a class="sc-sb-item"
            href="<?= $this->shadcnSidebar->getDocumentationUrl() ?>"
+           target="_blank" rel="noopener noreferrer"
            data-sc-tooltip="<?= t('Documentation') ?>">
             <i class="fa fa-fw fa-life-ring" aria-hidden="true"></i>
             <span class="sc-sb-item-label"><?= t('Documentation') ?></span>

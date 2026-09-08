@@ -40,4 +40,25 @@
         window.KB.on('modal.beforeDestroy', clear);
         window.KB.on('modal.close', clear);
     }
+
+    /* Clicking the scrim closes the sheet — always.
+     *
+     * core/modal.js already binds this, but it refuses once anything in the
+     * form has fired a change event: `isFormDirty` is set on the first
+     * keystroke and never cleared, so from then on the only way out is the
+     * X. Dismissing by clicking outside is what a Sheet, a Dialog and a
+     * Drawer all do, so this listener runs in the capture phase and closes
+     * it before core's own handler declines to.
+     */
+    document.addEventListener('click', function (event) {
+        if (event.target.id !== 'modal-overlay') {
+            return;
+        }
+
+        if (window.KB && window.KB.modal && typeof window.KB.modal.close === 'function') {
+            event.preventDefault();
+            event.stopPropagation();
+            window.KB.modal.close();
+        }
+    }, true);
 })();

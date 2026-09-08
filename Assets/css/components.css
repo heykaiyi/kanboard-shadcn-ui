@@ -1354,6 +1354,10 @@ html[data-sc-modal="sheet"] #modal-content:has(.page-header ul li) {
         width: auto !important;
         min-width: 0;
         max-width: none;
+        /* A drawer is a surface that comes up to meet you, not a strip along
+         * the bottom edge: a two-line confirmation gets the same presence as
+         * a form, and the sheet never has to be dragged to be read. */
+        min-height: 40vh;
         max-height: 85vh;
         transform: none;
         border: 1px solid var(--border);
@@ -1530,6 +1534,25 @@ table.table-small {
     font-size: 1rem;
     line-height: 1.5rem;
     margin-bottom: 0.5rem;
+}
+
+/* An avatar is an inline-block, so it sits on the text's baseline plus half
+ * an x-height — which is two or three pixels below the middle of the line
+ * it shares with a name. The rows that pair the two are laid out rather
+ * than aligned, so the answer does not depend on the font. */
+.table-list-row .table-list-title:has(.avatar) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task-board-change-assignee,
+.task-avatar-assignee,
+.activity-title:has(> .avatar),
+.comments .comment-title:has(.avatar) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
 }
 
 .table-list-row .table-list-title a {
@@ -4394,6 +4417,29 @@ td.board-column-task-collapsed:hover,
     line-height: 1.55;
 }
 
+/* A colour is answered twice — once for each palette — so the two answers
+ * stand side by side under one label rather than as two separate settings
+ * that happen to be about the same thing. */
+.sc-brand-schemes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+}
+
+.sc-brand-scheme {
+    display: flex;
+    flex: 1 1 18rem;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+}
+
+.sc-brand-scheme-label {
+    flex: 0 0 2.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
 /* The accent: a swatch, the value it stands for, and a way back to the
  * theme's own colour. */
 .sc-brand-color {
@@ -4443,9 +4489,21 @@ input[type="text"].sc-brand-hex {
 
 /* What the two colours actually look like on the surfaces they reach: the
  * accent as a filled button, a badge and a link, the secondary as the quiet
- * button beside them. The custom properties are set inline by the template
- * and rewritten by branding.js as the values change, so the row answers
- * before the save does. */
+ * button beside them. One row per palette, each drawn on its own ground —
+ * the dark one is the only way to judge a night colour without switching
+ * your own theme to find out. The custom properties are set inline by the
+ * template and rewritten by branding.js as the values change, so the rows
+ * answer before the save does. */
+.sc-brand-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.sc-brand-previews > * {
+    flex: 1 1 20rem;
+}
+
 .sc-brand-preview {
     display: flex;
     flex-wrap: wrap;
@@ -4502,6 +4560,22 @@ input[type="text"].sc-brand-hex {
     font-weight: 500;
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+/* Fixed values rather than tokens: this row is a picture of the other
+ * palette, so it keeps its own ground whichever palette the screen itself
+ * is in. The class is doubled to out-rank the base row above. */
+.sc-brand-preview.sc-brand-preview-dark {
+    border-color: oklch(1 0 0 / 12%);
+    background: oklch(0.145 0 0);
+}
+
+.sc-brand-preview-dark .sc-brand-preview-label {
+    color: oklch(0.708 0 0);
+}
+
+.sc-brand-preview-dark .sc-brand-preview-btn-2 {
+    border-color: oklch(1 0 0 / 15%);
 }
 
 /* An image and what can be done to it. */
@@ -4734,4 +4808,102 @@ input[type="text"].sc-brand-hex {
     .sc-brand-card-body {
         padding: 1.125rem;
     }
+}
+
+/* ===================================================================
+ * Password field — the control that shows what was typed
+ *
+ * Assets/js/password.js wraps every password input where it stands and
+ * puts a button beside it; nothing here needs the markup to have been
+ * written that way, which is why no template is overridden.
+ * =================================================================== */
+
+.sc-pw {
+    position: relative;
+    display: block;
+}
+
+/* The field fills the wrapper so the control lands on its own right edge
+ * rather than somewhere out in the row. form.css caps a password field at
+ * 95% of its container, which is what put the button 5% past the field's
+ * own edge — the cap moves to the wrapper, so the field still ends where an
+ * unwrapped one would. Kanboard's password fields are all block-level, one
+ * to a line, so nothing loses a layout to this. */
+.sc-pw {
+    max-width: 95%;
+}
+
+/* Both types, because the button changes the field's type and
+ * `input[type="text"]` is pinned to 300px — without the second selector the
+ * field snapped narrow the moment the password was shown. */
+.sc-pw > input[type="password"],
+.sc-pw > input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-right: 2.5rem;
+}
+
+/* Except where the theme has already made the fields fill their column. */
+#modal-content .sc-pw,
+.form-login .sc-pw {
+    max-width: 100%;
+}
+
+.sc-pw-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.sc-pw-toggle:hover {
+    background: none;
+    color: var(--foreground);
+}
+
+.sc-pw-toggle:focus-visible {
+    outline: none;
+    color: var(--ring);
+}
+
+/* The glyph is drawn the way every other icon in the theme is: a box
+ * painted with the current colour and masked by the path. */
+.sc-pw-toggle::before {
+    content: "";
+    width: 1.125rem;
+    height: 1.125rem;
+    background-color: currentColor;
+    -webkit-mask-image: var(--shadcn-eye);
+    mask-image: var(--shadcn-eye);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.sc-pw-shown .sc-pw-toggle::before {
+    -webkit-mask-image: var(--shadcn-eye-off);
+    mask-image: var(--shadcn-eye-off);
+}
+
+/* A password manager's own control sits in the same corner. Giving the
+ * field room for both is the browser's business, not the theme's — but the
+ * two should not be drawn on top of each other, so ours steps aside when
+ * the field carries one. */
+.sc-pw > input::-ms-reveal,
+.sc-pw > input::-ms-clear {
+    display: none;
 }

@@ -23,19 +23,12 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             'branding' => array(
                 'title' => $this->shadcnBrandingModel->getTitle(),
                 'subtitle' => $this->shadcnBrandingModel->getSubtitle(),
-                'color' => $this->shadcnBrandingModel->getColor(),
-                'secondary' => $this->shadcnBrandingModel->getSecondaryColor(),
-                'has_custom_secondary' => $this->shadcnBrandingModel->hasCustomSecondaryColor(),
-                'secondary_foreground' => $this->shadcnBrandingModel->getForegroundColor($this->shadcnBrandingModel->getSecondaryColor()),
-                'default_secondary' => BrandingModel::DEFAULT_SECONDARY,
+                'colors' => $this->getColorFields(),
                 'display' => $this->shadcnBrandingModel->getDisplay(),
                 'scale' => $this->shadcnBrandingModel->getLogoScale(),
                 'min_scale' => BrandingModel::MIN_SCALE,
                 'max_scale' => BrandingModel::MAX_SCALE,
                 'default_scale' => BrandingModel::DEFAULT_SCALE,
-                'has_custom_color' => $this->shadcnBrandingModel->hasCustomColor(),
-                'foreground' => $this->shadcnBrandingModel->getForegroundColor($this->shadcnBrandingModel->getColor()),
-                'default_color' => BrandingModel::DEFAULT_COLOR,
                 'logo_url' => $this->helper->shadcnBrand->getLogoCssUrl(),
                 'has_logo' => $this->shadcnBrandingModel->hasImage(BrandingModel::LOGO),
                 'favicon_url' => $this->helper->shadcnBrand->getIconUrl(),
@@ -43,6 +36,53 @@ class ConfigController extends \Kanboard\Controller\ConfigController
                 'max_size' => BrandingModel::MAX_UPLOAD_SIZE,
             ),
         )));
+    }
+
+    /**
+     * The four colour fields, as the screen needs them: two colours, each
+     * answered once for the light palette and once for the dark. The
+     * resolved value is what the swatch shows — a dark field left empty
+     * shows the light colour, which is the colour it will actually be.
+     */
+    private function getColorFields()
+    {
+        $model = $this->shadcnBrandingModel;
+
+        $colors = array(
+            'accent' => array(
+                'key' => 'shadcn_brand_color',
+                'label' => t('Accent color'),
+                'help' => t('Buttons, links, the active sidebar item, focus borders and the email header all follow it.'),
+                'default' => BrandingModel::DEFAULT_COLOR,
+            ),
+            'secondary' => array(
+                'key' => 'shadcn_brand_secondary',
+                'label' => t('Secondary color'),
+                'help' => t('The plate under the quiet controls: the search box and the bell in the top bar, and the chips inside a multi-select.'),
+                'default' => BrandingModel::DEFAULT_SECONDARY,
+            ),
+        );
+
+        foreach ($colors as $name => $color) {
+            foreach (array(BrandingModel::LIGHT, BrandingModel::DARK) as $scheme) {
+                $value = $name === 'accent'
+                    ? $model->getColor($scheme)
+                    : $model->getSecondaryColor($scheme);
+
+                $custom = $name === 'accent'
+                    ? $model->hasCustomColor($scheme)
+                    : $model->hasCustomSecondaryColor($scheme);
+
+                $colors[$name]['schemes'][$scheme] = array(
+                    'name' => $model->colorKey($color['key'], $scheme),
+                    'value' => $custom ? $value : '',
+                    'resolved' => $value,
+                    'foreground' => $model->getForegroundColor($value),
+                );
+            }
+        }
+
+        return $colors;
     }
 
     /**
@@ -75,7 +115,12 @@ class ConfigController extends \Kanboard\Controller\ConfigController
 
         $colors = array();
 
-        foreach (array('shadcn_brand_color', 'shadcn_brand_secondary') as $field) {
+        foreach (array(
+            'shadcn_brand_color',
+            'shadcn_brand_color_dark',
+            'shadcn_brand_secondary',
+            'shadcn_brand_secondary_dark',
+        ) as $field) {
             $raw = isset($values[$field]) ? $values[$field] : '';
             $colors[$field] = $this->shadcnBrandingModel->normalizeColor($raw);
 
@@ -99,7 +144,9 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             'shadcn_brand_title' => isset($values['shadcn_brand_title']) ? trim($values['shadcn_brand_title']) : '',
             'shadcn_brand_subtitle' => isset($values['shadcn_brand_subtitle']) ? trim($values['shadcn_brand_subtitle']) : '',
             'shadcn_brand_color' => $colors['shadcn_brand_color'],
+            'shadcn_brand_color_dark' => $colors['shadcn_brand_color_dark'],
             'shadcn_brand_secondary' => $colors['shadcn_brand_secondary'],
+            'shadcn_brand_secondary_dark' => $colors['shadcn_brand_secondary_dark'],
             'shadcn_brand_display' => $display,
             'shadcn_brand_logo_scale' => $this->shadcnBrandingModel->normalizeScale(
                 isset($values['shadcn_brand_logo_scale']) ? $values['shadcn_brand_logo_scale'] : ''

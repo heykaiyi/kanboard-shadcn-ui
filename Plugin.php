@@ -111,6 +111,12 @@ class Plugin extends Base
             'template' => 'plugins/Shadcn/Assets/js/branding.js',
         ));
 
+        // 5f. A way to see what was typed into a password field. Every one
+        //     of them, including the ones a sheet loads later.
+        $this->hook->on('template:layout:js', array(
+            'template' => 'plugins/Shadcn/Assets/js/password.js',
+        ));
+
         $this->template->hook->attach('template:layout:head', 'shadcn:layout/auth_strings');
 
         // 6. Dark tokens, chosen from the user's own Kanboard theme setting.
@@ -190,7 +196,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '0.32.1';
+        return '0.33.0';
     }
 
     public function getPluginHomepage()

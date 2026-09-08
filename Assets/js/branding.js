@@ -18,7 +18,9 @@
         return;
     }
 
-    var preview = form.querySelector('.sc-brand-preview');
+    function previewFor(scheme) {
+        return form.querySelector('[data-sc-brand-preview-scheme="' + scheme + '"]');
+    }
 
     /* The same rule BrandingModel applies on the server: whichever of black
      * or white has the better contrast ratio against the accent, so a pale
@@ -57,6 +59,7 @@
      * a matter of adding a third group to the template. */
     Array.prototype.forEach.call(form.querySelectorAll('[data-sc-brand-color]'), function (group) {
         var key = group.getAttribute('data-sc-brand-color');
+        var preview = previewFor(group.getAttribute('data-sc-brand-scheme'));
         var hex = group.querySelector('.sc-brand-hex');
         var swatch = group.querySelector('.sc-brand-swatch');
         var reset = group.querySelector('.sc-brand-reset');

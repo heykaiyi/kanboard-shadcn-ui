@@ -12,7 +12,7 @@
  * login screen), which is what we want.
  */
 $shadcn_theme = $this->user->getTheme();
-$shadcn_brand_css = $this->shadcnBrand->getThemeCss();
+$shadcn_brand_css = $this->shadcnBrand->getThemeCss($shadcn_theme);
 ?>
 <?php /* Noto Sans TC is not on most machines, so the stack alone would quietly
        * fall through to PingFang TC or Microsoft JhengHei. Google serves it

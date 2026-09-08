@@ -125,18 +125,22 @@ class SidebarHelper extends Base
      * With the Wiki plugin installed there is a real place for project
      * documentation, so the link goes there instead.
      */
+    /**
+     * Kanboard's own documentation, which is a website rather than a page of
+     * this instance — so it opens in a tab of its own and is never the
+     * "current" item in the sidebar. The copy bundled with the application is
+     * a snapshot of the same site, and always older than it.
+     */
+    const DOCUMENTATION_URL = 'https://docs.kanboard.org/';
+
     public function getDocumentationUrl()
     {
-        if ($this->hasPlugin('Wiki')) {
-            return $this->helper->url->href('WikiController', 'index', array('plugin' => 'wiki'));
-        }
-
-        return $this->helper->url->href('DocumentationController', 'show');
+        return self::DOCUMENTATION_URL;
     }
 
     public function isDocumentationActive()
     {
-        return $this->isActive('DocumentationController') || $this->isActive('WikiController');
+        return false;
     }
 
     public function hasPlugin($name)
@@ -164,12 +168,19 @@ class SidebarHelper extends Base
             );
         }
 
+        /* Switching project keeps the view you were reading. Kanboard's own
+         * switcher always landed on the board, which meant leaving the Gantt
+         * chart of one project put you on the board of the next. */
+        list($viewController, $viewAction) = $this->getProjectViewRoute();
+        $currentProject = $this->getProject();
+
         foreach ($this->getProjects() as $projectId => $projectName) {
             $items[] = array(
                 'group' => t('Projects'),
                 'label' => $projectName,
-                'url' => $this->helper->url->href('BoardViewController', 'show', array('project_id' => $projectId)),
+                'url' => $this->helper->url->href($viewController, $viewAction, array('project_id' => $projectId)),
                 'icon' => 'folder',
+                'current' => ! empty($currentProject) && (int) $currentProject['id'] === (int) $projectId,
             );
         }
 
@@ -191,6 +202,9 @@ class SidebarHelper extends Base
                     ? $this->getDocumentationUrl()
                     : $this->helper->url->href($entry[0], $entry[1], array()),
                 'icon' => $entry[3],
+                // The documentation is a website, so it opens beside the
+                // instance rather than over it.
+                'external' => $entry[0] === '__doc__',
             );
         }
 
@@ -448,6 +462,32 @@ class SidebarHelper extends Base
         }
 
         return array();
+    }
+
+    /**
+     * The project view the current page is, or the board when the page is
+     * not a project view at all. Only the five the sidebar itself offers —
+     * a project's settings screen is not a view to carry across.
+     */
+    private function getProjectViewRoute()
+    {
+        $views = array(
+            'ProjectOverviewController' => 'show',
+            'BoardViewController' => 'show',
+            'TaskListController' => 'show',
+            'CalendarController' => 'show',
+            'TaskGanttController' => 'show',
+        );
+
+        $controller = $this->router->getController();
+
+        foreach ($views as $name => $action) {
+            if (strtolower($name) === strtolower($controller)) {
+                return array($name, $action);
+            }
+        }
+
+        return array('BoardViewController', 'show');
     }
 
     private function getSectionLabel()
