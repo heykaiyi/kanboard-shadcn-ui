@@ -957,7 +957,7 @@ td a.dropdown-menu strong {
     /* The title row, the close control and the two paddings are laid out
      * from one set of values, so they cannot drift apart whatever any one
      * of them is set to. */
-    --sc-dialog-pad-top: 1.5rem;
+    --sc-dialog-pad-top: 1.125rem;
     --sc-dialog-pad-side: 1.5rem;
     --sc-dialog-head-height: 2.25rem;
 
@@ -3551,8 +3551,8 @@ body:has(> .form-login):not(:has(.sc-auth-brand))::before {
     top: 1.5rem;
     left: 1.5rem;
     display: flex;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: calc(2.25rem * var(--sc-brand-scale, 1));
+    height: calc(2.25rem * var(--sc-brand-scale, 1));
     background: var(--sc-logo) center / contain no-repeat;
 }
 
@@ -3612,8 +3612,9 @@ body:has(> .form-login) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    flex: 0 0 auto;
+    width: calc(2.25rem * var(--sc-brand-scale, 1));
+    height: calc(2.25rem * var(--sc-brand-scale, 1));
     background: var(--sc-logo) center / contain no-repeat;
 }
 
@@ -4569,6 +4570,125 @@ input[type="text"].sc-brand-hex {
 
 .sc-brand-restore {
     align-self: flex-start;
+}
+
+/* How much of the lockup is drawn, and how large the mark is drawn in it.
+ * Side by side, because they answer the same question about the same
+ * thing — and both preview on the real sidebar as they are changed. */
+.sc-brand-lockup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.sc-brand-choice {
+    display: flex;
+    flex: 1 1 16rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.sc-brand-choice legend {
+    margin: 0 0 0.25rem;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sc-brand-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.sc-brand-radio input[type="radio"] {
+    margin: 0;
+}
+
+.sc-brand-scale {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.sc-brand-scale label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sc-brand-scale output {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Slider, drawn rather than left to the platform: a bare range input is
+ * the one control on this screen that would still look like 2009. */
+.sc-brand-scale input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.25rem;
+    margin: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.sc-brand-scale input[type="range"]::-webkit-slider-runnable-track {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: var(--muted);
+}
+
+.sc-brand-scale input[type="range"]::-moz-range-track {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: var(--muted);
+}
+
+.sc-brand-scale input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: -0.375rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--background);
+    box-shadow: var(--shadow-xs);
+}
+
+.sc-brand-scale input[type="range"]::-moz-range-thumb {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--background);
+}
+
+.sc-brand-scale input[type="range"]:focus-visible {
+    outline: none;
+}
+
+.sc-brand-scale input[type="range"]:focus-visible::-webkit-slider-thumb {
+    border-color: var(--ring);
+}
+
+.sc-brand-scale input[type="range"]:focus-visible::-moz-range-thumb {
+    border-color: var(--ring);
 }
 
 .sc-brand-actions {

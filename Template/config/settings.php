@@ -121,6 +121,43 @@ $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_su
                     <?php endif ?>
                 </div>
             </div>
+
+            <?php /* How much of the lockup is drawn, and how large the mark
+                     is drawn in it. Both preview on the real sidebar as they
+                     are changed, which is the whole reason they sit here
+                     rather than in a column of labelled inputs. */ ?>
+            <div class="sc-brand-lockup">
+                <fieldset class="sc-brand-choice">
+                    <legend><?= t('Lockup') ?></legend>
+
+                    <?php foreach (array(
+                        'mark'  => t('Mark only'),
+                        'title' => t('Mark and name'),
+                        'full'  => t('Mark, name and tagline'),
+                    ) as $scValue => $scLabel): ?>
+                        <label class="sc-brand-radio">
+                            <input type="radio" name="shadcn_brand_display" value="<?= $scValue ?>"
+                                   data-sc-brand-display
+                                   <?= $branding['display'] === $scValue ? 'checked' : '' ?>>
+                            <span><?= $this->text->e($scLabel) ?></span>
+                        </label>
+                    <?php endforeach ?>
+
+                    <p class="sc-brand-help"><?= t('Applies to the sidebar, the phone top bar and the login screen. Email always carries the name, whatever is chosen here.') ?></p>
+                </fieldset>
+
+                <div class="sc-brand-field sc-brand-scale">
+                    <label for="form-shadcn_brand_logo_scale">
+                        <?= t('Mark size') ?>
+                        <output for="form-shadcn_brand_logo_scale" data-sc-brand-scale-output><?= (int) $branding['scale'] ?>%</output>
+                    </label>
+                    <input type="range" name="shadcn_brand_logo_scale" id="form-shadcn_brand_logo_scale"
+                           min="<?= (int) $branding['min_scale'] ?>" max="<?= (int) $branding['max_scale'] ?>" step="5"
+                           value="<?= (int) $branding['scale'] ?>"
+                           data-sc-brand-scale data-default="<?= (int) $branding['default_scale'] ?>">
+                    <p class="sc-brand-help"><?= t('A percentage of the size the theme draws the mark at. The sidebar beside this screen follows the slider.') ?></p>
+                </div>
+            </div>
         </div>
     </section>
 

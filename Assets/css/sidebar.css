@@ -308,14 +308,16 @@ body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-
     display: none;
 }
 
-/* SidebarMenuButton, size="lg" — the brand tile. */
+/* SidebarMenuButton, size="lg" — the brand tile. The row is a minimum
+ * rather than a height: the mark's size is a setting, and at 200% it has
+ * to be allowed to make the row taller instead of overflowing it. */
 .sc-sb-brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     width: 100%;
     min-width: 0;
-    height: 3rem;
+    min-height: 3rem;
     padding: 0;
     color: var(--sidebar-foreground);
     text-decoration: none;
@@ -331,14 +333,19 @@ body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-
 }
 
 /* The logo carries its own plate and its own rounded corners, so the
- * element under it draws neither. */
+ * element under it draws neither.
+ *
+ * --sc-brand-scale is the one number Settings → Appearance sets for every
+ * mark in the theme. A multiplier rather than a length, because each place
+ * draws the mark at its own base size and one setting has to move all of
+ * them without flattening them to one size. */
 .sc-sb-brand-mark {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    width: 2rem;
-    height: 2rem;
+    width: calc(2rem * var(--sc-brand-scale, 1));
+    height: calc(2rem * var(--sc-brand-scale, 1));
     background: var(--sc-logo) center / contain no-repeat;
     font-size: 0.8125rem;
     font-weight: 600;
@@ -756,7 +763,7 @@ html[data-sc-sidebar="collapsed"] .sc-sb-item {
 }
 
 html[data-sc-sidebar="collapsed"] .sc-sb-brand {
-    height: 2rem;
+    min-height: 2rem;
 }
 
 /* The label becomes a tooltip, the way shadcn switches SidebarMenuButton to
@@ -1319,8 +1326,9 @@ body:has(> .sc-sb) .select-dropdown-input-container .select-dropdown-chevron {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    flex: 0 0 auto;
+    width: calc(2rem * var(--sc-brand-scale, 1));
+    height: calc(2rem * var(--sc-brand-scale, 1));
     background: var(--sc-logo) center / contain no-repeat;
 }
 

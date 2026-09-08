@@ -245,4 +245,11 @@ return array(
     'A link' => '連結',
     'Choose an image' => '選擇圖片',
     'No file selected' => '尚未選擇檔案',
+    'Lockup' => '顯示方式',
+    'Mark only' => '只有標誌',
+    'Mark and name' => '標誌加名稱',
+    'Mark, name and tagline' => '標誌、名稱加副標題',
+    'Applies to the sidebar, the phone top bar and the login screen. Email always carries the name, whatever is chosen here.' => '會套用在側邊欄、手機版頂端列與登入頁。信件一律帶名稱，不受這裡影響。',
+    'Mark size' => '標誌大小',
+    'A percentage of the size the theme draws the mark at. The sidebar beside this screen follows the slider.' => '相對於佈景主題原本尺寸的百分比。拉的時候旁邊側邊欄的標誌會跟著變。',
 );

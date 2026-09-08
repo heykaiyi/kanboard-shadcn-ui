@@ -151,8 +151,8 @@ third-party plugins reach for.
 
 ## Branding
 
-**Settings → Appearance** (`/settings/brand`), admin only. Five things, and
-deliberately only five:
+**Settings → Appearance** (`/settings/brand`), admin only. Seven things, and
+deliberately only seven:
 
 | | |
 |---|---|
@@ -160,6 +160,8 @@ deliberately only five:
 | **Tagline** | The small line under the name in the sidebar. |
 | **Accent color** | One hex value, picked with a swatch or typed. |
 | **Logo** | PNG, JPG, GIF, WebP or SVG, up to 1 MB. Drawn in the sidebar, on the login screen and at the head of every email. |
+| **Lockup** | How much of it is drawn: the mark alone, the mark and the name, or the mark, the name and the tagline. |
+| **Mark size** | 50–200% of the size the theme draws the mark at. |
 | **Favicon** | The same formats. Leave it empty and the logo is used as the tab icon. |
 
 Everything is optional; an empty field means the bundled default, so
@@ -168,9 +170,27 @@ Everything is optional; an empty field means the bundled default, so
 The screen answers before the save does: the swatch and the hex field are two
 views of one value, a preview row shows the colour as a button, a badge and a
 link — including the black-or-white label the theme will compute for it — and
-a chosen image is drawn in its plate before it is uploaded. All of that is
+a chosen image is drawn in its plate before it is uploaded. The lockup and the
+mark size have a better preview still: the sidebar standing beside the screen
+*is* the preview, and it follows the radio and the slider live. All of that is
 `Assets/js/branding.js`, and none of it is required: without JavaScript the
 swatch is simply a second input that is not submitted.
+
+### Lockup and size
+
+A mark that already contains its own wordmark does not want the name printed
+beside it; an instance whose name is the point does not want a tagline under
+it. So the three spans are always rendered and the choice is one stylesheet
+fragment that hides what is not wanted — which is why the brand links carry an
+`aria-label`, and why the preview costs nothing but a `<style>` element. Email
+is the exception: it always carries the name, because a notification from a
+picture is not a notification from anyone.
+
+**Mark size** is a multiplier, not a length. Each place draws the mark at its
+own base — 2rem in the sidebar, 2.25rem on the login screen — and
+`--sc-brand-scale` moves all of them without flattening them to one size. The
+sidebar's brand row is a `min-height`, so at 200% the row grows instead of
+clipping.
 
 ### Why one colour and not forty
 

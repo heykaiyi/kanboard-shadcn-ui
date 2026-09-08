@@ -162,6 +162,16 @@ class BrandHelper extends Base
         return $this->brandingModel()->getColor();
     }
 
+    public function getDisplay()
+    {
+        return $this->brandingModel()->getDisplay();
+    }
+
+    public function getLogoScale()
+    {
+        return $this->brandingModel()->getLogoScale();
+    }
+
     public function getForegroundColor()
     {
         return $this->brandingModel()->getForegroundColor($this->getColor());
@@ -210,7 +220,38 @@ class BrandHelper extends Base
             $rules[] = '--sc-logo: url("'.$this->getLogoCssUrl().'")';
         }
 
-        return $rules === array() ? '' : ':root {'.implode('; ', $rules).'}';
+        if ($model->hasCustomLogoScale()) {
+            // A multiplier rather than a length: every mark in the theme is
+            // sized off its own base — 2rem in the sidebar, 2.25rem on the
+            // login screen — and one number has to move all of them without
+            // flattening them to the same size.
+            $rules[] = '--sc-brand-scale: '.number_format($model->getLogoScale() / 100, 2, '.', '');
+        }
+
+        $css = $rules === array() ? '' : ':root {'.implode('; ', $rules).'}';
+
+        return $css.$this->getDisplayCss();
+    }
+
+    /**
+     * The lockup, as the rules that take parts of it away.
+     *
+     * The three spans are always rendered — the brand links carry an
+     * aria-label, so hiding the text costs nothing a reader needs — which
+     * means the choice is one stylesheet fragment rather than a branch in
+     * four templates. It is also what lets the settings screen preview the
+     * change on the real sidebar as the radio is clicked.
+     */
+    public function getDisplayCss()
+    {
+        switch ($this->getDisplay()) {
+            case BrandingModel::DISPLAY_MARK:
+                return '.sc-sb-brand-text, .sc-topbar-brand-name, .sc-auth-brand-title {display: none}';
+            case BrandingModel::DISPLAY_TITLE:
+                return '.sc-sb-brand-sub {display: none}';
+            default:
+                return '';
+        }
     }
 
     /**

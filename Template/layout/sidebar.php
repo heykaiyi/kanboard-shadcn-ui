@@ -34,7 +34,7 @@ $sidebarItems = $this->shadcnSidebar->getDashboardItems();
 ?>
 <aside class="sc-sb" id="sc-sidebar" aria-label="<?= t('Navigation') ?>">
     <div class="sc-sb-header">
-        <a class="sc-sb-brand" href="<?= $this->url->href('DashboardController', 'show') ?>">
+        <a class="sc-sb-brand" href="<?= $this->url->href('DashboardController', 'show') ?>" aria-label="<?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?>">
             <span class="sc-sb-brand-mark" aria-hidden="true"></span>
             <span class="sc-sb-brand-text">
                 <span class="sc-sb-brand-title"><?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?></span>

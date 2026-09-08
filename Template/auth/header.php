@@ -13,7 +13,7 @@
        * style-src allows 'unsafe-inline', script-src does not. */ ?>
 <style>:root { --sc-or-label: "<?= $this->text->e(t('Or continue with')) ?>"; }</style>
 
-<a class="sc-auth-brand" href="<?= $this->shadcnSidebar->getBrandUrl() ?>">
+<a class="sc-auth-brand" href="<?= $this->shadcnSidebar->getBrandUrl() ?>" aria-label="<?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?>">
     <span class="sc-auth-brand-mark" aria-hidden="true"></span>
     <span class="sc-auth-brand-title"><?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?></span>
 </a>

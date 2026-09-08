@@ -24,6 +24,11 @@ class ConfigController extends \Kanboard\Controller\ConfigController
                 'title' => $this->shadcnBrandingModel->getTitle(),
                 'subtitle' => $this->shadcnBrandingModel->getSubtitle(),
                 'color' => $this->shadcnBrandingModel->getColor(),
+                'display' => $this->shadcnBrandingModel->getDisplay(),
+                'scale' => $this->shadcnBrandingModel->getLogoScale(),
+                'min_scale' => BrandingModel::MIN_SCALE,
+                'max_scale' => BrandingModel::MAX_SCALE,
+                'default_scale' => BrandingModel::DEFAULT_SCALE,
                 'has_custom_color' => $this->shadcnBrandingModel->hasCustomColor(),
                 'foreground' => $this->shadcnBrandingModel->getForegroundColor($this->shadcnBrandingModel->getColor()),
                 'default_color' => BrandingModel::DEFAULT_COLOR,
@@ -72,10 +77,23 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             return;
         }
 
+        // Both of these come from controls with a fixed set of answers, so
+        // anything else is a forged post rather than a mistake to report:
+        // the value simply falls back to the default.
+        $display = isset($values['shadcn_brand_display']) ? $values['shadcn_brand_display'] : '';
+
+        if (! in_array($display, BrandingModel::getDisplayModes(), true)) {
+            $display = BrandingModel::DEFAULT_DISPLAY;
+        }
+
         $saved = $this->configModel->save(array(
             'shadcn_brand_title' => isset($values['shadcn_brand_title']) ? trim($values['shadcn_brand_title']) : '',
             'shadcn_brand_subtitle' => isset($values['shadcn_brand_subtitle']) ? trim($values['shadcn_brand_subtitle']) : '',
             'shadcn_brand_color' => $color,
+            'shadcn_brand_display' => $display,
+            'shadcn_brand_logo_scale' => $this->shadcnBrandingModel->normalizeScale(
+                isset($values['shadcn_brand_logo_scale']) ? $values['shadcn_brand_logo_scale'] : ''
+            ),
         ));
 
         $failures = array();

@@ -11,8 +11,9 @@ use RuntimeException;
  * The theme itself is deliberately not configurable — a settings screen with
  * forty colour pickers is a way to build an ugly instance, not a branded one.
  * What is configurable is the short list that actually says whose instance
- * this is: the mark, the tab icon, the name and one accent colour. Everything
- * else stays derived, so a wrong answer here cannot make the interface
+ * this is: the mark, how much of the lockup is drawn and how large the mark
+ * is drawn, the tab icon, the name and one accent colour. Everything else
+ * stays derived, so a wrong answer here cannot make the interface
  * unreadable.
  *
  * Values live in Kanboard's own `settings` table, so they survive a plugin
@@ -42,6 +43,28 @@ class BrandingModel extends Base
      */
     const DEFAULT_COLOR = '#1145af';
     const DEFAULT_TITLE = '陳愷翊 Kaiyi Chen';
+
+    /**
+     * How much of the lockup is drawn.
+     *
+     * A mark that already contains its own wordmark does not want the name
+     * printed beside it, and an instance whose name is the point does not
+     * want a tagline under it. Three answers cover every logo anyone has:
+     * the mark alone, the mark and the name, or all three.
+     */
+    const DISPLAY_MARK = 'mark';
+    const DISPLAY_TITLE = 'title';
+    const DISPLAY_FULL = 'full';
+    const DEFAULT_DISPLAY = self::DISPLAY_FULL;
+
+    /**
+     * The mark's size, as a percentage of the size the theme draws it at.
+     * Bounded rather than free: a logo is one element of a row that also
+     * holds a name, and outside this range it stops being that.
+     */
+    const DEFAULT_SCALE = 100;
+    const MIN_SCALE = 50;
+    const MAX_SCALE = 200;
 
     /**
      * What each slot accepts, and the type it is served back as.
@@ -198,6 +221,57 @@ class BrandingModel extends Base
     public function getTitle()
     {
         return $this->configModel->get('shadcn_brand_title', self::DEFAULT_TITLE);
+    }
+
+    /**
+     * Which of the three lockups this instance draws. An unknown value —
+     * a hand-edited settings row, a downgrade — reads as the default rather
+     * than as a broken sidebar.
+     */
+    public function getDisplay()
+    {
+        $display = $this->configModel->get('shadcn_brand_display', self::DEFAULT_DISPLAY);
+
+        return in_array($display, self::getDisplayModes(), true) ? $display : self::DEFAULT_DISPLAY;
+    }
+
+    public static function getDisplayModes()
+    {
+        return array(self::DISPLAY_MARK, self::DISPLAY_TITLE, self::DISPLAY_FULL);
+    }
+
+    /**
+     * The mark's size as a percentage. Out-of-range values are pulled back
+     * to the nearest end rather than refused: the setting arrives from a
+     * slider, and a number outside its own range is not worth an error.
+     */
+    public function getLogoScale()
+    {
+        $scale = (int) $this->configModel->get('shadcn_brand_logo_scale', self::DEFAULT_SCALE);
+
+        return max(self::MIN_SCALE, min(self::MAX_SCALE, $scale));
+    }
+
+    public function hasCustomLogoScale()
+    {
+        return $this->getLogoScale() !== self::DEFAULT_SCALE;
+    }
+
+    /**
+     * A percentage the settings screen can save, or an empty string for
+     * "leave it at the default" — the same contract normalizeColor has.
+     */
+    public function normalizeScale($value)
+    {
+        $value = trim((string) $value);
+
+        if ($value === '' || ! ctype_digit(ltrim($value, '-'))) {
+            return '';
+        }
+
+        $scale = max(self::MIN_SCALE, min(self::MAX_SCALE, (int) $value));
+
+        return $scale === self::DEFAULT_SCALE ? '' : (string) $scale;
     }
 
     public function getSubtitle()

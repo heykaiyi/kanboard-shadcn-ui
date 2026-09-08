@@ -93,6 +93,55 @@
         });
     }
 
+    /* The mark's size, on the sidebar standing beside this screen. The
+     * property is the same one the theme's CSS multiplies every mark by, so
+     * the slider moves the real logo rather than a mock-up of it. */
+    var scale = form.querySelector('[data-sc-brand-scale]');
+    var scaleOutput = form.querySelector('[data-sc-brand-scale-output]');
+
+    if (scale !== null) {
+        scale.addEventListener('input', function () {
+            if (scaleOutput !== null) {
+                scaleOutput.textContent = scale.value + '%';
+            }
+
+            document.documentElement.style.setProperty('--sc-brand-scale', (scale.value / 100).toFixed(2));
+        });
+    }
+
+    /* Which parts of the lockup are drawn, previewed the same way.
+     *
+     * Template/layout/head.php has already emitted the saved answer as a
+     * stylesheet; this one is appended after it, so it wins. Each mode
+     * therefore states the whole answer — what is shown as well as what is
+     * hidden — rather than relying on what the page happened to load with.
+     */
+    var SHOW = '.sc-sb-brand-text{display:grid}'
+        + '.sc-sb-brand-sub,.sc-topbar-brand-name,.sc-auth-brand-title{display:block}';
+
+    var LOCKUPS = {
+        full: SHOW,
+        title: SHOW + '.sc-sb-brand-sub{display:none}',
+        mark: SHOW + '.sc-sb-brand-text,.sc-topbar-brand-name,.sc-auth-brand-title{display:none}'
+    };
+
+    var lockupStyle = null;
+
+    Array.prototype.forEach.call(form.querySelectorAll('[data-sc-brand-display]'), function (radio) {
+        radio.addEventListener('change', function () {
+            if (! radio.checked) {
+                return;
+            }
+
+            if (lockupStyle === null) {
+                lockupStyle = document.createElement('style');
+                document.head.appendChild(lockupStyle);
+            }
+
+            lockupStyle.textContent = LOCKUPS[radio.value] || LOCKUPS.full;
+        });
+    });
+
     /* The chosen file, drawn where the current one is. The object URL is
      * released when it is replaced, so picking a file five times in a row
      * does not hold five images. */
