@@ -99,8 +99,14 @@
 
     /* Badge fills. A tinted background rather than a bare outline, in the
      * four meanings Kanboard actually distinguishes. */
-    /* Cards and neutral chips share one surface, so a card never reads as a
-     * different kind of thing from the chips inside it. */
+    /* The filled card.
+     *
+     * --card is the page's own white, so a block that takes it reads as a
+     * bare outline rather than as a surface. This is the version that is
+     * meant to be seen: the blocks that carry content rather than chrome —
+     * a message, an activity entry, a plain alert — sit on it, and so do
+     * the neutral chips, so a card never reads as a different kind of
+     * thing from the chips inside it. */
     --surface-neutral: #fafafa;
     --badge-neutral: #fafafa;
     --badge-neutral-foreground: var(--foreground);

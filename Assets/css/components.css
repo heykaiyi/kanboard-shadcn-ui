@@ -948,8 +948,12 @@ td a.dropdown-menu strong {
  * the shape a sheet takes when there is no room beside the content.
  * =================================================================== */
 
+/* The scrim scrolls nothing: the sheet inside it is fixed and full height,
+ * so core's `overflow: auto` here can only ever add a second scrollbar
+ * beside the one the sheet's own body already has. */
 #modal-overlay {
     background: var(--overlay);
+    overflow: hidden;
     animation: shadcn-fade-in 0.15s ease-out;
 }
 
@@ -977,6 +981,10 @@ td a.dropdown-menu strong {
     max-width: 100vw;
     max-height: 100vh;
     transform: none;
+    /* The sheet itself does not scroll — #modal-content does. Core sets
+     * `overflow: auto` on this element, which put a second scrollbar
+     * alongside the body's own. */
+    overflow: hidden;
     background: var(--background);
     color: var(--foreground);
     border: none;
@@ -1685,7 +1693,7 @@ span.task-date-today,
     margin: 0.5rem 0 1rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    background-color: var(--card);
+    background-color: var(--surface-neutral);
     color: var(--card-foreground);
     font-size: 0.9375rem;
     line-height: 1.375rem;
@@ -2472,7 +2480,7 @@ div.draggable-item-selected {
     padding: 0.625rem 0.875rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    background: var(--card);
+    background: var(--surface-neutral);
     color: var(--card-foreground);
     transition: border-color 0.15s ease;
 }
@@ -2588,7 +2596,7 @@ div.draggable-item-selected {
     padding: 0.625rem 0.875rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    background: var(--card);
+    background: var(--surface-neutral);
     color: var(--muted-foreground);
 }
 

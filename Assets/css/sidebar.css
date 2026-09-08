@@ -914,13 +914,19 @@ body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a:hover
     text-decoration: none;
 }
 
-/* Inside a plate the glyph is a size smaller than it was standing alone. */
+/* Inside a plate the glyph is a size smaller than it was standing alone.
+ *
+ * The margin has to go with it: `a .fa` carries 0.375rem on its right to
+ * separate a glyph from the label beside it, and this link has no label —
+ * so that margin was counted into the centring and sat the bell 3px left
+ * of the middle of its own button. */
 body:has(> .sc-sb) > header > .menus-container > .notification .fa {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 1.25rem;
     height: 1.25rem;
+    margin: 0;
     font-size: 1.25rem;
     line-height: 1;
 }
