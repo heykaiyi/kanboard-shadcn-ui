@@ -42,6 +42,7 @@ class BrandingModel extends Base
      * so removing a custom value is the same operation as never setting one.
      */
     const DEFAULT_COLOR = '#1145af';
+    const DEFAULT_SECONDARY = '#f7f7f7';
     const DEFAULT_TITLE = '陳愷翊 Kaiyi Chen';
 
     /**
@@ -216,6 +217,25 @@ class BrandingModel extends Base
     public function hasCustomColor()
     {
         return $this->normalizeColor($this->configModel->get('shadcn_brand_color', '')) !== '';
+    }
+
+    /**
+     * The quiet colour.
+     *
+     * Not a second brand colour competing with the first: it is the plate
+     * under the controls that are not the page's action — the search pill and
+     * the bell in the top bar, and the chips inside a multi-select. Left at
+     * the default it is the near-white shadcn ships, which is why an
+     * untouched instance shows no colour there at all.
+     */
+    public function getSecondaryColor()
+    {
+        return $this->normalizeColor($this->configModel->get('shadcn_brand_secondary', '')) ?: self::DEFAULT_SECONDARY;
+    }
+
+    public function hasCustomSecondaryColor()
+    {
+        return $this->normalizeColor($this->configModel->get('shadcn_brand_secondary', '')) !== '';
     }
 
     public function getTitle()

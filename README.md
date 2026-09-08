@@ -151,14 +151,15 @@ third-party plugins reach for.
 
 ## Branding
 
-**Settings → Appearance** (`/settings/brand`), admin only. Seven things, and
-deliberately only seven:
+**Settings → Appearance** (`/settings/brand`), admin only. Eight things, and
+deliberately only eight:
 
 | | |
 |---|---|
 | **Application name** | The sidebar mark's label, the login heading, and the sender name on every email. |
 | **Tagline** | The small line under the name in the sidebar. |
-| **Accent color** | One hex value, picked with a swatch or typed. |
+| **Accent color** | One hex value, picked with a swatch or typed. Buttons, links, the active sidebar item, focus borders and the email header. |
+| **Secondary color** | The plate under the quiet controls: the top bar's search box and bell, and the chips inside a multi-select. |
 | **Logo** | PNG, JPG, GIF, WebP or SVG, up to 1 MB. Drawn in the sidebar, on the login screen and at the head of every email. |
 | **Lockup** | How much of it is drawn: the mark alone, the mark and the name, or the mark, the name and the tagline. |
 | **Mark size** | 50–200% of the size the theme draws the mark at. |
@@ -192,7 +193,7 @@ own base — 2rem in the sidebar, 2.25rem on the login screen — and
 sidebar's brand row is a `min-height`, so at 200% the row grows instead of
 clipping.
 
-### Why one colour and not forty
+### Why two colours and not forty
 
 The accent is written into `--primary`, `--sidebar-primary` and the badge
 fill, and the text on top of it is *computed* — the greater of the two WCAG
@@ -200,6 +201,14 @@ contrast ratios against black and white — rather than assumed to be white.
 So a pale brand colour produces dark button labels instead of an unreadable
 button. The same guard runs on the email body: links only take the accent
 when it clears 4.5:1 on white, and keep the default blue when it does not.
+
+The secondary is not a second brand colour competing with the first. It is
+`--secondary`, the plate under the controls that are *not* the page's action:
+the search box and the bell in the top bar, and the chips inside a
+multi-select. Its foreground is computed the same way, and the search box's
+label is mixed from that foreground toward the plate rather than fixed to
+grey, so it stays legible on a strong colour as well as on the near-white the
+theme ships.
 
 The rest of the palette stays derived. A settings screen with a picker for
 every token is a way to build an ugly instance, not a branded one.

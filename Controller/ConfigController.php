@@ -24,6 +24,10 @@ class ConfigController extends \Kanboard\Controller\ConfigController
                 'title' => $this->shadcnBrandingModel->getTitle(),
                 'subtitle' => $this->shadcnBrandingModel->getSubtitle(),
                 'color' => $this->shadcnBrandingModel->getColor(),
+                'secondary' => $this->shadcnBrandingModel->getSecondaryColor(),
+                'has_custom_secondary' => $this->shadcnBrandingModel->hasCustomSecondaryColor(),
+                'secondary_foreground' => $this->shadcnBrandingModel->getForegroundColor($this->shadcnBrandingModel->getSecondaryColor()),
+                'default_secondary' => BrandingModel::DEFAULT_SECONDARY,
                 'display' => $this->shadcnBrandingModel->getDisplay(),
                 'scale' => $this->shadcnBrandingModel->getLogoScale(),
                 'min_scale' => BrandingModel::MIN_SCALE,
@@ -69,12 +73,17 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             throw new AccessForbiddenException();
         }
 
-        $color = $this->shadcnBrandingModel->normalizeColor(isset($values['shadcn_brand_color']) ? $values['shadcn_brand_color'] : '');
+        $colors = array();
 
-        if ($color === '' && ! empty($values['shadcn_brand_color'])) {
-            $this->flash->failure(t('That is not a valid colour. Use a hex value such as #1145af.'));
-            $this->redirectToSettings();
-            return;
+        foreach (array('shadcn_brand_color', 'shadcn_brand_secondary') as $field) {
+            $raw = isset($values[$field]) ? $values[$field] : '';
+            $colors[$field] = $this->shadcnBrandingModel->normalizeColor($raw);
+
+            if ($colors[$field] === '' && ! empty($raw)) {
+                $this->flash->failure(t('That is not a valid colour. Use a hex value such as #1145af.'));
+                $this->redirectToSettings();
+                return;
+            }
         }
 
         // Both of these come from controls with a fixed set of answers, so
@@ -89,7 +98,8 @@ class ConfigController extends \Kanboard\Controller\ConfigController
         $saved = $this->configModel->save(array(
             'shadcn_brand_title' => isset($values['shadcn_brand_title']) ? trim($values['shadcn_brand_title']) : '',
             'shadcn_brand_subtitle' => isset($values['shadcn_brand_subtitle']) ? trim($values['shadcn_brand_subtitle']) : '',
-            'shadcn_brand_color' => $color,
+            'shadcn_brand_color' => $colors['shadcn_brand_color'],
+            'shadcn_brand_secondary' => $colors['shadcn_brand_secondary'],
             'shadcn_brand_display' => $display,
             'shadcn_brand_logo_scale' => $this->shadcnBrandingModel->normalizeScale(
                 isset($values['shadcn_brand_logo_scale']) ? $values['shadcn_brand_logo_scale'] : ''

@@ -18,9 +18,6 @@
         return;
     }
 
-    var hex = form.querySelector('.sc-brand-hex');
-    var swatch = form.querySelector('.sc-brand-swatch');
-    var reset = form.querySelector('[data-sc-brand-reset]');
     var preview = form.querySelector('.sc-brand-preview');
 
     /* The same rule BrandingModel applies on the server: whichever of black
@@ -55,43 +52,56 @@
         return /^[0-9a-f]{6}$/i.test(value) ? '#' + value.toLowerCase() : '';
     }
 
-    function paint(color) {
-        if (preview !== null) {
-            preview.style.setProperty('--sc-brand-preview', color);
-            preview.style.setProperty('--sc-brand-preview-fg', foreground(color));
+    /* One wiring, run once per colour. Each group names the pair of custom
+     * properties it paints on the preview row, so adding a third colour is
+     * a matter of adding a third group to the template. */
+    Array.prototype.forEach.call(form.querySelectorAll('[data-sc-brand-color]'), function (group) {
+        var key = group.getAttribute('data-sc-brand-color');
+        var hex = group.querySelector('.sc-brand-hex');
+        var swatch = group.querySelector('.sc-brand-swatch');
+        var reset = group.querySelector('.sc-brand-reset');
+
+        if (hex === null) {
+            return;
         }
 
-        if (swatch !== null) {
-            swatch.value = color;
+        function fallback() {
+            return hex.placeholder !== '' ? hex.placeholder : '#1145af';
         }
-    }
 
-    function fallback() {
-        return hex !== null && hex.placeholder !== '' ? hex.placeholder : '#1145af';
-    }
+        function paint(color) {
+            if (preview !== null) {
+                preview.style.setProperty('--sc-brand-' + key, color);
+                preview.style.setProperty('--sc-brand-' + key + '-fg', foreground(color));
+            }
 
-    if (hex !== null) {
+            if (swatch !== null) {
+                swatch.value = color;
+            }
+        }
+
         hex.addEventListener('input', function () {
             var color = normalize(hex.value);
             paint(color !== '' ? color : fallback());
         });
-    }
 
-    if (swatch !== null && hex !== null) {
-        swatch.addEventListener('input', function () {
-            hex.value = swatch.value;
-            paint(swatch.value);
-        });
-    }
+        if (swatch !== null) {
+            swatch.addEventListener('input', function () {
+                hex.value = swatch.value;
+                paint(swatch.value);
+            });
+        }
 
-    /* Back to the theme's own colour, which is an empty field rather than
-     * the default written out — "reset" and "never set" are one state. */
-    if (reset !== null && hex !== null) {
-        reset.addEventListener('click', function () {
-            hex.value = '';
-            paint(reset.getAttribute('data-default') || fallback());
-        });
-    }
+        /* Back to the theme's own colour, which is an empty field rather
+         * than the default written out — "reset" and "never set" are one
+         * state. */
+        if (reset !== null) {
+            reset.addEventListener('click', function () {
+                hex.value = '';
+                paint(reset.getAttribute('data-default') || fallback());
+            });
+        }
+    });
 
     /* The mark's size, on the sidebar standing beside this screen. The
      * property is the same one the theme's CSS multiplies every mark by, so

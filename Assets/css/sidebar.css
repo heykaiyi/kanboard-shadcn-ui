@@ -98,10 +98,16 @@ body:has(> .sc-sb) > header > .menus-container {
 }
 
 /* The bar's outer edges line up with the page content below it: .page is
- * padded 1.5rem, so the first and last items in the bar are too. */
+ * padded 1.5rem, so the first and last items in the bar are too. Between
+ * those edges every control is one gap apart — each cell carries half of
+ * it, so the pairs cannot drift as items are added or hidden. */
 body:has(> .sc-sb) > .sc-sb-trigger {
     grid-area: trig;
     padding-left: 1.5rem;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+    padding-right: 1.5rem;
 }
 
 /* Kanboard's <h1> is a single pre-joined string, so it cannot become
@@ -867,28 +873,58 @@ body:has(> .sc-sb) > header > .menus-container a {
     font-size: 0.9375rem;
 }
 
-/* Icon-only buttons are the glyph and nothing else: no plate, no padding,
- * and only the colour moves on hover. */
 body:has(> .sc-sb) > header > .menus-container > .notification a,
 body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.125rem;
-    padding: 0 0.5rem;
     background: none;
     color: var(--muted-foreground);
     transition: color 0.15s ease;
 }
 
-body:has(> .sc-sb) > header > .menus-container > .notification a:hover,
+/* The bell is a Button, variant="secondary": a square plate the same height
+ * as the search box on one side and the New button on the other, so the
+ * three controls read as one row rather than as a glyph between two
+ * buttons. Its plate is --secondary, which is the colour Settings →
+ * Appearance calls the secondary. */
+body:has(> .sc-sb) > header > .menus-container > .notification > a {
+    box-sizing: border-box;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .notification > a:hover {
+    background: color-mix(in oklab, var(--secondary) 92%, var(--foreground));
+    border-color: var(--input);
+    color: var(--secondary-foreground);
+    text-decoration: none;
+}
+
 body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a:hover {
     background: none;
     color: var(--foreground);
     text-decoration: none;
 }
 
-body:has(> .sc-sb) > header > .menus-container > .notification .fa,
+/* Inside a plate the glyph is a size smaller than it was standing alone. */
+body:has(> .sc-sb) > header > .menus-container > .notification .fa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
 .sc-sb-trigger .fa {
     display: flex;
     align-items: center;
@@ -1492,6 +1528,8 @@ body:has(> .sc-sb) > .sc-command-slot {
     grid-row: 1;
     display: flex;
     align-items: center;
+    /* The same half-gap every other cell in the bar carries. */
+    padding: 0 0.25rem;
     border-bottom: 1px solid var(--border);
     background: var(--background);
 }
@@ -1506,12 +1544,19 @@ body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger {
     padding: 0 0.5rem 0 0.75rem;
     border: 1px solid var(--input);
     border-radius: var(--radius-md);
-    background: var(--surface-neutral);
-    color: var(--muted-foreground);
+    /* The same plate the bell beside it takes. Its label is that plate's own
+     * ink, thinned toward the plate rather than fixed to grey, so it stays
+     * legible whatever colour the secondary is set to. */
+    background: var(--secondary);
+    color: color-mix(in oklab, var(--secondary-foreground) 65%, var(--secondary));
     font-family: inherit;
     font-size: 0.9375rem;
     cursor: pointer;
     transition: border-color 0.15s ease;
+}
+
+body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger .sc-command-trigger-search {
+    background-color: color-mix(in oklab, var(--secondary-foreground) 65%, var(--secondary));
 }
 
 body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger:hover {

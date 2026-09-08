@@ -162,6 +162,11 @@ class BrandHelper extends Base
         return $this->brandingModel()->getColor();
     }
 
+    public function getSecondaryColor()
+    {
+        return $this->brandingModel()->getSecondaryColor();
+    }
+
     public function getDisplay()
     {
         return $this->brandingModel()->getDisplay();
@@ -214,6 +219,13 @@ class BrandHelper extends Base
             $rules[] = '--sidebar-primary: '.$color;
             $rules[] = '--sidebar-primary-foreground: '.$foreground;
             $rules[] = '--badge-primary-foreground: '.$foreground;
+        }
+
+        if ($model->hasCustomSecondaryColor()) {
+            $secondary = $model->getSecondaryColor();
+
+            $rules[] = '--secondary: '.$secondary;
+            $rules[] = '--secondary-foreground: '.$model->getForegroundColor($secondary);
         }
 
         if ($this->hasCustomLogo()) {

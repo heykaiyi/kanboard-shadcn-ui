@@ -18,6 +18,7 @@
  * are ordinary file inputs.
  */
 $scColor = $branding['has_custom_color'] ? $branding['color'] : '';
+$scSecondary = $branding['has_custom_secondary'] ? $branding['secondary'] : '';
 $scTitle = isset($values['shadcn_brand_title']) ? $values['shadcn_brand_title'] : '';
 $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_subtitle'] : '';
 ?>
@@ -55,38 +56,67 @@ $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_su
         </div>
     </section>
 
-    <section class="sc-brand-card" data-sc-brand-color-card>
+    <section class="sc-brand-card">
         <div class="sc-brand-card-head">
-            <h3><?= t('Accent color') ?></h3>
-            <p><?= t('One hex value, for example #1145af. Buttons, links, the active sidebar item and the email header all follow it.') ?></p>
+            <h3><?= t('Colors') ?></h3>
+            <p><?= t('Two hex values: the one the interface acts with, and the one it rests on.') ?></p>
         </div>
 
         <div class="sc-brand-card-body">
-            <div class="sc-brand-color">
-                <?php /* The swatch is a second view of the same value, kept in
-                         step by branding.js. Only the text field is submitted,
-                         so an instance without JavaScript loses the picker
-                         and keeps the setting. */ ?>
-                <input type="color" class="sc-brand-swatch" id="form-shadcn_brand_color_picker"
-                       value="<?= $this->text->e($branding['color']) ?>"
-                       aria-label="<?= t('Accent color') ?>" tabindex="-1">
-                <input type="text" name="shadcn_brand_color" id="form-shadcn_brand_color"
-                       class="sc-brand-hex"
-                       value="<?= $this->text->e($scColor) ?>"
-                       placeholder="<?= $this->text->e($branding['default_color']) ?>"
-                       autocomplete="off" spellcheck="false" maxlength="7">
-                <button type="button" class="btn sc-brand-reset" data-sc-brand-reset
-                        data-default="<?= $this->text->e($branding['default_color']) ?>"><?= t('Reset') ?></button>
-            </div>
+            <?php /* Each swatch is a second view of the field beside it, kept
+                     in step by branding.js. Only the text field is submitted,
+                     so an instance without JavaScript loses the picker and
+                     keeps the setting. */ ?>
+            <?php foreach (array(
+                array(
+                    'key' => 'accent',
+                    'name' => 'shadcn_brand_color',
+                    'label' => t('Accent color'),
+                    'value' => $scColor,
+                    'current' => $branding['color'],
+                    'default' => $branding['default_color'],
+                    'help' => t('Buttons, links, the active sidebar item, focus borders and the email header all follow it.'),
+                ),
+                array(
+                    'key' => 'secondary',
+                    'name' => 'shadcn_brand_secondary',
+                    'label' => t('Secondary color'),
+                    'value' => $scSecondary,
+                    'current' => $branding['secondary'],
+                    'default' => $branding['default_secondary'],
+                    'help' => t('The plate under the quiet controls: the search box and the bell in the top bar, and the chips inside a multi-select.'),
+                ),
+            ) as $scField): ?>
+                <div class="sc-brand-field" data-sc-brand-color="<?= $scField['key'] ?>">
+                    <label for="form-<?= $scField['name'] ?>"><?= $this->text->e($scField['label']) ?></label>
+
+                    <div class="sc-brand-color">
+                        <input type="color" class="sc-brand-swatch"
+                               value="<?= $this->text->e($scField['current']) ?>"
+                               aria-label="<?= $this->text->e($scField['label']) ?>" tabindex="-1">
+                        <input type="text" name="<?= $scField['name'] ?>" id="form-<?= $scField['name'] ?>"
+                               class="sc-brand-hex"
+                               value="<?= $this->text->e($scField['value']) ?>"
+                               placeholder="<?= $this->text->e($scField['default']) ?>"
+                               autocomplete="off" spellcheck="false" maxlength="7">
+                        <button type="button" class="btn sc-brand-reset"
+                                data-default="<?= $this->text->e($scField['default']) ?>"><?= t('Reset') ?></button>
+                    </div>
+
+                    <p class="sc-brand-help"><?= $this->text->e($scField['help']) ?></p>
+                </div>
+            <?php endforeach ?>
 
             <p class="sc-brand-help">
-                <?= t('Leave empty for the theme default.') ?>
-                <?= t('Text on top of the accent is chosen automatically, whichever of black or white is readable.') ?>
+                <?= t('Leave either empty for the theme default.') ?>
+                <?= t('Text on top of a colour is chosen automatically, whichever of black or white is readable.') ?>
             </p>
 
-            <div class="sc-brand-preview" style="--sc-brand-preview: <?= $this->text->e($branding['color']) ?>; --sc-brand-preview-fg: <?= $this->text->e($branding['foreground']) ?>;">
+            <div class="sc-brand-preview"
+                 style="--sc-brand-accent: <?= $this->text->e($branding['color']) ?>; --sc-brand-accent-fg: <?= $this->text->e($branding['foreground']) ?>; --sc-brand-secondary: <?= $this->text->e($branding['secondary']) ?>; --sc-brand-secondary-fg: <?= $this->text->e($branding['secondary_foreground']) ?>;">
                 <span class="sc-brand-preview-label"><?= t('Preview') ?></span>
                 <span class="sc-brand-preview-btn"><?= t('Save') ?></span>
+                <span class="sc-brand-preview-btn-2"><?= t('cancel') ?></span>
                 <span class="sc-brand-preview-badge"><?= t('Active') ?></span>
                 <span class="sc-brand-preview-link"><?= t('A link') ?></span>
             </div>

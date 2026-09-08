@@ -251,5 +251,12 @@ return array(
     'Mark, name and tagline' => '標誌、名稱加副標題',
     'Applies to the sidebar, the phone top bar and the login screen. Email always carries the name, whatever is chosen here.' => '會套用在側邊欄、手機版頂端列與登入頁。信件一律帶名稱，不受這裡影響。',
     'Mark size' => '標誌大小',
+    'Colors' => '色彩',
+    'Two hex values: the one the interface acts with, and the one it rests on.' => '兩組十六進位色碼：介面用來動作的那一個，和它安放其上的那一個。',
+    'Secondary color' => '次要色',
+    'Buttons, links, the active sidebar item, focus borders and the email header all follow it.' => '按鈕、連結、側邊欄目前所在項目、聚焦邊框與信件標頭都會跟著改。',
+    'The plate under the quiet controls: the search box and the bell in the top bar, and the chips inside a multi-select.' => '安靜控制項底下的那塊底：頂端列的搜尋框與通知鈴，以及多選欄位裡的標籤。',
+    'Leave either empty for the theme default.' => '任一欄留白就用佈景主題的預設色。',
+    'Text on top of a colour is chosen automatically, whichever of black or white is readable.' => '色塊上的文字會自動在黑與白之間挑一個看得清楚的。',
     'A percentage of the size the theme draws the mark at. The sidebar beside this screen follows the slider.' => '相對於佈景主題原本尺寸的百分比。拉的時候旁邊側邊欄的標誌會跟著變。',
 );
