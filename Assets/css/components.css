@@ -1,0 +1,4588 @@
+/*!
+ * Shadcn theme for Kanboard — components
+ *
+ * Each section reproduces one shadcn/ui component on the markup Kanboard
+ * already emits. Nothing here changes the DOM: the selectors are the ones
+ * in assets/css/src/*.css, restyled against the tokens in tokens.css.
+ *
+ * Section order follows the shadcn registry, so a component is easy to find
+ * by its shadcn name rather than by Kanboard's class names.
+ */
+
+/* ===================================================================
+ * Base — typography, surfaces, focus ring
+ * =================================================================== */
+
+body {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    /* Noto Sans TC is a static face, so a half step would round back down —
+     * the weight has to be one the file actually contains. */
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--foreground);
+    background-color: var(--background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-bottom: 0;
+}
+
+code,
+kbd,
+pre,
+samp,
+.markdown code,
+.markdown pre {
+    font-family: var(--font-mono);
+}
+
+.page {
+    margin: 0;
+    padding: 1.25rem 1.5rem 3rem;
+}
+
+@media (max-width: 768px) {
+    /* Matches the side padding the breadcrumb above it takes, so the page
+     * has one left and right edge from the trail down. */
+    .page {
+        padding: 1rem 1.25rem 3rem;
+    }
+}
+
+/* No focus ring anywhere in the theme. What marks focus is the border,
+ * in the instance's own accent — --ring resolves to --primary, so a branded
+ * instance gets its colour here too. Mouse users still see nothing:
+ * :focus-visible, never :focus. */
+:focus {
+    outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+    outline: none;
+    border-radius: var(--radius-sm);
+    border-color: var(--ring);
+}
+
+/* A link has no border to colour, so it takes the accent as an underline —
+ * visible, and still not a ring. */
+a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--ring);
+}
+
+::selection {
+    background: color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+}
+
+/* ScrollArea */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+}
+
+/* ===================================================================
+ * Typography — headings, links, Separator
+ * =================================================================== */
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--foreground);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+h1 {
+    font-size: 1rem;
+}
+
+h2 {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+}
+
+h3 {
+    font-size: 0.9375rem;
+    margin-top: 1rem;
+}
+
+small {
+    font-size: 0.875rem;
+}
+
+a {
+    color: var(--foreground);
+    text-decoration: none;
+    text-underline-offset: 4px;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+}
+
+a:focus {
+    color: var(--foreground);
+}
+
+a .fa {
+    color: inherit;
+    padding-right: 0;
+    margin-right: 0.375rem;
+    opacity: 0.7;
+}
+
+a:hover .fa {
+    opacity: 1;
+}
+
+/* Separator */
+hr {
+    height: 1px;
+    border: 0;
+    background: var(--border);
+    margin: 1rem 0;
+}
+
+fieldset {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem 1.25rem;
+    margin-top: 1rem;
+}
+
+legend {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 0 0.375rem;
+    color: var(--foreground);
+}
+
+/* Kanboard's own wordmark, toned down to a monochrome badge. */
+.logo a,
+.logo a:hover {
+    opacity: 1;
+    color: var(--foreground);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+}
+
+.logo span,
+.logo a:hover span,
+.logo a:focus span {
+    color: var(--muted-foreground);
+}
+
+/* ===================================================================
+ * Button
+ * =================================================================== */
+
+/* Kept at a single class so .btn-blue / .btn-red can override it; an
+ * element-qualified selector here would out-specify the variants. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* A floor, not a ceiling: a fixed height clips a label that needs two
+     * lines or an icon taller than the text. Everything is border-box, so
+     * the padding lives inside the 2.25rem and the common case is
+     * unchanged. */
+    min-height: 2.25rem;
+    padding: 0.375rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--shadow-xs);
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn .fa {
+    opacity: 1;
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.btn:hover,
+.btn:focus {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    border-color: var(--border);
+    text-decoration: none;
+}
+
+.btn:focus-visible {
+    border-color: var(--ring);
+}
+
+.btn:active {
+    background: color-mix(in oklab, var(--accent) 80%, var(--background));
+}
+
+/* variant="default" */
+.btn-blue {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+}
+
+.btn-blue:hover,
+.btn-blue:focus {
+    background: color-mix(in oklab, var(--primary) 90%, transparent);
+    color: var(--primary-foreground);
+    border-color: transparent;
+}
+
+/* variant="destructive" */
+.btn-red {
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+    border-color: var(--destructive);
+}
+
+.btn-red:hover,
+.btn-red:focus {
+    background: color-mix(in oklab, var(--destructive) 90%, transparent);
+    color: var(--destructive-foreground);
+    border-color: transparent;
+}
+
+.btn-red:focus-visible {
+    border-color: var(--destructive);
+}
+
+.btn:disabled,
+.btn[disabled] {
+    pointer-events: none;
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+/* Kanboard puts "Save / cancel" pairs in .form-actions and toolbars in
+ * .buttons-header; both read as a shadcn button row. */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1.5rem;
+}
+
+.buttons-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    margin: 0 0 1rem;
+}
+
+/* ===================================================================
+ * Input, Textarea, Label, Select, Checkbox, Radio
+ * =================================================================== */
+
+label {
+    display: block;
+    margin-top: 0.875rem;
+    margin-bottom: 0.375rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="url"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="text"]:not(.input-addon-field),
+textarea,
+select {
+    /* Kanboard leaves some of these content-box, which turned the padding
+     * added alongside min-height into extra height — 36 + 12 + 2 = 50px on
+     * the settings forms. With border-box the padding lives inside the
+     * floor and every field is the same height wherever it appears. */
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--foreground);
+    background-color: var(--background);
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="url"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="text"]:not(.input-addon-field) {
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+select {
+    min-height: 2.25rem;
+    padding: 0.375rem 2rem 0.375rem 0.75rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    /* Chevron drawn inline so <select> matches the shadcn Select trigger. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 9s-4.419 6-6 6-6-6-6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem 1rem;
+}
+
+select[multiple] {
+    min-height: 0;
+    height: auto;
+    padding: 0.375rem;
+    background-image: none;
+}
+
+textarea {
+    min-height: 5rem;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.5;
+}
+
+/* Fields do not take a ring. Kanboard puts `autofocus` on the first input of
+ * most dialogs, so a 3px halo fires the moment a dialog opens, before anyone
+ * has touched anything. Focus is a crisp border-colour change instead — the
+ * ring is kept for buttons and links, which are not autofocused.
+ * (There is no hover state on a field at all: hover and idle compute to the
+ * same shadow-xs.) */
+input:focus,
+input[type="text"]:focus,
+textarea:focus,
+select:focus,
+.select2-container--focus .select2-selection {
+    outline: none;
+    color: var(--foreground);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-xs);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Checkbox and Radio Group, drawn rather than tinted. accent-color can
+ * only recolour the platform control; shadcn's is a bordered box that
+ * fills with --primary and shows a stroked tick, so the native appearance
+ * is dropped and the control is rebuilt. The tick reuses the exact path
+ * from the HugeIcons check in icons.css, so it matches every other tick in
+ * the interface. */
+input[type="checkbox"],
+input[type="radio"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    margin: 0 0.375rem 0 0;
+    padding: 0;
+    border: 1px solid var(--input);
+    background: var(--background);
+    box-shadow: var(--shadow-xs);
+    vertical-align: -0.1875rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+input[type="checkbox"] {
+    border-radius: var(--radius-sm);
+}
+
+input[type="radio"] {
+    border-radius: 9999px;
+}
+
+input[type="checkbox"]:checked,
+input[type="checkbox"]:indeterminate,
+input[type="radio"]:checked {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    width: 0.875rem;
+    height: 0.875rem;
+    background-color: var(--primary-foreground);
+    transform: scale(0);
+    transition: transform 0.15s ease;
+    -webkit-mask-image: var(--shadcn-check);
+    mask-image: var(--shadcn-check);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+input[type="checkbox"]:indeterminate::before {
+    -webkit-mask-image: var(--shadcn-dash);
+    mask-image: var(--shadcn-dash);
+    transform: scale(1);
+}
+
+input[type="radio"]::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--primary-foreground);
+    transform: scale(0);
+    transition: transform 0.15s ease;
+}
+
+input[type="radio"]:checked::before {
+    transform: scale(1);
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline: none;
+    border-color: var(--ring);
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Required fields.
+ *
+ * FormHelper emits `<label>` `<input>` `<span class="form-required">*</span>`
+ * as three siblings, so the marker lands after the control instead of on its
+ * label — and a full-width control pushes it onto a line of its own. When
+ * that exact shape is present the label takes the asterisk and the stray
+ * span is dropped; anywhere the shape does not hold, the original span is
+ * left alone. */
+label:has(+ input + .form-required)::after,
+label:has(+ select + .form-required)::after,
+label:has(+ textarea + .form-required)::after {
+    content: "*";
+    margin-left: 0.25rem;
+    color: var(--primary);
+}
+
+label + input + .form-required,
+label + select + .form-required,
+label + textarea + .form-required {
+    display: none;
+}
+
+/* The password-reset captcha puts its image between the label and the field,
+ * so the adjacency above never matches it. */
+label:has(+ img + input + .form-required)::after {
+    content: "*";
+    margin-left: 0.25rem;
+    color: var(--primary);
+}
+
+label + img + input + .form-required {
+    display: none;
+}
+
+input[type="file"] {
+    font-size: 0.9375rem;
+    color: var(--muted-foreground);
+}
+
+input[type="file"]::file-selector-button {
+    height: 2rem;
+    margin-right: 0.75rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--accent);
+}
+
+/* Form messaging */
+.form-help {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin-top: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.form-required {
+    color: var(--destructive);
+    font-weight: 500;
+}
+
+.form-errors,
+ul.form-errors li {
+    color: var(--destructive);
+    font-size: 0.875rem;
+}
+
+input.form-error,
+textarea.form-error,
+input.form-error:focus,
+textarea.form-error:focus {
+    border: 1px solid var(--destructive);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 20%, transparent);
+}
+
+.form-inline label {
+    display: inline-block;
+    margin: 0 0.5rem 0 0;
+}
+
+.form-inline .form-actions {
+    padding-top: 0;
+}
+
+.form-columns .form-column {
+    margin-right: 1.5rem;
+}
+
+/* login-02 makes the page the layout, so the wrapper is not a Card — the
+ * auth section further down owns its geometry. */
+.form-login h2 {
+    margin-bottom: 1.5rem;
+}
+
+.form-login li {
+    margin-left: 0;
+    list-style: none;
+    line-height: inherit;
+}
+
+
+/* The template separates the checkbox from the actions with a <br>. */
+.form-login br {
+    display: none;
+}
+
+.form-login .form-actions {
+    padding-top: 1.25rem;
+}
+
+.reset-password a {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+/* ===================================================================
+ * Input group (shadcn "Input with addon")
+ * =================================================================== */
+
+/* The search field and the button welded to it. Both are content-box by
+ * default, which made the pair 38px against every other field's 36 —
+ * border-box plus the same floor lines them up with the rest. */
+.input-addon-field,
+.input-addon-item {
+    box-sizing: border-box;
+    border: 1px solid var(--input);
+    padding: 0.375rem 0.75rem;
+    min-height: 2.25rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375rem;
+    /* An inherited line-height of 1.6 makes the content box 24px, which
+     * with the padding and border comes to 38 and overshoots the floor. */
+    line-height: 1.25;
+    background-color: var(--background);
+}
+
+.input-addon-field {
+    color: var(--foreground);
+    border-radius: 0;
+}
+
+.input-addon-item {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+}
+
+.input-addon-field:first-child,
+.input-addon-item:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.input-addon-field:last-child,
+.input-addon-item:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.input-addon-field:focus {
+    position: relative;
+    z-index: 1;
+    border-color: var(--ring);
+}
+
+/* ===================================================================
+ * Dropdown Menu (also Context Menu / Navigation Menu)
+ * =================================================================== */
+
+ul.dropdown-submenu-open {
+    min-width: 14rem;
+    margin: 0.375rem 0 0;
+    padding: 0.25rem;
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.dropdown-submenu-open li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.25rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--popover-foreground);
+}
+
+.dropdown-submenu-open li:not(.no-hover):hover,
+.dropdown-submenu-open li:not(.no-hover):focus-within {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.dropdown-submenu-open li:hover a,
+.dropdown-submenu-open li:hover i,
+.dropdown-submenu-open a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dropdown-submenu-open li a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.dropdown-submenu-open a:focus {
+    text-decoration: none;
+}
+
+/* The first <li> of the user menu is a label, not an item. */
+.dropdown-submenu-open li.no-hover {
+    padding: 0.375rem 0.5rem 0.5rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.dropdown-menu-link-text,
+.dropdown-menu-link-icon {
+    color: var(--foreground);
+}
+
+.dropdown-menu-link-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: var(--radius-md);
+}
+
+/* No plate, at rest or under the pointer. These triggers are glyphs and
+ * short labels sitting on the page; boxing them turned every row that
+ * carries one into a row of chips. */
+.dropdown-menu-link-icon,
+.dropdown-menu-link-icon:hover {
+    height: auto;
+    padding: 0;
+    background: none;
+    text-decoration: none;
+}
+
+/* The caret that follows every menu trigger. */
+.dropdown-menu-link-icon .fa-caret-down,
+.action-menu .fa-caret-down {
+    font-size: 0.9375rem;
+    opacity: 0.5;
+}
+
+td a.dropdown-menu i,
+td a.dropdown-menu strong i {
+    color: var(--muted-foreground);
+}
+
+td a.dropdown-menu:hover i,
+td a.dropdown-menu:hover strong,
+td a.dropdown-menu:hover strong i,
+td a.dropdown-menu strong {
+    color: var(--foreground);
+}
+
+.action-menu {
+    color: var(--foreground);
+}
+
+/* ===================================================================
+ * Combobox (select-dropdown) and Command (suggest-menu)
+ * =================================================================== */
+
+#select-dropdown-menu,
+#suggest-menu {
+    min-width: 14rem;
+    padding: 0.25rem;
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    overflow: auto;
+}
+
+.select-dropdown-menu-item,
+.suggest-menu-item {
+    padding: 0.375rem 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--popover-foreground);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+}
+
+.select-dropdown-menu-item.active,
+.suggest-menu-item.active,
+.select-dropdown-menu-item:hover,
+.suggest-menu-item:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.suggest-menu-item small,
+.suggest-menu-item.active small {
+    color: var(--muted-foreground);
+    font-weight: 400;
+}
+
+.select-dropdown-input-container {
+    max-width: 20rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background-color: var(--background);
+    box-shadow: var(--shadow-xs);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.select-dropdown-input-container:focus-within {
+    border-color: var(--ring);
+}
+
+.select-dropdown-input-container input.select-dropdown-input,
+.select-dropdown-input-container input.select-dropdown-input:focus {
+    flex: 1;
+    height: 100%;
+    width: auto;
+    margin: 0;
+    padding: 0 2rem 0 0.75rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    font-size: 0.9375rem;
+}
+
+.select-dropdown-input-container .select-dropdown-chevron,
+.select-dropdown-input-container .select-loading-icon {
+    top: 50%;
+    right: 0.625rem;
+    transform: translateY(-50%);
+    color: var(--muted-foreground);
+}
+
+/* ===================================================================
+ * Select2 (bundled vendor widget) matched to the Select trigger
+ * =================================================================== */
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    min-height: 2.25rem;
+    background-color: var(--background);
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--ring);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--foreground);
+    line-height: 2.125rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 2.125rem;
+}
+
+.select2-dropdown {
+    background-color: var(--popover);
+    border-color: var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--secondary);
+    border-color: var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--secondary-foreground);
+}
+
+.select2-search__field {
+    border-radius: var(--radius-sm) !important;
+}
+
+/* ===================================================================
+ * Sheet — every dialog Kanboard opens
+ *
+ * Kanboard renders all of its dynamic screens into one #modal-box: task
+ * edit, project creation, every confirmation. The theme docks that box to
+ * the right edge as a shadcn Sheet — full height, its own scroll, the
+ * title held at the top and the form's actions held at the foot — instead
+ * of a box floating in the middle of the page.
+ *
+ * A phone gets the same box as a bottom drawer (further down), which is
+ * the shape a sheet takes when there is no room beside the content.
+ * =================================================================== */
+
+#modal-overlay {
+    background: var(--overlay);
+    animation: shadcn-fade-in 0.15s ease-out;
+}
+
+#modal-box {
+    /* The title row, the close control and the two paddings are laid out
+     * from one set of values, so they cannot drift apart whatever any one
+     * of them is set to. */
+    --sc-dialog-pad-top: 1.5rem;
+    --sc-dialog-pad-side: 1.5rem;
+    --sc-dialog-head-height: 2.25rem;
+
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    display: flex;
+    flex-direction: column;
+    /* core/modal.js measures the viewport and writes one width per size
+     * straight onto the element, so the sheet has to out-rank an inline
+     * style. Wide enough for a two-column form, never wider than the
+     * screen. */
+    width: min(36rem, 100vw) !important;
+    min-width: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    transform: none;
+    background: var(--background);
+    color: var(--foreground);
+    border: none;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: var(--shadow-lg);
+    animation: shadcn-sheet-in 0.2s ease-out;
+}
+
+/* modal.js renders #modal-header (the close button) as a block above
+ * #modal-content, so it cannot share a row with the title by markup.
+ * Lifting it out of the flow and onto the title's own line gives the
+ * two-column header — title left, close right — without touching either
+ * template. It is anchored to the sheet rather than to the scrolling
+ * content, so it stays put while the body moves. */
+#modal-header {
+    position: absolute;
+    top: var(--sc-dialog-pad-top);
+    right: var(--sc-dialog-pad-side);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: var(--sc-dialog-head-height);
+    padding: 0;
+}
+
+/* The body is the only thing that scrolls. */
+#modal-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 var(--sc-dialog-pad-side);
+}
+
+/* The top and bottom padding belong to the header and the actions, which
+ * are the elements that hold those edges. A fragment without one of them
+ * takes the padding back. */
+#modal-content:not(:has(.page-header)) {
+    padding-top: var(--sc-dialog-pad-top);
+}
+
+#modal-content:not(:has(.form-actions)) {
+    padding-bottom: var(--sc-dialog-pad-side);
+}
+
+/* The title row holds the top of the sheet while the body scrolls under
+ * it. Its own padding is the sheet's top padding, so the rule under the
+ * title sits the same distance below the text however tall the title
+ * runs — and the close control, anchored to the same value, lands on the
+ * title's line rather than above it.
+ *
+ * .page-header h2 carries a section rule of its own: 0.75rem of padding
+ * and then a border. Inside a sheet that padding would push the title
+ * text off the centre line of the control beside it, so the rule is moved
+ * down here and the h2 is left as plain text. */
+#modal-content .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    min-height: var(--sc-dialog-head-height);
+    margin: 0 0 1.25rem;
+    padding: var(--sc-dialog-pad-top) 0 0.875rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+}
+
+#modal-content .page-header h2 {
+    flex: 1;
+    min-width: 0;
+    margin-top: 0;
+    /* Room for the close control, which is positioned over this row. */
+    padding-right: 2.5rem;
+    padding-bottom: 0;
+    border-bottom: none;
+    /* The heading's own leading, rather than the body's 1.5 — that extra
+     * half-line above and below the words is what made the space over the
+     * rule read as a gap. */
+    line-height: 1.35;
+}
+
+/* Icon-only button: the glyph and nothing else — no plate, no padding, and
+ * only the colour moves on hover. */
+#modal-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    color: var(--muted-foreground);
+    opacity: 1;
+}
+
+#modal-close-button .fa {
+    font-size: 1.375rem;
+}
+
+#modal-close-button:hover,
+#modal-close-button:focus {
+    background: none;
+    color: var(--foreground);
+}
+
+/* Sheet footer.
+ *
+ * submit-buttons.js emits `[Save] " or " [cancel]` — a button, a bare text
+ * node and a link. shadcn pairs the action with a real outline Button and
+ * puts Cancel first, so the link is promoted to a button and reordered, and
+ * the stray " or " is collapsed with font-size: 0.
+ *
+ * It holds the foot of the sheet the way the title holds the head: a long
+ * form scrolls under it instead of burying Save below the fold.
+ *
+ * gap is 0 on purpose. The " or " between the two controls is a bare text
+ * node, so the flex container wraps it in an anonymous item at order 0 — it
+ * takes the first slot and one gap with it, which pushed the whole row 8px
+ * right of the fields. The pair is spaced with a margin instead. */
+#modal-content .form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 1.5rem;
+    padding: 1rem 0 var(--sc-dialog-pad-side);
+    border-top: 1px solid var(--border);
+    background: var(--background);
+    font-size: 0;
+}
+
+#modal-content .form-actions > * {
+    font-size: 0.9375rem;
+}
+
+/* min-width: 0 because a flex item defaults to min-width: auto, which would
+ * let the labels decide the split instead of the ratio. */
+#modal-content .form-actions > button,
+#modal-content .form-actions > #modal-confirm-button {
+    order: 2;
+    flex: 7 1 0;
+    min-width: 0;
+    margin-left: 0.5rem;
+}
+
+#modal-content .form-actions > a {
+    order: 1;
+    flex: 3 1 0;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: var(--shadow-xs);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#modal-content .form-actions > a:hover,
+#modal-content .form-actions > a:focus {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+#modal-content .form-actions > a:focus-visible {
+    outline: none;
+    border-color: var(--ring);
+}
+
+/* The task form is Kanboard's only two-column dialog. In a sheet the two
+ * columns are stacked rather than squeezed — the sheet is a tall, narrow
+ * surface, so a 15rem sidebar column beside a 22rem main one would leave
+ * neither enough room. */
+#modal-content .task-form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+}
+
+#modal-content .task-form-main-column {
+    flex: 3 1 20rem;
+    min-width: 0;
+}
+
+#modal-content .task-form-secondary-column {
+    flex: 1 1 20rem;
+    min-width: 0;
+}
+
+/* A sheet is a single-column form, so its fields fill it. form.css pins most
+ * of them to 70px / 150px / 300px / 400px, which leaves a ragged right edge at
+ * any width. */
+#modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="hidden"]),
+#modal-content select,
+#modal-content textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Two exceptions: an inline filter row is meant to stay on one line, and a
+ * field sitting inside an input group keeps the group's sizing. */
+#modal-content .form-inline input,
+#modal-content .form-inline select,
+#modal-content .input-addon input {
+    width: auto;
+}
+
+/* Dialogs opened at size "large" — board configuration, task edit — carry
+ * more than a form's worth of content, so their sheet is wider. modal.js
+ * writes those two values as an inline width; if they ever change the
+ * sheet simply keeps the default width, which is the safe direction to
+ * fail in. */
+#modal-box[style*="1350px"],
+#modal-box[style*="98%"] {
+    width: min(56rem, 100vw) !important;
+}
+
+@keyframes shadcn-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes shadcn-sheet-in {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* The notification panel — a sheet like every other, but a list to skim
+ * rather than a form to fill in.
+ *
+ * Assets/js/modal.js marks <html> when the link that opened the modal was
+ * the notification one; every modal shares one #modal-box with nothing
+ * else to tell them apart. The list takes the scroll instead of the sheet,
+ * so the title stays put without being sticky, and "mark all as read" —
+ * which Kanboard renders inside the header's menu — moves to the foot as
+ * the one action the panel offers. */
+html[data-sc-modal="sheet"] #modal-box {
+    width: 28rem !important;
+}
+
+html[data-sc-modal="sheet"] #modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    padding: var(--sc-dialog-pad-top) 1.25rem 0;
+    overflow: hidden;
+}
+
+html[data-sc-modal="sheet"] #modal-content .page-header {
+    position: static;
+    flex: 0 0 auto;
+    margin-bottom: 0.75rem;
+    padding-top: 0;
+}
+
+html[data-sc-modal="sheet"] #modal-header {
+    right: 1.25rem;
+}
+
+html[data-sc-modal="sheet"] #modal-content .table-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: 0;
+    border: none;
+    border-radius: 0;
+}
+
+html[data-sc-modal="sheet"] #modal-content .table-list-header {
+    display: none;
+}
+
+html[data-sc-modal="sheet"] #modal-content .table-list-row {
+    padding: 0.875rem 0.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+html[data-sc-modal="sheet"] #modal-content .table-list-row:last-child {
+    border-bottom: none;
+}
+
+html[data-sc-modal="sheet"] #modal-content .alert {
+    flex: 0 0 auto;
+}
+
+html[data-sc-modal="sheet"] #modal-content .page-header ul {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+html[data-sc-modal="sheet"] #modal-content .page-header ul li {
+    display: flex;
+    flex: 1;
+    margin: 0;
+    list-style: none;
+}
+
+html[data-sc-modal="sheet"] #modal-content .page-header ul li a {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+html[data-sc-modal="sheet"] #modal-content .page-header ul li a:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* Room for that button, and for the list to stop above it. */
+html[data-sc-modal="sheet"] #modal-content:has(.page-header ul li) {
+    padding-bottom: 4.5rem;
+}
+
+
+/* Drawer — the same sheet, docked to the bottom edge on a phone.
+ *
+ * There is no room beside the content on a narrow screen, so the sheet
+ * takes the bottom edge instead of the right one. Everything inside it —
+ * the held title, the scrolling body, the held actions — is unchanged.
+ * Tapping the overlay still dismisses it, which is what Kanboard already
+ * wires up. */
+@media (max-width: 768px) {
+    #modal-box {
+        --sc-dialog-pad-top: 1rem;
+        --sc-dialog-pad-side: 1rem;
+
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto !important;
+        min-width: 0;
+        max-width: none;
+        max-height: 85vh;
+        transform: none;
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        animation: shadcn-drawer-in 0.2s ease-out;
+    }
+
+    /* Wide dialogs are as wide as the screen here like every other one. */
+    #modal-box[style*="1350px"],
+    #modal-box[style*="98%"] {
+        width: auto !important;
+    }
+
+    /* The grab handle every drawer has. */
+    #modal-box::before {
+        content: "";
+        flex: 0 0 auto;
+        display: block;
+        width: 2.25rem;
+        height: 0.25rem;
+        margin: 0.625rem auto 0;
+        border-radius: 9999px;
+        background: var(--border);
+    }
+
+    /* The handle sits above the content, so the close control drops past
+     * it to stay on the title's line: 0.25rem of handle over 0.625rem of
+     * margin. */
+    #modal-header {
+        top: calc(var(--sc-dialog-pad-top) + 0.875rem);
+        right: var(--sc-dialog-pad-side);
+    }
+}
+
+@keyframes shadcn-drawer-in {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* ===================================================================
+ * Table
+ * =================================================================== */
+
+table {
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+}
+
+table th {
+    height: 2.75rem;
+    padding: 0 0.875rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background-color: transparent;
+    color: var(--muted-foreground);
+    font-weight: 500;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+table th a {
+    color: var(--muted-foreground);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+table th a:hover {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+table td {
+    padding: 0.75rem 0.875rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--foreground);
+}
+
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+table.table-striped tr:nth-child(odd) {
+    background: transparent;
+}
+
+table tbody tr:hover td {
+    background: var(--surface-subtle);
+}
+
+table.table-small {
+    font-size: 0.875rem;
+}
+
+.task-table a {
+    color: var(--foreground);
+}
+
+/* ===================================================================
+ * Table list — the card-shaped list used for tasks and projects
+ * =================================================================== */
+
+.table-list {
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--card);
+}
+
+.table-list-header {
+    background: var(--muted);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    line-height: 2.75rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+}
+
+.table-list-header a {
+    color: var(--muted-foreground);
+    font-weight: 500;
+}
+
+.table-list-header a:hover,
+.table-list-header a:focus {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+.table-list-header .table-list-header-count {
+    color: var(--muted-foreground);
+}
+
+.table-list-row {
+    display: flow-root;
+    padding: 1rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.15s ease;
+}
+
+.table-list-row.table-border-left {
+    border-left: none;
+}
+
+.table-list-row:nth-child(odd) {
+    background: transparent;
+}
+
+.table-list-row:last-child {
+    border-bottom: none;
+    border-radius: 0;
+}
+
+/* No wash under a task on hover — the row is a target, not a button. */
+.table-list-row:hover {
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    border-right: none;
+}
+
+.table-list-row .table-list-title {
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.table-list-row .table-list-title a {
+    color: var(--foreground);
+}
+
+.table-list-row .table-list-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--muted-foreground);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+}
+
+/* core spaces these with margin-left, which fights the gap */
+.table-list-row .table-list-details span,
+.table-list-row .table-list-details span:first-child {
+    margin-left: 0;
+}
+
+.table-list-row .table-list-details strong {
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+.table-list-row .table-list-icons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    line-height: 1.75rem;
+}
+
+.table-list-row .table-list-icons span {
+    margin-left: 0;
+}
+
+/* The sub-task strip a list row can carry sits apart from the row's own
+ * details rather than butting straight up against them. */
+.table-list-row .subtask-cell {
+    padding: 0.5rem 0.75rem;
+}
+
+.table-list-row .table-list-icons a:hover,
+.table-list-row .table-list-icons a:hover i {
+    color: var(--foreground);
+}
+
+/* Badge — the shadcn "secondary" variant, applied to every chip Kanboard
+ * renders: the category on a list row or a board card, the priority marker,
+ * and the estimate / spent pair on a card. */
+.task-board-priority,
+.task-list-priority,
+.task-priority,
+.task-time-estimated,
+.task-time-spent,
+.task-board-date,
+.table-list-category,
+.task-board-category {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--badge-neutral-border);
+    border-radius: var(--radius-sm);
+    background: var(--badge-neutral);
+    color: var(--badge-neutral-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    white-space: nowrap;
+}
+
+.task-time-estimated,
+.task-time-spent {
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The category is the one chip that names something, so it carries the
+ * brand colour. */
+.table-list-category,
+.task-board-category {
+    border-color: var(--badge-primary-border);
+    background: var(--badge-primary);
+    color: var(--badge-primary-foreground);
+}
+
+.table-list-category a,
+.table-list-category a:hover,
+.task-board-category a,
+.task-board-category a:hover {
+    color: inherit;
+}
+
+/* A due date is neutral until it is not. */
+span.task-date-overdue .fa,
+.task-date-overdue .fa,
+span.task-date-today .fa,
+.task-date-today .fa {
+    color: inherit;
+}
+
+span.task-date-overdue,
+.task-date-overdue {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--badge-warning-border);
+    border-radius: var(--radius-sm);
+    background: var(--badge-warning);
+    color: var(--badge-warning-foreground);
+    font-weight: 500;
+}
+
+span.task-date-today,
+.task-date-today {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--badge-success-border);
+    border-radius: var(--radius-sm);
+    background: var(--badge-success);
+    color: var(--badge-success-foreground);
+    font-weight: 500;
+}
+
+/* Badge */
+.table-list-category {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--badge-primary-border);
+    border-radius: var(--radius-sm);
+    background: var(--badge-primary);
+    color: var(--badge-primary-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.125rem;
+}
+
+.table-list-category a,
+.table-list-category a:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ===================================================================
+ * Alert
+ * =================================================================== */
+
+.alert {
+    display: block;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background-color: var(--card);
+    color: var(--card-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
+}
+
+.alert ul {
+    margin: 0.5rem 0 0;
+}
+
+.alert li {
+    margin-left: 1.125rem;
+}
+
+/* ===================================================================
+ * Sonner (toast) — the flash message Kanboard fades out
+ * =================================================================== */
+
+.alert-fade-out {
+    left: auto;
+    right: 1rem;
+    bottom: 1rem;
+    width: auto;
+    min-width: 22rem;
+    max-width: min(26rem, calc(100vw - 2rem));
+    text-align: left;
+    padding: 0.875rem 1rem;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: var(--shadow-lg);
+    animation: shadcn-toast-in 0.2s ease-out, fadeout 5s linear forwards;
+}
+
+@keyframes shadcn-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================================================
+ * Card — .panel and the dashboard boxes
+ * =================================================================== */
+
+.panel {
+    padding: 1rem 1.25rem;
+    margin: 0 0 1rem;
+    border: none;
+    border-radius: var(--radius-xl);
+    background-color: var(--surface-neutral);
+    color: var(--card-foreground);
+    box-shadow: var(--shadow-xs);
+}
+
+.panel li {
+    list-style-type: none;
+    margin-left: 0;
+    line-height: 1.625rem;
+}
+
+/* ===================================================================
+ * Tabs — the view switcher
+ * =================================================================== */
+
+.views {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    margin: 0 0.75rem 0 0;
+    padding: 0.1875rem;
+    background: var(--muted);
+    border-radius: var(--radius-lg);
+    font-size: 0.9375rem;
+}
+
+.views li {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.views li:first-child,
+.views li:last-child {
+    border-radius: var(--radius-md);
+    border-right: 1px solid transparent;
+}
+
+.views li a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    color: var(--muted-foreground);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.views li a:hover {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+.views li.active {
+    background: var(--background);
+    box-shadow: var(--shadow-sm);
+}
+
+.views li.active a {
+    color: var(--foreground);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+@media (max-width: 560px) {
+    .views {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .views li {
+        display: flex;
+        margin-top: 0;
+        border: 1px solid transparent;
+    }
+}
+
+/* Every page title needs air above it, or it butts into the top bar's
+ * rule. The first one on a page already sits below that rule. */
+.page-header {
+    margin-top: 1.5rem;
+}
+
+.page-header h2 {
+    font-size: 1.375rem;
+    font-weight: 700;
+}
+
+.page > .page-header:first-child,
+#main > .page-header:first-child,
+#modal-content > .page-header:first-child,
+.sidebar-content > .page-header:first-child {
+    margin-top: 0;
+}
+
+/* ===================================================================
+ * Menubar — the section nav under a page title
+ * =================================================================== */
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.page-header h2 a {
+    color: var(--foreground);
+}
+
+.page-header h2 a:hover,
+.page-header h2 a:focus {
+    color: var(--foreground);
+}
+
+.page-header ul,
+.menu-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+}
+
+.page-header li,
+.menu-inline li {
+    display: inline-flex;
+    padding: 0;
+}
+
+.page-header li a,
+.menu-inline li a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2rem;
+    padding: 0 0.625rem;
+    border-radius: var(--radius-md);
+    color: var(--muted-foreground);
+    font-weight: 500;
+}
+
+.page-header li a:hover,
+.menu-inline li a:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+.page-header li.active a,
+.page-header li.active a:hover,
+.page-header li.active a:focus,
+.menu-inline li .active a {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.page-header .dropdown {
+    padding-right: 0.5rem;
+}
+
+/* ===================================================================
+ * Navigation bar — the application header
+ * =================================================================== */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+    background-color: color-mix(in oklab, var(--background) 85%, transparent);
+    backdrop-filter: blur(8px);
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: 0.625rem 1rem;
+    }
+}
+
+header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+header h1 .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+header h1 .tooltip {
+    opacity: 0.6;
+    font-size: 0.875rem;
+}
+
+header .menus-container {
+    gap: 0.25rem;
+}
+
+header .board-selector-container {
+    min-width: 18rem;
+}
+
+a i.web-notification-icon {
+    color: var(--destructive);
+}
+
+a i.web-notification-icon:focus,
+a i.web-notification-icon:hover {
+    color: var(--destructive);
+}
+
+/* ===================================================================
+ * Sidebar
+ * =================================================================== */
+
+.sidebar {
+    min-width: 15rem;
+    max-width: 17rem;
+    padding-right: 1.25rem;
+}
+
+.sidebar h2 {
+    margin: 0 0 0.75rem;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+}
+
+.sidebar > ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.sidebar > ul li,
+.sidebar > ul li:hover,
+.sidebar > ul li.active {
+    display: flex;
+    list-style-type: none;
+    line-height: 1.25rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-md);
+}
+
+.sidebar > ul li:last-child {
+    margin-bottom: 1rem;
+}
+
+.sidebar > ul a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+    padding: 0.4375rem 0.5rem;
+    border-radius: var(--radius-md);
+    color: var(--sidebar-foreground);
+    font-weight: 400;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.sidebar > ul a:hover {
+    background: var(--sidebar-accent);
+    color: var(--sidebar-accent-foreground);
+    text-decoration: none;
+}
+
+.sidebar > ul li.active a,
+.sidebar > ul li.active a:hover,
+.sidebar > ul li.active a:focus {
+    background: var(--sidebar-accent);
+    color: var(--sidebar-accent-foreground);
+    font-weight: 500;
+}
+
+.sidebar-content {
+    padding-left: 0;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        max-width: 100%;
+        padding-right: 0;
+    }
+}
+
+/* ===================================================================
+ * Popover / Hover Card / Tooltip
+ * =================================================================== */
+
+#tooltip-container {
+    padding: 0.875rem 1rem;
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    font-size: 0.9375rem;
+}
+
+.tooltip .fa-info-circle {
+    color: var(--muted-foreground);
+}
+
+/* ===================================================================
+ * Pagination
+ * =================================================================== */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-size: 0.9375rem;
+    color: var(--muted-foreground);
+}
+
+.pagination a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    height: 2rem;
+    padding: 0 0.625rem;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.pagination a:hover {
+    background: var(--accent);
+    text-decoration: none;
+}
+
+.pagination-showing {
+    margin: 0 0.5rem 0 0;
+    padding-right: 0.75rem;
+    border-right: 1px solid var(--border);
+}
+
+.pagination-next,
+.pagination-previous {
+    margin: 0;
+}
+
+/* ===================================================================
+ * Accordion / Collapsible
+ * =================================================================== */
+
+.accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 0;
+    margin-top: 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.accordion-title:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.accordion-content {
+    margin: 1rem 0 1.5rem;
+}
+
+/* ===================================================================
+ * Avatar
+ * =================================================================== */
+
+.avatar img,
+.avatar div,
+.avatar-20 img,
+.avatar-20 div,
+.avatar-48 img,
+.avatar-48 div {
+    border-radius: 9999px;
+}
+
+.avatar-letter {
+    color: var(--primary-foreground);
+    font-weight: 500;
+}
+
+.avatar-inline {
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+
+/* ===================================================================
+ * Skeleton / loading indicator
+ * =================================================================== */
+
+#app-loading-icon {
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    background: var(--popover);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    color: var(--muted-foreground);
+}
+
+.icon-success {
+    color: var(--success);
+}
+
+.icon-error {
+    color: var(--destructive);
+}
+
+/* ===================================================================
+ * Project header — the toolbar above every project view
+ *
+ * Kanboard floats the settings dropdown and the view switcher and never
+ * clears them, so anything taller than the stock 26px switcher overflows
+ * .project-header and pushes the flex layout below it sideways. Flex
+ * removes the float entirely instead of patching around it.
+ * =================================================================== */
+
+.project-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.project-header .dropdown-component,
+.project-header .views-switcher-component {
+    float: none;
+    margin: 0;
+}
+
+.project-header .filter-box-component {
+    flex: 1 1 22rem;
+    min-width: 0;
+}
+
+.project-header .views {
+    margin-right: 0;
+}
+
+/* ===================================================================
+ * Content links
+ *
+ * Navigation is monochrome, the way shadcn renders it. Links inside prose
+ * need to stay recognisable, so the Card / Alert / markdown surfaces get
+ * the shadcn link treatment instead.
+ * =================================================================== */
+
+.panel a,
+.alert a,
+.markdown a,
+#tooltip-container a,
+.activity-content a,
+.comment-content a {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--foreground) 35%, transparent);
+    text-underline-offset: 4px;
+}
+
+.panel a:hover,
+.alert a:hover,
+.markdown a:hover,
+#tooltip-container a:hover,
+.activity-content a:hover,
+.comment-content a:hover {
+    text-decoration-color: var(--foreground);
+}
+
+/* ===================================================================
+ * Board — first pass
+ *
+ * Task colours are user data, so they are kept: colorCss() paints
+ * .task-board.color-* with a background and a matching border. Only the
+ * background is neutralised here, which turns the colour into a shadcn
+ * Card accent on the border instead of a full colour wash. The [class*=]
+ * selector matches colorCss()'s specificity and wins by load order.
+ * =================================================================== */
+
+.task-board {
+    margin-bottom: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border-width: 1px 1px 1px 3px;
+    border-style: solid;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    font-size: 0.875rem;
+    transition: box-shadow 0.15s ease;
+}
+
+.task-board[class*="color-"],
+.task-summary-container[class*="color-"],
+.task-board-collapsed[class*="color-"] {
+    background-color: var(--card);
+    /* colorCss() writes the shorthand border-color, so overriding three
+     * longhands leaves the task colour on the left edge alone. */
+    border-top-color: var(--border);
+    border-right-color: var(--border);
+    border-bottom-color: var(--border);
+}
+
+.task-board:hover {
+    box-shadow: none;
+}
+
+.task-board a,
+.task-board-title,
+.task-board-title a,
+.task-summary-column,
+.task-summary-column a,
+.task-summary-column a:hover {
+    color: var(--card-foreground);
+}
+
+.task-board-title {
+    margin: 0.375rem 0 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.task-board-icons,
+.task-list-icons {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+/* In a list the icons are their own row rather than a tail on the title,
+ * so they get air above and below. */
+.task-list-icons {
+    display: block;
+    margin: 10px 0;
+}
+
+.task-summary-container {
+    padding: 1rem 1.25rem;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+}
+
+#task-summary h2 {
+    color: var(--foreground);
+    font-size: 1.375rem;
+    font-weight: 600;
+}
+
+.task-summary-column span {
+    color: var(--muted-foreground);
+}
+
+/* Column headers read as a Table head row. */
+#board th.board-column-header {
+    height: auto;
+    padding: 0 0.5rem 0.625rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.board-column-title a,
+.board-column-title .dropdown-menu {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.board-column-header-task-count {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.board-add-icon i {
+    color: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.board-add-icon i:focus,
+.board-add-icon i:hover {
+    color: var(--foreground);
+}
+
+.draggable-placeholder {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--muted);
+}
+
+div.draggable-item-selected {
+    border: 1px solid var(--ring);
+    box-shadow: var(--shadow-md);
+}
+
+/* The colour stripe colorCss() puts on list rows, narrowed to a shadcn
+ * accent rather than a 5px slab. */
+.table-list-row[class*="color-"] {
+    border-left-width: 3px;
+}
+
+/* ===================================================================
+ * Message — comment threads and the activity stream
+ *
+ * Both surfaces ship the same stock geometry: a 48px avatar floated
+ * left, everything else pushed clear of it with margin-left: 55px, and
+ * the rows zebra-striped. shadcn's Message is a small avatar next to a
+ * bubble, so the float is replaced with a grid. No DOM change is
+ * needed — the existing children simply get named areas.
+ * =================================================================== */
+
+.comments .comment {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+        "avatar header actions"
+        "avatar bubble bubble";
+    align-items: start;
+    column-gap: 0.75rem;
+    row-gap: 0.375rem;
+    padding: 0;
+    margin: 0 0 1rem;
+    background: transparent;
+}
+
+/* The zebra stripe and the row hover wash both go: on a bubble layout
+ * the card edge already separates one message from the next. Selectors
+ * are copied from comment.css so they match its specificity exactly. */
+.comments .comment:hover,
+.comments .comment:nth-child(even):not(.comment-highlighted),
+.comments .comment:nth-child(even):not(.comment-highlighted):hover {
+    background: transparent;
+}
+
+.comments .comment > .avatar,
+.activity-event > .avatar {
+    float: none;
+    margin: 0;
+}
+
+.comments .comment > .avatar {
+    grid-area: avatar;
+}
+
+/* 48px is a profile avatar; a message wants 32. */
+.comments .comment > .avatar img,
+.activity-event > .avatar img {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+}
+
+.comments .comment > .avatar .avatar-letter,
+.activity-event > .avatar .avatar-letter {
+    width: 2rem;
+    line-height: 2rem;
+    font-size: 0.875rem;
+    border-radius: 9999px;
+}
+
+.comments .comment-title {
+    grid-area: header;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 2rem;
+    margin: 0;
+    border-bottom: none;
+}
+
+.comments .comment-username {
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.comments .comment-date,
+.comments .comment-visibility {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+/* The bubble. justify-self keeps it hugging its content the way a
+ * shadcn Message does, instead of stretching across the whole grid
+ * column, while max-width stops a long line from overflowing. */
+.comments .comment-content {
+    grid-area: bubble;
+    justify-self: start;
+    max-width: 100%;
+    margin-left: 0;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    color: var(--card-foreground);
+    transition: border-color 0.15s ease;
+}
+
+.comments .comment:hover .comment-content {
+    border-color: color-mix(in oklab, var(--foreground) 12%, var(--border));
+}
+
+.comments .comment-content .markdown > :first-child {
+    margin-top: 0;
+}
+
+.comments .comment-content .markdown > :last-child {
+    margin-bottom: 0;
+}
+
+/* Row actions stay out of the way until the message is pointed at or
+ * focused, the way shadcn reveals them on a Message. */
+.comments .comment-actions {
+    grid-area: actions;
+    align-self: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.comments .comment:hover .comment-actions,
+.comments .comment:focus-within .comment-actions,
+.comments .comment:has(.active-dropdown-menu) .comment-actions {
+    opacity: 1;
+}
+
+/* Highlighted (linked-to) comment: a ring on the bubble rather than a
+ * 2px border and a wash on the whole row. */
+.comments .comment-highlighted,
+.comments .comment-highlighted:hover {
+    background: transparent;
+    border: none;
+}
+
+.comments .comment-highlighted .comment-content {
+    border-color: var(--ring);
+}
+
+/* The add / sort / mail toolbar above the thread. */
+.comments .comment-sorting {
+    margin-bottom: 1rem;
+}
+
+.comments .comment-sorting small {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.comments .comment-sorting a {
+    color: var(--muted-foreground);
+    font-weight: 400;
+}
+
+.comments .comment-sorting a:hover,
+.comments .comment-sorting a:focus {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+/* The activity stream is the same message shape without the action
+ * column: avatar, then a title line with the body underneath. */
+.activity-event {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.75rem;
+    padding: 0;
+    margin: 0 0 1rem;
+    background: transparent;
+}
+
+.activity-event:nth-child(even),
+.activity-event:hover {
+    background: transparent;
+}
+
+.activity-content {
+    margin-left: 0;
+    min-width: 0;
+}
+
+.activity-title {
+    margin: 0;
+    padding-top: 0.3125rem;
+    border-bottom: none;
+    color: var(--foreground);
+    font-weight: 400;
+    line-height: 1.375rem;
+}
+
+.activity-title a,
+.activity-title strong {
+    font-weight: 500;
+}
+
+.activity-date {
+    margin-left: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+.activity-description {
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    color: var(--muted-foreground);
+}
+
+/* Each entry leads with the task it happened to; that is the bubble's
+ * heading, not more body copy. */
+.activity-task-title {
+    margin: 0 0 0.25rem;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.activity-description ul {
+    margin-top: 0.5rem;
+    margin-left: 1.25rem;
+}
+
+.activity-description li {
+    list-style-type: disc;
+}
+
+/* ===================================================================
+ * Sub-tasks — the row list on the task detail page
+ *
+ * border-collapse is switched to separate here so the card corners
+ * actually clip; every cell still draws only its own bottom rule, so
+ * the grid reads the same as the collapsed original.
+ * =================================================================== */
+
+.subtasks-table {
+    margin-bottom: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+}
+
+.subtasks-table th:first-child,
+.subtasks-table td:first-child {
+    padding-left: 0.875rem;
+}
+
+.subtasks-table th:last-child,
+.subtasks-table td:last-child {
+    padding-right: 0.875rem;
+}
+
+/* min-width: 400px in subtasks.css pushes the table sideways on a
+ * phone; the flex row already keeps the title from collapsing. */
+.subtasks-table .subtask-table-td {
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.subtasks-table .draggable-row-handle {
+    color: var(--muted-foreground);
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.subtasks-table tr:hover .draggable-row-handle,
+.subtasks-table tr:focus-within .draggable-row-handle,
+.subtasks-table tr:has(.active-dropdown-menu) .draggable-row-handle {
+    opacity: 1;
+}
+
+.subtasks-table .draggable-row-handle:hover {
+    color: var(--foreground);
+}
+
+.subtasks-table .subtask-submenu {
+    align-items: center;
+    color: var(--muted-foreground);
+}
+
+.subtasks-table .subtask-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.subtasks-table .js-subtask-toggle-status,
+.subtasks-table .subtask-title > a {
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    color: var(--foreground);
+}
+
+.subtasks-table .js-subtask-toggle-status:hover,
+.subtasks-table .js-subtask-toggle-status:focus {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Checkbox — the three status glyphs, read as unchecked / running /
+ * done rather than as three identical grey boxes. */
+.subtasks-table .fa-square-o {
+    color: var(--muted-foreground);
+}
+
+.subtasks-table .fa-gears {
+    color: var(--info);
+}
+
+.subtasks-table .fa-check-square-o {
+    color: var(--primary);
+}
+
+/* A finished row steps back. :has() is progressive here: without it the
+ * row simply keeps its normal ink, nothing breaks. */
+.subtasks-table tr:has(.fa-check-square-o) .subtask-title a,
+.subtasks-table tr:has(.fa-check-square-o) .subtask-time-tracking {
+    color: var(--muted-foreground);
+}
+
+.subtasks-table .subtask-time-tracking {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.subtasks-table .subtask-timer-toggle a {
+    color: var(--muted-foreground);
+}
+
+.subtasks-table .subtask-timer-toggle a:hover,
+.subtasks-table .subtask-timer-toggle a:focus {
+    color: var(--foreground);
+}
+
+/* The same rows inside a board tooltip, where they are laid out as
+ * table cells rather than as a real table. */
+.subtask-cell {
+    padding: 0.375rem 0.625rem;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+}
+
+.subtask-cell a {
+    color: var(--foreground);
+}
+
+.subtask-cell a:hover,
+.subtask-cell a:focus {
+    color: var(--foreground);
+}
+
+/* ===================================================================
+ * Calendar — the FullCalendar 3 view
+ *
+ * FullCalendar ships its own light chrome: #ddd rules, a #fcf8e3 today
+ * cell and jQuery-UI gradient buttons. Every selector below is one
+ * class deeper than the vendor rule it replaces (.fc and .fc-unthemed
+ * both land on the container), so this wins on specificity and does not
+ * depend on which plugin's stylesheet loads last.
+ * =================================================================== */
+
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1rem;
+}
+
+.fc .fc-toolbar h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+    color: var(--foreground);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 2.25rem;
+}
+
+/* Button, in the outline variant. */
+.fc .fc-state-default {
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    background-image: none;
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-shadow: none;
+    box-shadow: var(--shadow-xs);
+    transition: background-color 0.15s ease, color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.fc .fc-state-default.fc-corner-left {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+}
+
+.fc .fc-state-default.fc-corner-right {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+}
+
+.fc .fc-state-hover {
+    background: var(--accent);
+    background-image: none;
+    background-position: 0 0;
+    color: var(--accent-foreground);
+}
+
+.fc .fc-state-active,
+.fc .fc-state-down {
+    background: var(--primary);
+    background-image: none;
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: none;
+}
+
+.fc .fc-state-disabled {
+    opacity: 0.5;
+}
+
+.fc button:focus-visible {
+    outline: none;
+    border-color: var(--ring);
+}
+
+/* Card around the grid. The grid's own outer edge is made transparent
+ * instead of clipping the container with overflow, which would swallow
+ * the "+n more" popover FullCalendar positions inside the view. */
+.fc .fc-view-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--card);
+}
+
+.fc.fc-unthemed .fc-view > table > thead > tr > td,
+.fc.fc-unthemed .fc-view > table > tbody > tr > td {
+    border-left-color: transparent;
+    border-right-color: transparent;
+}
+
+.fc.fc-unthemed .fc-view > table > thead > tr > td {
+    border-top-color: transparent;
+}
+
+.fc.fc-unthemed .fc-view > table > tbody > tr > td {
+    border-bottom-color: transparent;
+}
+
+.fc.fc-unthemed .fc-row td:first-child,
+.fc.fc-unthemed .fc-row th:first-child {
+    border-left-color: transparent;
+}
+
+.fc.fc-unthemed .fc-row td:last-child,
+.fc.fc-unthemed .fc-row th:last-child {
+    border-right-color: transparent;
+}
+
+.fc.fc-unthemed .fc-day-grid .fc-row:last-child td {
+    border-bottom-color: transparent;
+}
+
+.fc.fc-unthemed .fc-content,
+.fc.fc-unthemed .fc-divider,
+.fc.fc-unthemed .fc-list-heading td,
+.fc.fc-unthemed .fc-list-view,
+.fc.fc-unthemed .fc-popover,
+.fc.fc-unthemed .fc-row,
+.fc.fc-unthemed tbody,
+.fc.fc-unthemed td,
+.fc.fc-unthemed th,
+.fc.fc-unthemed thead {
+    border-color: var(--border);
+}
+
+.fc.fc-unthemed th {
+    height: 2.25rem;
+    padding: 0 0.25rem;
+    border-top: none;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+}
+
+.fc .fc-day-number {
+    padding: 0.25rem 0.375rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.fc .fc-day-top.fc-other-month {
+    opacity: 0.4;
+}
+
+/* #fcf8e3 is the one colour FullCalendar hard-codes that a dark theme
+ * cannot survive. */
+.fc.fc-unthemed td.fc-today {
+    border-style: solid;
+    background: color-mix(in oklab, var(--primary) 6%, var(--card));
+}
+
+.fc.fc-unthemed td.fc-today .fc-day-number {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.fc.fc-unthemed .fc-disabled-day,
+.fc .fc-nonbusiness {
+    background: var(--muted);
+    opacity: 1;
+}
+
+.fc .fc-highlight {
+    background: var(--primary);
+    opacity: 0.1;
+}
+
+.fc .fc-basic-view .fc-day-top .fc-week-number,
+.fc.fc-unthemed .fc-divider,
+.fc.fc-unthemed .fc-list-heading td {
+    background: var(--muted);
+    color: var(--muted-foreground);
+}
+
+.fc .fc-axis,
+.fc .fc-list-item-time {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Events keep the task colour — it is user data, exactly as on the
+ * board. Only the chrome around it is shadcn, and the white-on-pastel
+ * label FullCalendar defaults to becomes dark ink so it is legible
+ * against Kanboard's light task palette in either theme. */
+.fc .fc-event,
+.fc .fc-event:hover {
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    padding: 0.0625rem 0;
+    color: oklch(0.205 0 0);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+}
+
+.fc .fc-day-grid-event {
+    margin: 0.125rem 0.25rem 0;
+    padding: 0 0.25rem;
+}
+
+.fc .fc-day-grid-event .fc-time,
+.fc .fc-time-grid-event .fc-time {
+    font-weight: 600;
+}
+
+.fc .fc-event.fc-selected {
+    border-color: var(--ring);
+}
+
+.fc a.fc-more {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.fc a.fc-more:hover {
+    color: var(--foreground);
+}
+
+/* Popover — the "+n more" overflow panel. */
+.fc.fc-unthemed .fc-popover {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: var(--shadow-md);
+}
+
+.fc.fc-unthemed .fc-popover .fc-header {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.fc.fc-unthemed .fc-popover .fc-header .fc-close {
+    color: var(--muted-foreground);
+}
+
+/* List view. */
+.fc .fc-list-item:hover td {
+    background: var(--surface-subtle);
+}
+
+.fc .fc-list-item-title a {
+    color: var(--foreground);
+}
+
+.fc.fc-unthemed .fc-list-empty {
+    background: var(--muted);
+    color: var(--muted-foreground);
+}
+
+.fc .fc-now-indicator {
+    border-color: var(--destructive);
+}
+
+/* ===================================================================
+ * Gantt — the jQuery.ganttView grid
+ *
+ * gantt.css paints its own #999 / #d0d0d0 / #f0f0f0 rules and a
+ * #fcf8e3 today column, none of which survive a dark theme. Everything
+ * here is scoped to #gantt-chart, which out-specifies the plugin's
+ * div.ganttview-* selectors regardless of plugin load order.
+ * =================================================================== */
+
+#gantt-chart .ganttview {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--card);
+    font-size: 0.875rem;
+}
+
+#gantt-chart .ganttview-hzheader-month,
+#gantt-chart .ganttview-hzheader-day {
+    border-right: 1px solid var(--border);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+#gantt-chart .ganttview-hzheader-day {
+    border-top: 1px solid var(--border);
+}
+
+#gantt-chart .ganttview-vtheader {
+    background: var(--card);
+}
+
+#gantt-chart .ganttview-vtheader-item {
+    color: var(--foreground);
+}
+
+#gantt-chart .ganttview-vtheader-series-name {
+    border-top: 1px solid var(--border);
+    padding-left: 0.625rem;
+}
+
+#gantt-chart .ganttview-vtheader-series-name a {
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+#gantt-chart .ganttview-vtheader-series-name a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+#gantt-chart .ganttview-vtheader-series-name a i,
+#gantt-chart .ganttview-vtheader-series-name a:hover i {
+    color: var(--muted-foreground);
+}
+
+#gantt-chart .ganttview-slide-container {
+    border-left: 1px solid var(--border);
+}
+
+#gantt-chart .ganttview-grid-row-cell {
+    border-right: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+    border-top: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+}
+
+#gantt-chart .ganttview-grid-row-cell.ganttview-weekend {
+    background: var(--surface-subtle);
+}
+
+#gantt-chart .ganttview-grid-row-cell.ganttview-today {
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+/* Bars keep the task colour, like every other colour-carrying surface
+ * in this theme; only the geometry and the label become shadcn. The
+ * background and border come from an inline style written by
+ * chart.js, so they are left untouched here. */
+#gantt-chart .ganttview-block {
+    height: 1.5rem;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    box-shadow: var(--shadow-xs);
+}
+
+#gantt-chart .ganttview-block-text {
+    height: auto;
+    padding: 0.1875rem 0.375rem;
+    color: oklch(0.205 0 0);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.125rem;
+}
+
+#gantt-chart .ganttview-progress-bar {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    opacity: 0.35;
+}
+
+/* ===================================================================
+ * Chart — the c3 / d3 analytics canvases
+ *
+ * c3 writes its series colours as inline style attributes, so a
+ * stylesheet cannot reach them without !important. The nth-of-type
+ * index matches the order c3 assigns colours in, which is the same
+ * order it builds the legend in, so series and legend stay in step.
+ * =================================================================== */
+
+/* No horizontal padding: c3 sizes the <svg> to the element's border-box
+ * width and then draws it inside the padding box, so any left/right
+ * padding pushes the chart straight out through the card's right edge. */
+#chart {
+    padding: 1rem 0 0.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--card);
+    box-shadow: var(--shadow-xs);
+}
+
+.c3 {
+    /* Fallback for any target the index rules below do not reach, so
+     * var(--c3-series) always resolves to a real colour. */
+    --c3-series: var(--chart-1);
+}
+
+.c3 svg {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+}
+
+.c3 line,
+.c3 path {
+    stroke: var(--border);
+}
+
+.c3 text,
+.c3 .c3-legend-item text {
+    fill: var(--muted-foreground);
+}
+
+.c3-grid line {
+    stroke: color-mix(in oklab, var(--border) 70%, transparent);
+}
+
+.c3-grid text {
+    fill: var(--muted-foreground);
+}
+
+.c3-text.c3-empty {
+    fill: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.c3-line {
+    stroke-width: 2px;
+}
+
+.c3-area {
+    opacity: 0.15;
+}
+
+.c3-circle._expanded_,
+.c3-selected-circle {
+    stroke: var(--card);
+}
+
+/* Donut and pie slices are separated by the card behind them, not by
+ * white. */
+.c3-chart-arc path {
+    stroke: var(--card);
+}
+
+.c3-chart-arc rect {
+    stroke: var(--card);
+}
+
+.c3-chart-arc text {
+    fill: var(--primary-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.c3-chart-arcs .c3-chart-arcs-background {
+    fill: var(--muted);
+    stroke: var(--card);
+}
+
+.c3-legend-background {
+    fill: var(--popover);
+    stroke: var(--border);
+    opacity: 1;
+}
+
+/* Tooltip — the shadcn Popover surface. */
+.c3-tooltip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    /* collapse + border-radius do not clip; separate does. */
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    background-color: var(--popover);
+    box-shadow: var(--shadow-md);
+    opacity: 1;
+}
+
+.c3-tooltip tr {
+    border: none;
+}
+
+.c3-tooltip th {
+    padding: 0.375rem 0.625rem;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.c3-tooltip td {
+    padding: 0.25rem 0.625rem;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    font-size: 0.8125rem;
+}
+
+.c3-tooltip td.value {
+    font-variant-numeric: tabular-nums;
+}
+
+.c3-tooltip td > span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    margin-right: 0.5rem;
+}
+
+/* The five shadcn chart tokens, in series order. */
+.c3-chart-line:nth-of-type(1) .c3-line,
+.c3-chart-line:nth-of-type(1) .c3-circle,
+.c3-chart-line:nth-of-type(1) .c3-area,
+.c3-chart-bar:nth-of-type(1) .c3-bar,
+.c3-chart-arc:nth-of-type(1) path,
+.c3-legend-item:nth-of-type(1) .c3-legend-item-tile {
+    --c3-series: var(--chart-1);
+}
+
+.c3-chart-line:nth-of-type(2) .c3-line,
+.c3-chart-line:nth-of-type(2) .c3-circle,
+.c3-chart-line:nth-of-type(2) .c3-area,
+.c3-chart-bar:nth-of-type(2) .c3-bar,
+.c3-chart-arc:nth-of-type(2) path,
+.c3-legend-item:nth-of-type(2) .c3-legend-item-tile {
+    --c3-series: var(--chart-2);
+}
+
+.c3-chart-line:nth-of-type(3) .c3-line,
+.c3-chart-line:nth-of-type(3) .c3-circle,
+.c3-chart-line:nth-of-type(3) .c3-area,
+.c3-chart-bar:nth-of-type(3) .c3-bar,
+.c3-chart-arc:nth-of-type(3) path,
+.c3-legend-item:nth-of-type(3) .c3-legend-item-tile {
+    --c3-series: var(--chart-3);
+}
+
+.c3-chart-line:nth-of-type(4) .c3-line,
+.c3-chart-line:nth-of-type(4) .c3-circle,
+.c3-chart-line:nth-of-type(4) .c3-area,
+.c3-chart-bar:nth-of-type(4) .c3-bar,
+.c3-chart-arc:nth-of-type(4) path,
+.c3-legend-item:nth-of-type(4) .c3-legend-item-tile {
+    --c3-series: var(--chart-4);
+}
+
+.c3-chart-line:nth-of-type(5) .c3-line,
+.c3-chart-line:nth-of-type(5) .c3-circle,
+.c3-chart-line:nth-of-type(5) .c3-area,
+.c3-chart-bar:nth-of-type(5) .c3-bar,
+.c3-chart-arc:nth-of-type(5) path,
+.c3-legend-item:nth-of-type(5) .c3-legend-item-tile {
+    --c3-series: var(--chart-5);
+}
+
+/* Series six and beyond wrap around the five-colour scale. */
+.c3-chart-line:nth-of-type(5n + 6) .c3-line,
+.c3-chart-line:nth-of-type(5n + 6) .c3-circle,
+.c3-chart-line:nth-of-type(5n + 6) .c3-area,
+.c3-chart-bar:nth-of-type(5n + 6) .c3-bar,
+.c3-chart-arc:nth-of-type(5n + 6) path,
+.c3-legend-item:nth-of-type(5n + 6) .c3-legend-item-tile {
+    --c3-series: var(--chart-1);
+}
+
+.c3-chart-line:nth-of-type(5n + 7) .c3-line,
+.c3-chart-line:nth-of-type(5n + 7) .c3-circle,
+.c3-chart-line:nth-of-type(5n + 7) .c3-area,
+.c3-chart-bar:nth-of-type(5n + 7) .c3-bar,
+.c3-chart-arc:nth-of-type(5n + 7) path,
+.c3-legend-item:nth-of-type(5n + 7) .c3-legend-item-tile {
+    --c3-series: var(--chart-2);
+}
+
+.c3-chart-line:nth-of-type(5n + 8) .c3-line,
+.c3-chart-line:nth-of-type(5n + 8) .c3-circle,
+.c3-chart-line:nth-of-type(5n + 8) .c3-area,
+.c3-chart-bar:nth-of-type(5n + 8) .c3-bar,
+.c3-chart-arc:nth-of-type(5n + 8) path,
+.c3-legend-item:nth-of-type(5n + 8) .c3-legend-item-tile {
+    --c3-series: var(--chart-3);
+}
+
+.c3-chart-line:nth-of-type(5n + 9) .c3-line,
+.c3-chart-line:nth-of-type(5n + 9) .c3-circle,
+.c3-chart-line:nth-of-type(5n + 9) .c3-area,
+.c3-chart-bar:nth-of-type(5n + 9) .c3-bar,
+.c3-chart-arc:nth-of-type(5n + 9) path,
+.c3-legend-item:nth-of-type(5n + 9) .c3-legend-item-tile {
+    --c3-series: var(--chart-4);
+}
+
+.c3-chart-line:nth-of-type(5n + 10) .c3-line,
+.c3-chart-line:nth-of-type(5n + 10) .c3-circle,
+.c3-chart-line:nth-of-type(5n + 10) .c3-area,
+.c3-chart-bar:nth-of-type(5n + 10) .c3-bar,
+.c3-chart-arc:nth-of-type(5n + 10) path,
+.c3-legend-item:nth-of-type(5n + 10) .c3-legend-item-tile {
+    --c3-series: var(--chart-5);
+}
+
+/* One !important each, applied to the variable set above rather than
+ * to a literal colour, so the palette still lives in tokens.css. */
+.c3-line {
+    stroke: var(--c3-series) !important;
+}
+
+.c3-circle {
+    fill: var(--c3-series) !important;
+}
+
+.c3-area {
+    fill: var(--c3-series) !important;
+}
+
+.c3-bar {
+    fill: var(--c3-series) !important;
+}
+
+.c3-chart-arc path {
+    fill: var(--c3-series) !important;
+}
+
+.c3-legend-item-tile {
+    stroke: var(--c3-series) !important;
+}
+
+/* Core paints a handful of drop shadows directly rather than through a
+ * variable. The theme is flat, so they go too. */
+ul.dropdown-submenu-open,
+#select-dropdown-menu,
+#suggest-menu,
+#tooltip-container,
+.thumbnails a img,
+tr.draggable-item-selected,
+input:focus,
+textarea:focus,
+.task-board:hover,
+#modal-box {
+    box-shadow: none;
+}
+
+/* ===================================================================
+ * Dashboard — the welcome row and its stat tiles
+ * =================================================================== */
+
+.sc-welcome {
+    margin: 0 0 1.5rem;
+}
+
+.sc-welcome-title {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.sc-welcome-sub {
+    margin: 0.5rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.sc-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.sc-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1.25rem 1.75rem;
+    border: none;
+    border-radius: var(--radius-xl);
+    background: var(--surface-neutral);
+    color: var(--card-foreground);
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* The whole tile is the target, so the whole tile answers. */
+.sc-stat:hover,
+.sc-stat:focus {
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+}
+
+.sc-stat:hover .sc-stat-label,
+.sc-stat:hover .fa,
+.sc-stat:hover .sc-stat-value,
+.sc-stat:focus .sc-stat-label,
+.sc-stat:focus .fa,
+.sc-stat:focus .sc-stat-value {
+    color: #fff;
+}
+
+.sc-stat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sc-stat-label {
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.sc-stat .fa {
+    font-size: 1.125rem;
+    color: var(--muted-foreground);
+}
+
+.sc-stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+/* One ink for every tile: a row of four is a set, not four states. */
+.sc-stat .fa {
+    color: var(--muted-foreground);
+}
+
+/* ===================================================================
+ * Auth screens — shadcn's login-02
+ *
+ * login-02 is a two-column page: a brand mark at the top of the left
+ * column, the form centred beneath it, and a muted cover panel on the
+ * right that disappears below lg. Kanboard renders these screens with
+ * no_layout, so <body> holds nothing but .form-login and the whole
+ * layout can hang off it. The cover panel is body::after — a grid item
+ * needs no markup.
+ *
+ * The same rules cover the two password-reset screens, which use the
+ * same wrapper and carry their own <h2> instead of the hook's heading.
+ * =================================================================== */
+
+body:has(> .form-login) {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 100svh;
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 1024px) {
+    body:has(> .form-login) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body:has(> .form-login)::after {
+        content: "";
+        /* login-02 puts a cover image here; a plain surface stands in for
+         * it until there is one. */
+        background-color: var(--muted);
+    }
+}
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 1.5rem;
+    border: none;
+    border-radius: 0;
+    background: var(--background);
+}
+
+@media (min-width: 768px) {
+    .form-login {
+        padding: 2.5rem;
+    }
+}
+
+
+/* The brand sits at the top; the heading and the form share the space
+ * left over, which is what centres them without a wrapper element. */
+/* It is a link now, on every auth screen, so it stops looking like one. */
+.sc-auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--foreground);
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sc-auth-brand:hover,
+.sc-auth-brand:focus {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+/* The password-reset screens have no hook to render the brand into — they
+ * are no_layout pages and Kanboard fires nothing inside their body. So on
+ * those two the mark is drawn instead: the tile is body::before (the cover
+ * panel is body::after) and the wordmark is .form-login::before. Both stand
+ * down as soon as the real .sc-auth-brand element is present. */
+body:has(> .form-login):not(:has(.sc-auth-brand))::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--sc-logo) center / contain no-repeat;
+}
+
+.form-login:not(:has(.sc-auth-brand))::before {
+    content: "Kanboard";
+    position: absolute;
+    z-index: 1;
+    top: 1.5rem;
+    left: 4.375rem;
+    line-height: 2.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    body:has(> .form-login):not(:has(.sc-auth-brand))::before {
+        top: 2.5rem;
+        left: 2.5rem;
+    }
+
+    .form-login:not(:has(.sc-auth-brand))::before {
+        top: 2.5rem;
+        left: 5.375rem;
+    }
+}
+
+/* Both are positioned against the page, so the column has to be the
+ * containing block. */
+body:has(> .form-login) {
+    position: relative;
+}
+
+.form-login {
+    position: relative;
+}
+
+/* The legal line, bottom-left of the form column. Built by auth.js because
+ * a pseudo-element cannot hold links. */
+.sc-auth-legal {
+    margin: 1.5rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    text-align: left;
+}
+
+.sc-auth-legal a {
+    color: var(--muted-foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.sc-auth-legal a:hover {
+    color: var(--foreground);
+}
+
+.sc-auth-brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--sc-logo) center / contain no-repeat;
+}
+
+/* The column stays centred on the panel; the copy inside it starts at the
+ * same left edge as the labels and fields below. */
+.sc-auth-head,
+.form-login h2 {
+    width: 100%;
+    max-width: 20rem;
+    margin-top: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+/* Typography only — the auto margins that centre the stack are set on
+ * .form-login h2 above, and a `margin: 0` here would wipe them out. */
+.sc-auth-head h1 {
+    margin: 0;
+}
+
+.sc-auth-head h1,
+.form-login h2 {
+    padding: 0;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.sc-auth-head p {
+    margin: 0.375rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    text-wrap: balance;
+}
+
+/* A wrapping row rather than a column: it is the only way to get "remember
+ * me" and "forgot your password?" onto one line, since they are siblings
+ * with fields between them and cannot be wrapped in a container. */
+.form-login form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 0;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 20rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-login form > * {
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
+/* The stack is centred by giving the slack to whatever ends it — the form,
+ * a social row, or (when auth.js has run) the legal line, which is pinned to
+ * the bottom instead so the rest stays centred above it. */
+.form-login > :last-child {
+    margin-bottom: auto;
+}
+
+.form-login > .sc-auth-legal {
+    margin-bottom: 0;
+}
+
+.form-login:has(> .sc-auth-legal) > :nth-last-child(2) {
+    margin-bottom: auto;
+}
+
+.form-login label {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+}
+
+/* border-box, or a 100%-wide input adds its padding on top and ends up
+ * wider than the button beneath it. */
+.form-login input,
+.form-login select,
+.form-login textarea,
+.form-login .btn,
+.form-login > ul li a {
+    box-sizing: border-box;
+}
+
+.form-login input[type="text"],
+.form-login input[type="password"],
+.form-login input[type="email"] {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* The challenge is rendered by a hook after </form>, so it is a sibling of
+ * the form rather than a child — without this it takes the column's width
+ * instead of the form's and nothing lines up. */
+.form-login .cf-turnstile {
+    width: 100%;
+    max-width: 20rem;
+    margin: 0.875rem auto 0;
+}
+
+.form-login .cf-turnstile iframe {
+    max-width: 100%;
+}
+
+.turnstile-error {
+    margin: 0.5rem 0 0;
+    color: var(--destructive);
+    font-size: 0.8125rem;
+}
+
+/* Remember me: a checkbox row, and the <br> after it is noise. */
+.form-login label:has(> input[type="checkbox"]) {
+    display: flex;
+    flex: 1 1 auto;
+    align-self: center;
+    align-items: center;
+    gap: 0.5rem;
+    order: 3;
+    min-height: 1.5rem;
+    margin-top: 0.875rem;
+    margin-bottom: 0;
+    font-weight: 400;
+    line-height: 1.5rem;
+}
+
+.form-login form > br {
+    display: none;
+}
+
+.form-login .form-actions {
+    display: block;
+    order: 5;
+    padding-top: 1rem;
+}
+
+.form-login .form-actions .btn {
+    width: 100%;
+    height: 2.75rem;
+    font-size: 1rem;
+}
+
+/* login-02 ties "forgot your password?" to the password field rather than
+ * leaving it under the button. It is the last child in Kanboard's markup
+ * and the fields above it vary (captcha, remember me), so it is ordered
+ * up to just under the password field rather than onto its label row —
+ * the association reads the same and nothing depends on a field count. */
+/* Paired with "remember me" on one line, right-aligned. Both carry the same
+ * line box so the two sit on one optical line rather than one riding high. */
+.form-login .reset-password {
+    display: flex;
+    flex: 0 0 auto;
+    align-self: center;
+    align-items: center;
+    order: 4;
+    min-height: 1.5rem;
+    margin-top: 0.875rem;
+    margin-bottom: 0;
+    margin-left: auto;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    text-align: right;
+}
+
+.form-login .reset-password a {
+    color: var(--muted-foreground);
+    text-underline-offset: 4px;
+}
+
+.form-login .reset-password a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+}
+
+.form-login .alert {
+    width: 100%;
+    max-width: 20rem;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+.form-login .form-help {
+    margin: 0.25rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+/* The social row login-02 puts under the form. An auth plugin renders it
+ * as a plain <ul> of links after </form>; each becomes an outline Button,
+ * introduced by a labelled rule. --sc-or-label is set by
+ * Template/auth/header.php so the label goes through t(). */
+.form-login > ul {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 20rem;
+    margin: 0 auto;
+    padding: 2.75rem 0 0;
+    list-style: none;
+}
+
+/* The rule, and the label sitting on top of it — two pseudo-elements
+ * because the label has to punch a hole in the line to read as centred. */
+.form-login > ul::after {
+    content: "";
+    position: absolute;
+    top: 1.375rem;
+    right: 0;
+    left: 0;
+    border-top: 1px solid var(--border);
+}
+
+.form-login > ul::before {
+    content: var(--sc-or-label, "");
+    position: absolute;
+    top: 1.375rem;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    padding: 0 0.75rem;
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.form-login > ul li {
+    display: flex;
+    margin: 0;
+    list-style: none;
+    background: var(--background);
+}
+
+.form-login > ul li a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.form-login > ul li a:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+/* The captcha on the reset screen, and any social button a auth plugin
+ * drops in after the form. */
+.form-login img[alt="Captcha"] {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.375rem;
+}
+
+/* ===================================================================
+ * Hard-coded colours in core CSS
+ *
+ * A handful of core rules paint text #000 or #999 outright rather than
+ * through a variable. They were safe while every surface underneath them
+ * was light; on a shadcn Card in dark mode they disappear. Re-pointing
+ * them at tokens is the last piece that makes dark mode complete.
+ * =================================================================== */
+
+.task-date {
+    color: var(--muted-foreground);
+    font-weight: 500;
+}
+
+/* These two were colour-only in round 1; the badge fills above now own
+ * them, so the ink has to be the fill's foreground — the icon inside is a
+ * masked box painted with currentColor, so it follows. */
+span.task-date-today,
+span.task-date-today .fa {
+    color: var(--badge-success-foreground);
+}
+
+span.task-date-overdue,
+span.task-date-overdue .fa {
+    color: var(--badge-warning-foreground);
+}
+
+.task-list-avatars .task-avatar-assignee {
+    color: var(--muted-foreground);
+}
+
+.task-list-avatars:hover .task-avatar-assignee {
+    color: var(--foreground);
+}
+
+/* Badge, on a Card rather than on the task colour. */
+.task-board-category {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--badge-primary-border);
+    border-radius: var(--radius-sm);
+    background: var(--badge-primary);
+    color: var(--badge-primary-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.task-board-category a,
+.task-board-category a:hover {
+    color: inherit;
+}
+
+a.board-swimlane-toggle:hover,
+a.board-swimlane-toggle:focus {
+    color: var(--foreground);
+}
+
+.dashboard-table-link {
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.dashboard-table-link:focus,
+.dashboard-table-link:hover {
+    color: var(--muted-foreground);
+}
+
+.dashboard-project-stats small {
+    color: var(--muted-foreground);
+}
+
+/* The screenshot viewer paints its own dark chrome; leave it alone. */
+
+/* ===================================================================
+ * Auth, narrow screens — last, so it outranks the measures above
+ *
+ * Below the breakpoint the column is already narrow, so a 20rem cap
+ * inside it just creates a second measure that lines up with nothing —
+ * least of all the legal line, which sits against the padding.
+ * Everything shares one width.
+ * =================================================================== */
+
+@media (max-width: 640px) {
+    .form-login form,
+    .form-login > ul,
+    .sc-auth-head,
+    .form-login h2 {
+        max-width: none;
+    }
+}
+
+
+/* ===================================================================
+ * Board — the card, and the chrome around it
+ *
+ * The task card is the same neutral surface as a stat tile: no hairline,
+ * one fill. The colour a task carries stays as the left accent, because
+ * it is user data and the only thing on the card that encodes meaning.
+ * =================================================================== */
+
+.task-board {
+    border-width: 0 0 0 3px;
+    border-style: solid;
+    border-radius: var(--radius-lg);
+    background: var(--surface-neutral);
+}
+
+.task-board[class*="color-"],
+.task-board-collapsed[class*="color-"] {
+    background: var(--surface-neutral);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* A board row is not a button. */
+.board-swimlane:hover,
+.board-swimlane:hover td,
+[class*="board-swimlane-tasks-"]:hover,
+[class*="board-swimlane-tasks-"]:hover td,
+td.board-column-task-collapsed:hover,
+.board-task-list:hover {
+    background: transparent;
+}
+
+/* The score / count repeated at the foot of a column says nothing the
+ * header has not already said. */
+.pull-right.board-column-header-task-count {
+    display: none;
+}
+
+/* ===================================================================
+ * The in-page sidebar stays with the column it belongs to
+ * =================================================================== */
+
+.sidebar-container > .sidebar {
+    position: sticky;
+    top: 1rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .sidebar-container > .sidebar {
+        position: static;
+        max-height: none;
+    }
+}
+
+/* ===================================================================
+ * Stat tiles on a phone
+ *
+ * auto-fit with a 13rem floor drops to a single column below ~28rem, so
+ * four tiles become four full-width slabs and the greeting scrolls away.
+ * A fixed 2×2 keeps the whole set on screen; the numbers shrink to suit
+ * the narrower tile.
+ * =================================================================== */
+
+@media (max-width: 640px) {
+    .sc-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .sc-stat {
+        padding: 1rem 1rem 1.25rem;
+        gap: 0.5rem;
+    }
+
+    .sc-stat-label {
+        font-size: 0.875rem;
+    }
+
+    .sc-stat-value {
+        font-size: 1.75rem;
+    }
+}
+
+/* ===================================================================
+ * Wiki plugin
+ *
+ * The plugin lays its actions out as bare <a> tags separated by <br>, and
+ * floats three icon buttons against an <h2>. All of it is restyled from
+ * here rather than by overriding the templates, so the Wiki plugin can be
+ * updated without taking the theme down with it.
+ * =================================================================== */
+
+.wikisidebar {
+    max-width: none;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+/* The two actions share one row, so the line breaks between them go. */
+.wikisidebar > br,
+.wikisidebar > .page-header > br,
+.page-header.wikicontent > br {
+    display: none;
+}
+
+.wikisidebar > a,
+.page-header.wikicontent > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2.25rem;
+    margin-right: 0.5rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    /* Two inline-flex buttons with different glyphs have different
+     * baselines, which put them 2px out of line with each other. */
+    vertical-align: middle;
+}
+
+.wikisidebar > a:hover,
+.page-header.wikicontent > a:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+/* Creating a page is the one thing this screen is for. */
+.wikisidebar > a.js-modal-medium,
+.page-header.wikicontent > a.js-modal-medium {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.wikisidebar > a.js-modal-medium:hover,
+.page-header.wikicontent > a.js-modal-medium:hover {
+    background: color-mix(in oklab, var(--primary) 88%, black);
+    color: var(--primary-foreground);
+}
+
+.wikisidebar > a .fa,
+.page-header.wikicontent > a .fa {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+}
+
+/* Title left, the three tree controls right. */
+/* The rule belongs to the whole row, not to the title: left on the <h2> it
+ * stopped where the buttons began and left the row looking unfinished. */
+.wikisidebar > .page-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.wikisidebar > .page-header > h2,
+.page-header.wikicontent > h2 {
+    flex: 1 1 auto;
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* The plugin sets float: right inline; a flex row does not need it. */
+.wikisidebar > .page-header > div {
+    float: none !important;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.375rem;
+}
+
+.wikisidebar .actionBigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.wikisidebar .actionBigger:hover {
+    background: var(--accent);
+    color: var(--foreground);
+}
+
+.wikisidebar .actionBigger a {
+    display: flex;
+    color: inherit;
+    text-decoration: none;
+}
+
+.wikisidebar > ul {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* The empty state is a list item pretending to be a notice. */
+.wikisidebar li.alert-info {
+    display: block;
+    margin: 0;
+    padding: 3rem 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--surface-neutral);
+    color: var(--muted-foreground);
+    text-align: center;
+}
+
+.page-header.wikicontent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Ten columns of nothing say less than no table at all. */
+#wikilist:not(:has(.table-list-row)) {
+    display: none;
+}
+
+/* ===================================================================
+ * Project overview counters
+ *
+ * Kanboard renders these as a row of bare numbers with a caption under
+ * each. They are the same kind of thing as the dashboard's stat tiles —
+ * one number, one label — so they are given the same face. The DOM order
+ * is number-then-caption; `order` puts the caption on top without
+ * touching the template.
+ * =================================================================== */
+
+.project-overview-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.project-overview-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: auto;
+    padding: 1.25rem 1.25rem 1.75rem;
+    border: none;
+    border-radius: var(--radius-xl);
+    background: var(--surface-neutral);
+    color: var(--card-foreground);
+    text-align: left;
+}
+
+.project-overview-column small {
+    order: 0;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.project-overview-column strong {
+    order: 1;
+    /* Kanboard tints these grey; on a tile the number is the content, so
+     * it takes the card's own ink like .sc-stat-value does. */
+    color: var(--card-foreground);
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .project-overview-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .project-overview-column {
+        padding: 1rem 1rem 1.25rem;
+        gap: 0.5rem;
+    }
+
+    .project-overview-column small {
+        font-size: 0.875rem;
+    }
+
+    .project-overview-column strong {
+        font-size: 1.75rem;
+    }
+}
+
+/* ===================================================================
+ * Settings → Appearance
+ *
+ * The one settings screen that is not a column of labelled inputs.
+ * Everything on it is judged by looking at it — a colour, a mark, a tab
+ * icon — so each value sits next to what it does: shadcn Cards, a swatch
+ * beside the hex, and each image drawn in the plate it will be drawn in.
+ *
+ * The markup is the plugin's own (Template/config/settings.php), so
+ * nothing here has to out-rank Kanboard's form styling except the widths
+ * form.css pins onto text fields.
+ * =================================================================== */
+
+.sc-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 46rem;
+}
+
+.sc-brand-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    color: var(--card-foreground);
+}
+
+/* Title and the sentence that explains it share a row and wrap onto two
+ * when there is no room for both — a shadcn CardHeader with the
+ * description beside the title rather than under it, because these
+ * descriptions are one line each. */
+.sc-brand-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    padding: 1.25rem 1.5rem 0;
+}
+
+.sc-brand-card-head h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sc-brand-card-head p {
+    flex: 1 1 20rem;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.sc-brand-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.sc-brand-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sc-brand-field label {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* form.css pins a text field to 300px whatever it is in. */
+.sc-brand-field input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+.sc-brand-help {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+
+/* The accent: a swatch, the value it stands for, and a way back to the
+ * theme's own colour. */
+.sc-brand-color {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sc-brand-swatch {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: 2.75rem;
+    height: 2.25rem;
+    padding: 0.1875rem;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    cursor: pointer;
+}
+
+.sc-brand-swatch::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.sc-brand-swatch::-webkit-color-swatch {
+    border: none;
+    border-radius: calc(var(--radius-md) - 3px);
+}
+
+.sc-brand-swatch::-moz-color-swatch {
+    border: none;
+    border-radius: calc(var(--radius-md) - 3px);
+}
+
+input[type="text"].sc-brand-hex {
+    flex: 0 1 9rem;
+    box-sizing: border-box;
+    width: 9rem;
+    margin: 0;
+    font-family: var(--font-mono);
+}
+
+.sc-brand-reset {
+    flex: 0 0 auto;
+}
+
+/* What the colour actually looks like on the three surfaces it reaches:
+ * a filled button, a badge and a link. The two custom properties are set
+ * inline by the template and rewritten by branding.js as the value
+ * changes, so the row answers before the save does. */
+.sc-brand-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--muted);
+}
+
+.sc-brand-preview-label {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+.sc-brand-preview-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-md);
+    background: var(--sc-brand-preview);
+    color: var(--sc-brand-preview-fg);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sc-brand-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 1.5rem;
+    padding: 0 0.625rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--sc-brand-preview) 14%, transparent);
+    color: var(--sc-brand-preview);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.sc-brand-preview-link {
+    color: var(--sc-brand-preview);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* An image and what can be done to it. */
+.sc-brand-media {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.sc-brand-plate {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--background);
+}
+
+.sc-brand-plate img {
+    max-width: 3.25rem;
+    max-height: 3.25rem;
+    object-fit: contain;
+}
+
+.sc-brand-plate-small {
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.sc-brand-plate-small img {
+    max-width: 2rem;
+    max-height: 2rem;
+}
+
+.sc-brand-media-body {
+    display: flex;
+    flex: 1 1 16rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    min-width: 0;
+}
+
+/* A file input as a Button. The control itself is the whole label, and the
+ * input inside it is hidden rather than removed — it still opens the picker,
+ * still submits, and still takes focus, which the label shows. */
+.sc-brand-file {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sc-brand-file:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.sc-brand-file:focus-within {
+    border-color: var(--ring);
+}
+
+.sc-brand-file input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.sc-brand-file-name {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+}
+
+.sc-brand-restore {
+    align-self: flex-start;
+}
+
+.sc-brand-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+    .sc-brand-card-head {
+        padding: 1.125rem 1.125rem 0;
+    }
+
+    .sc-brand-card-body {
+        padding: 1.125rem;
+    }
+}

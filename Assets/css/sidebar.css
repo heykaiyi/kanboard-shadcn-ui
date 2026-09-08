@@ -1,0 +1,1736 @@
+/*!
+ * Shadcn theme for Kanboard — the sidebar-07 shell
+ *
+ * The other stylesheets in this plugin restyle markup Kanboard already
+ * emits. This one is different: it lays out markup the plugin itself ships
+ * (Template/layout/sidebar.php, rendered on the template:layout:top hook)
+ * together with Kanboard's own <header> and <section class="page">.
+ *
+ * The whole thing rests on one trick. Kanboard's header is
+ *
+ *     <header>
+ *       <div class="title-container">…      the page title
+ *       <div class="board-selector-container">…  jump to another project
+ *       <div class="menus-container">…      notifications, new, user
+ *
+ * and `header { display: contents }` promotes those three divs into the page
+ * grid as if <header> were not there. Each one can then be placed anywhere on
+ * the page — the user menu into the sidebar footer, the rest into a top bar —
+ * while keeping its own markup, its own JavaScript and its own extension
+ * hooks. Nothing is overridden and nothing is duplicated.
+ *
+ * =================================================================== */
+
+:root {
+    --sc-sb-width: 16rem;
+    --sc-sb-width-icon: 4rem;
+    --sc-sb-topbar-height: 4.5rem;
+    --sc-sb-foot-height: 4rem;
+    --sc-sb-item-height: 2.25rem;
+}
+
+html[data-sc-sidebar="collapsed"] {
+    --sc-sb-width: var(--sc-sb-width-icon);
+}
+
+/* ===================================================================
+ * The page grid
+ *
+ * Scoped with :has() so that anything rendered without the layout — the
+ * login screen, public boards, the fragments loaded into a modal — keeps
+ * Kanboard's ordinary block flow. Without :has() support the page simply
+ * stays stacked, which is exactly the stock layout.
+ * =================================================================== */
+
+body:has(> .sc-sb) {
+    display: grid;
+    grid-template-columns:
+        var(--sc-sb-width)      /* the sidebar          */
+        auto                    /* the trigger          */
+        minmax(0, 1fr)          /* the breadcrumb       */
+        auto                    /* the project switcher */
+        auto                    /* notifications        */
+        auto;                   /* new …                */
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "sb trig main-top main-top main-top main-top"
+        "sb main main     main     main     main";
+    /* Kanboard appends #dropdown, #modal-overlay and #tooltip-container
+     * straight to <body>; nothing should be able to open a row of its own. */
+    grid-auto-rows: 0;
+    min-height: 100vh;
+    margin: 0;
+    transition: grid-template-columns 0.2s ease;
+}
+
+body:has(> .sc-sb) > header {
+    display: contents;
+}
+
+body:has(> .sc-sb) > .page {
+    grid-area: main;
+    min-width: 0;
+}
+
+/* The top bar is five separate grid items rather than one flex row, because
+ * three of them are Kanboard's and cannot be wrapped in a container. They
+ * are given a shared height and rule so they read as one bar. */
+body:has(> .sc-sb) > .sc-sb-trigger,
+body:has(> .sc-sb) > header > .title-container,
+body:has(> .sc-sb) > header > .board-selector-container,
+body:has(> .sc-sb) > header > .menus-container > .notification,
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+    display: flex;
+    align-items: center;
+    min-height: var(--sc-sb-topbar-height);
+    padding: 0 0.25rem;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+}
+
+body:has(> .sc-sb) > header > .menus-container {
+    display: contents;
+    /* the &nbsp; separators between the three menus would otherwise become
+     * anonymous grid items */
+    font-size: 0;
+}
+
+/* The bar's outer edges line up with the page content below it: .page is
+ * padded 1.5rem, so the first and last items in the bar are too. */
+body:has(> .sc-sb) > .sc-sb-trigger {
+    grid-area: trig;
+    padding-left: 1.5rem;
+}
+
+/* Kanboard's <h1> is a single pre-joined string, so it cannot become
+ * crumbs. Template/layout/sidebar.php renders a real trail instead and the
+ * original title steps out of the grid. */
+body:has(> .sc-crumbs) > header > .title-container {
+    display: none;
+}
+
+body:has(> .sc-sb) > .sc-crumbs {
+    grid-column: 3;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: var(--sc-sb-topbar-height);
+    /* Room on the right so the trail stops well clear of the project
+     * switcher rather than running up against it. */
+    padding: 0 1.5rem 0 0.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+}
+
+.sc-crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sc-crumbs li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    list-style: none;
+    font-size: 1.25rem;
+}
+
+/* The root is a word where there is room for one and a house where there
+ * is not — the icon costs a phone almost no width. */
+.sc-crumb-home a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sc-crumb-home .fa {
+    display: none;
+}
+
+/* The separator is drawn, not typed, so it never lands in a copy-paste. */
+.sc-crumbs li + li::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 1.125rem;
+    height: 1.125rem;
+    background-color: var(--muted-foreground);
+    opacity: 0.7;
+    -webkit-mask-image: var(--shadcn-crumb-chevron);
+    mask-image: var(--shadcn-crumb-chevron);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.sc-crumbs a {
+    color: var(--muted-foreground);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sc-crumbs a:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* The last crumb is the page, so it carries the weight and is the one
+ * allowed to truncate. */
+.sc-crumbs [aria-current="page"] {
+    overflow: hidden;
+    color: var(--foreground);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* On a phone only the page itself survives. */
+@media (max-width: 768px) {
+    body:has(> .sc-sb) > .sc-crumbs {
+        grid-column: 2;
+    }
+
+    /* The whole trail stays; on a phone it moves out of the bar and sits
+     * above the content, where there is room for it. The side padding is
+     * the same 1.25rem .page uses below it, so the trail and the content
+     * share one left and right edge. */
+    body:has(> .sc-sb) > .sc-crumbs {
+        grid-area: crumb;
+        min-height: 0;
+        padding: 1.125rem 1.25rem 0.375rem;
+        border-bottom: none;
+    }
+
+    .sc-crumbs li {
+        font-size: 0.9375rem;
+    }
+
+    .sc-crumbs li + li::before {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .sc-crumb-home .fa {
+        display: flex;
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 1.25rem;
+    }
+
+    .sc-crumb-home .sc-crumb-home-text {
+        display: none;
+    }
+}
+
+/* The palette replaces it, so the autocomplete leaves the bar. It stays in
+ * the DOM: its component is still wired up and other plugins hook it. */
+body:has(> .sc-sb) > header > .board-selector-container {
+    display: none;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .notification {
+    grid-column: 5;
+    grid-row: 1;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+    grid-column: 6;
+    grid-row: 1;
+    padding-right: 1.5rem;
+}
+
+/* The user menu is the one header child that moves into the sidebar, and it
+ * is pinned to the bottom of the screen with it. */
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 31;
+    width: var(--sc-sb-width);
+    height: var(--sc-sb-foot-height);
+    transition: width 0.2s ease;
+}
+
+/* ===================================================================
+ * Sidebar shell
+ * =================================================================== */
+
+/* Fixed, not a grid item.
+ *
+ * As an in-flow grid item the sidebar was as tall as the document, so on any
+ * page taller than the window the nav scrolled away and the user menu ended
+ * up at the bottom of the page instead of the bottom of the screen. shadcn's
+ * Sidebar is a fixed, viewport-height column; column one of the grid stays
+ * behind as an explicit track, which is what keeps the content clear of it. */
+.sc-sb {
+    position: fixed;
+    top: 0;
+    bottom: var(--sc-sb-foot-height);
+    left: 0;
+    z-index: 30;
+    box-sizing: border-box;
+    width: var(--sc-sb-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    transition: width 0.2s ease;
+    border-right: 1px solid var(--border);
+    /* One surface with the page rather than a tinted rail. */
+    background: var(--background);
+    color: var(--sidebar-foreground);
+}
+
+.sc-sb-header {
+    padding: 0.25rem 1rem 0.75rem;
+    min-height: var(--sc-sb-topbar-height);
+    display: flex;
+    align-items: center;
+}
+
+/* There is nothing to dismiss on a desktop: the sidebar is part of the
+ * page, not a sheet over it. */
+.sc-sb-close {
+    display: none;
+}
+
+/* SidebarMenuButton, size="lg" — the brand tile. */
+.sc-sb-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    height: 3rem;
+    padding: 0;
+    color: var(--sidebar-foreground);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+/* No plate on hover — only the ink moves. */
+.sc-sb-brand:hover,
+.sc-sb-brand:focus {
+    background: none;
+    color: var(--sidebar-accent-foreground);
+    text-decoration: none;
+}
+
+/* The logo carries its own plate and its own rounded corners, so the
+ * element under it draws neither. */
+.sc-sb-brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    background: var(--sc-logo) center / contain no-repeat;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.sc-sb-brand-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.sc-sb-brand-title,
+.sc-sb-brand-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sc-sb-brand-title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.sc-sb-brand-sub {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+/* Documentation is a destination, not part of the working nav, so it sits
+ * on its own above the user row. */
+.sc-sb-secondary {
+    flex: 0 0 auto;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.sc-sb-content {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0.25rem 1rem 0.5rem;
+}
+
+.sc-sb-group + .sc-sb-group {
+    margin-top: 0.5rem;
+}
+
+.sc-sb-group-label {
+    display: flex;
+    align-items: center;
+    height: 2.25rem;
+    padding: 0;
+    color: color-mix(in oklab, var(--sidebar-foreground) 70%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.sc-sb-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sc-sb-menu li {
+    list-style: none;
+    margin: 0;
+    line-height: normal;
+}
+
+/* SidebarMenuButton */
+.sc-sb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    height: var(--sc-sb-item-height);
+    padding: 0;
+    color: var(--sidebar-foreground);
+    font-size: 1rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.sc-sb-item:hover,
+.sc-sb-item:focus {
+    background: none;
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+/* An inset line rather than a real border, so the row does not grow 2px
+ * and nudge every item under it when focus lands on it. */
+.sc-sb-item:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+/* The current page is marked by ink and weight rather than a filled row. */
+.sc-sb-item.is-active {
+    background: none;
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* A fixed box rather than a font-size alone, so every glyph shares one
+ * optical centre and the icons line up down the rail. */
+/* Kanboard puts margin-right: 6px on every .fa, for icon-then-text runs.
+ * Here the space between icon and label is the flex gap, so the margin is
+ * duplication when expanded — and once the label is hidden it is pure
+ * offset, which pushed every glyph 3px left of the rail's centre line
+ * while the brand mark and the avatar stayed put. */
+.sc-sb-item .fa {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.sc-sb-item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sc-sb-item-muted {
+    color: color-mix(in oklab, var(--sidebar-foreground) 70%, transparent);
+}
+
+/* ===================================================================
+ * Sidebar footer — Kanboard's user dropdown, relocated
+ * =================================================================== */
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0.5rem 1rem;
+    border-right: 1px solid var(--border);
+    background: var(--background);
+    font-size: 0.9375rem;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) > .dropdown-menu,
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) > .active-dropdown-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    height: 3rem;
+    padding: 0;
+    color: var(--sidebar-foreground);
+    transition: color 0.15s ease;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) > a:hover {
+    background: none;
+    color: var(--primary);
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .avatar-inline {
+    margin: 0;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .avatar-20 img,
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .avatar-20 div {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-md);
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .avatar-20 .avatar-letter {
+    width: 2rem;
+    line-height: 2rem;
+    font-size: 0.875rem;
+}
+
+/* The username sits in its own element because it only exists inside the
+ * dropdown's hidden <ul> otherwise. It overlays the trigger and lets every
+ * click through, so the whole row still behaves as one button. */
+/* NavUser: our own avatar (the header's is a 20px thumbnail and blurs when
+ * scaled), then the name over the address, all flush left. */
+.sc-sb-user-meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 32;
+    box-sizing: border-box;
+    width: var(--sc-sb-width);
+    height: var(--sc-sb-foot-height);
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0 1rem;
+    pointer-events: none;
+}
+
+.sc-sb-user-avatar {
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.sc-sb-user-avatar img,
+.sc-sb-user-avatar div {
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    border-radius: var(--radius-md);
+}
+
+.sc-sb-user-avatar .avatar-letter {
+    width: 2rem;
+    line-height: 2rem;
+    font-size: 0.875rem;
+}
+
+.sc-sb-user-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    text-align: left;
+}
+
+/* The header's own 20px avatar is the trigger's, and it sits underneath —
+ * hidden so only the crisp one shows. The link itself stays clickable. */
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .avatar {
+    visibility: hidden;
+}
+
+/* The mark next to an administrator's name. */
+/* The seal the brand uses, drawn as a mask so it takes the theme colour. */
+.sc-verified {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.25rem;
+    background-color: var(--primary);
+    -webkit-mask-image: var(--shadcn-verified);
+    mask-image: var(--shadcn-verified);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+/* it is no longer a Font Awesome glyph */
+.sc-verified::before {
+    content: none;
+}
+
+.sc-sb-user-name,
+.sc-sb-user-mail {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.25;
+}
+
+.sc-sb-user-name {
+    display: flex;
+    align-items: center;
+    color: var(--sidebar-foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.sc-sb-user-mail {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+/* ===================================================================
+ * Rail and trigger
+ * =================================================================== */
+
+.sc-sb-rail {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: var(--sc-sb-width);
+    z-index: 33;
+    width: 1rem;
+    margin-left: -0.5rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: w-resize;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-rail {
+    cursor: e-resize;
+}
+
+.sc-sb-rail::after {
+    content: "";
+    display: block;
+    width: 2px;
+    height: 100%;
+    margin: 0 auto;
+    background: transparent;
+    transition: background-color 0.15s ease;
+}
+
+.sc-sb-rail:hover::after,
+.sc-sb-rail:focus-visible::after {
+    background: var(--sidebar-border);
+}
+
+.sc-sb-trigger {
+    justify-content: flex-start;
+    border: none;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.sc-sb-trigger .fa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.375rem;
+    transition: color 0.15s ease;
+}
+
+.sc-sb-trigger:hover {
+    color: var(--foreground);
+}
+
+.sc-sb-trigger:focus-visible .fa {
+    outline: none;
+    border-radius: var(--radius-sm);
+    color: var(--ring);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ===================================================================
+ * Collapsed to icons
+ * =================================================================== */
+
+html[data-sc-sidebar="collapsed"] .sc-sb-brand-text,
+html[data-sc-sidebar="collapsed"] .sc-sb-item-label,
+html[data-sc-sidebar="collapsed"] .sc-sb-group-label,
+html[data-sc-sidebar="collapsed"] .sc-sb-user-text,
+html[data-sc-sidebar="collapsed"] .sc-sb-group-projects,
+html[data-sc-sidebar="collapsed"] body:has(> .sc-sb) > header > .board-selector-container {
+    display: none;
+}
+
+/* The rail still needs a face on it: the meta block stays, centred, with
+ * only its text removed. */
+html[data-sc-sidebar="collapsed"] .sc-sb-user-meta {
+    justify-content: center;
+    padding: 0;
+}
+
+/* No side padding, so the glyphs sit on the rail's exact centre line
+ * rather than the centre of a padded box inside it. */
+html[data-sc-sidebar="collapsed"] .sc-sb-header,
+html[data-sc-sidebar="collapsed"] .sc-sb-content {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-brand,
+html[data-sc-sidebar="collapsed"] .sc-sb-item {
+    justify-content: center;
+    padding: 0;
+}
+
+/* Collapsed there is no label to sit beside, so the glyph carries the row
+ * on its own and grows to suit. */
+html[data-sc-sidebar="collapsed"] .sc-sb-item .fa {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-item {
+    height: 2.5rem;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-brand {
+    height: 2rem;
+}
+
+/* The label becomes a tooltip, the way shadcn switches SidebarMenuButton to
+ * a Tooltip once the sidebar is an icon rail. */
+html[data-sc-sidebar="collapsed"] .sc-sb-item {
+    position: relative;
+}
+
+/* The rail clips its own contents so the width transition stays clean, but
+ * a tooltip has to escape it. Collapsed there is nothing left to scroll —
+ * the Projects group is hidden — so overflow can simply be released. */
+html[data-sc-sidebar="collapsed"] .sc-sb,
+html[data-sc-sidebar="collapsed"] .sc-sb-content {
+    overflow: visible;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-item::after {
+    content: attr(data-sc-tooltip);
+    position: absolute;
+    left: calc(100% + 0.75rem);
+    top: 50%;
+    z-index: 60;
+    transform: translateY(-50%);
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-item:hover::after,
+html[data-sc-sidebar="collapsed"] .sc-sb-item:focus-visible::after {
+    opacity: 1;
+}
+
+html[data-sc-sidebar="collapsed"] body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) > a {
+    justify-content: center;
+    padding: 0;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) .fa-caret-down {
+    display: none;
+}
+
+/* ===================================================================
+ * Top bar — larger than the stock header, now that it only carries the
+ * breadcrumb and the three menus.
+ * =================================================================== */
+
+body:has(> .sc-sb) > header > .title-container h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* The mark now lives in the sidebar. */
+body:has(> .sc-sb) > header > .title-container h1 .logo {
+    display: none;
+}
+
+body:has(> .sc-sb) > header > .title-container h1 .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body:has(> .sc-sb) > header > .title-container h1 a {
+    color: var(--foreground);
+}
+
+body:has(> .sc-sb) > header > .title-container h1 .tooltip {
+    opacity: 1;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+}
+
+body:has(> .sc-sb) > header > .board-selector-container {
+    min-width: 0;
+}
+
+body:has(> .sc-sb) > header > .board-selector-container .select-dropdown-input-container,
+body:has(> .sc-sb) > header > .board-selector-container input[type="text"] {
+    width: 16rem;
+    max-width: 100%;
+}
+
+body:has(> .sc-sb) > header > .menus-container .dropdown-menu-link-icon,
+body:has(> .sc-sb) > header > .menus-container a {
+    font-size: 0.9375rem;
+}
+
+/* Icon-only buttons are the glyph and nothing else: no plate, no padding,
+ * and only the colour moves on hover. */
+body:has(> .sc-sb) > header > .menus-container > .notification a,
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    padding: 0 0.5rem;
+    background: none;
+    color: var(--muted-foreground);
+    transition: color 0.15s ease;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .notification a:hover,
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a:hover {
+    background: none;
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .notification .fa,
+.sc-sb-trigger .fa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu .fa-plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu .fa-caret-down {
+    order: 2;
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+}
+
+/* The create menu carries a label, so unlike the bell it reads as a button
+ * rather than a bare glyph. --sc-new-label is set by the head template, so
+ * the word still goes through t(). */
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a {
+    gap: 0.375rem;
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a::after {
+    content: var(--sc-new-label, "");
+    order: 1;
+    white-space: nowrap;
+}
+
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu > a:hover {
+    background: color-mix(in oklab, var(--primary) 90%, transparent);
+    color: var(--primary-foreground);
+}
+
+/* A labelled button needs no disclosure arrow, and its glyph sits with the
+ * text rather than towering over it. */
+body:has(> .sc-sb) > header > .menus-container > .header-creation-menu .fa-caret-down {
+    display: none;
+}
+
+/* The user menu, once auth.js has rebuilt its first row. */
+.sc-menu-user {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    padding: 0.5rem 0;
+}
+
+.sc-menu-user strong {
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.sc-menu-user img,
+.sc-menu-user > div {
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    border-radius: var(--radius-md);
+}
+
+.sc-menu-user .avatar-letter {
+    width: 2rem;
+    line-height: 2rem;
+    font-size: 0.875rem;
+}
+
+.sc-menu-user-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.sc-menu-user-mail {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body:has(> .sc-sb) > header > .menus-container a i.web-notification-icon {
+    color: var(--info);
+}
+
+/* ===================================================================
+ * Narrow screens — the sidebar slides in over the page instead
+ * =================================================================== */
+
+.sc-sb-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body:has(> .sc-sb) {
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        /* The bell and the New button get tracks of their own. They used to
+         * be placed over the brand area with grid-column, which left the
+         * brand with no width limit — so a long name ran underneath them
+         * instead of truncating. */
+        grid-template-areas:
+            "trig  brand notif new"
+            "crumb crumb crumb crumb"
+            "main  main  main  main";
+    }
+
+    body:has(> .sc-sb) > .sc-topbar-brand {
+        grid-area: brand;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: var(--sc-sb-topbar-height);
+        /* Clear of the hamburger rather than hard against it. */
+        padding: 0 0.25rem 0 0.875rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--background);
+        min-width: 0;
+        color: var(--foreground);
+        font-size: 0.9375rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* The bar is narrow and the name is long. Truncating it cut the name
+     * mid-word, so the phone gets the short form instead and the drawer —
+     * one tap away — carries the full one. */
+    .sc-topbar-brand-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    body:has(> .sc-sb) > header > .menus-container > .notification {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    .sc-sb {
+        top: 0;
+        left: 0;
+        bottom: var(--sc-sb-foot-height);
+        z-index: 50;
+        width: var(--sc-sb-width-mobile, 18rem);
+        --sc-sb-gutter: 1.25rem;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        box-shadow: var(--shadow-lg);
+    }
+
+    html[data-sc-sidebar-mobile="open"] .sc-sb {
+        transform: translateX(0);
+    }
+
+    .sc-sb-rail {
+        display: none;
+    }
+
+    /* Off-canvas, the sidebar is 16rem wide whatever the desktop state is. */
+    html[data-sc-sidebar="collapsed"] .sc-sb-brand-text,
+    html[data-sc-sidebar="collapsed"] .sc-sb-item-label,
+    html[data-sc-sidebar="collapsed"] .sc-sb-group-label,
+    html[data-sc-sidebar="collapsed"] .sc-sb-group-projects {
+        display: revert;
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-brand,
+    html[data-sc-sidebar="collapsed"] .sc-sb-item {
+        justify-content: flex-start;
+        padding: 0 0.5rem;
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-item::after {
+        content: none;
+    }
+
+    body:has(> .sc-sb) > header > .title-container {
+        grid-column: 2;
+    }
+
+    body:has(> .sc-sb) > header > .board-selector-container {
+        display: none;
+    }
+
+    body:has(> .sc-sb) > header > .menus-container > .notification {
+        grid-column: 3;
+    }
+
+    body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+        grid-column: 4;
+    }
+
+    /* The user menu has nowhere to dock, so it rides along inside the
+     * drawer, pinned to the bottom. */
+    body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 51;
+        width: var(--sc-sb-width-mobile, 18rem);
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        border-top: 1px solid var(--sidebar-border);
+    }
+
+    html[data-sc-sidebar-mobile="open"] body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) {
+        transform: translateX(0);
+    }
+
+    /* There is room for the name inside a 16rem drawer, so it rides along
+     * with the footer instead of being dropped. */
+    .sc-sb-user-meta {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 52;
+        box-sizing: border-box;
+        width: var(--sc-sb-width-mobile, 18rem);
+        height: 4rem;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+    }
+
+    html[data-sc-sidebar-mobile="open"] .sc-sb-user-meta {
+        transform: translateX(0);
+    }
+
+    html[data-sc-sidebar-mobile="open"] .sc-sb-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 49;
+        background: var(--overlay);
+    }
+}
+
+/* ===================================================================
+ * Print — the navigation is not part of the document
+ * =================================================================== */
+
+@media print {
+    body:has(> .sc-sb) {
+        display: block;
+    }
+
+    .sc-sb,
+    .sc-sb-rail,
+    .sc-sb-trigger,
+    .sc-sb-user-meta,
+    .sc-sb-overlay,
+    body:has(> .sc-sb) > header > .board-selector-container,
+    body:has(> .sc-sb) > header > .menus-container {
+        display: none;
+    }
+}
+
+/* ===================================================================
+ * Navigation progress
+ *
+ * A line across the very top while the next page is on its way. It runs
+ * most of the way quickly and then crawls, because the remaining time is
+ * unknowable — the page load itself finishes it.
+ * =================================================================== */
+
+.sc-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    width: 0;
+    height: 3px;
+    background: var(--primary);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sc-progress.is-loading {
+    opacity: 1;
+    animation: sc-progress-run 8s cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
+}
+
+.sc-progress.is-done {
+    width: 100%;
+    opacity: 0;
+    transition: width 0.15s ease, opacity 0.3s ease 0.1s;
+}
+
+@keyframes sc-progress-run {
+    0% {
+        width: 0;
+    }
+    40% {
+        width: 65%;
+    }
+    100% {
+        width: 92%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sc-progress.is-loading {
+        animation: none;
+        width: 40%;
+    }
+}
+
+html[data-sc-sidebar="collapsed"] .sc-sb-secondary {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* ===================================================================
+ * Command — the project switcher
+ *
+ * Kanboard renders it as an autocomplete input. Given a search glyph and a
+ * shortcut hint it reads as the command palette it already behaves like;
+ * Cmd/Ctrl-K focuses it (Assets/js/sidebar.js).
+ * =================================================================== */
+
+body:has(> .sc-sb) .select-dropdown-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background: var(--surface-neutral);
+    transition: border-color 0.15s ease;
+}
+
+body:has(> .sc-sb) .select-dropdown-input-container:focus-within {
+    border-color: var(--primary);
+    box-shadow: none;
+}
+
+body:has(> .sc-sb) .select-dropdown-input-container input.select-dropdown-input,
+body:has(> .sc-sb) .select-dropdown-input-container input.select-dropdown-input:focus {
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 3.25rem 0 2.25rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-size: 0.9375rem;
+}
+
+/* The search glyph, and the shortcut that reaches it. */
+body:has(> .sc-sb) .select-dropdown-input-container::before {
+    content: "";
+    position: absolute;
+    left: 0.625rem;
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--muted-foreground);
+    -webkit-mask-image: var(--shadcn-search);
+    mask-image: var(--shadcn-search);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+body:has(> .sc-sb) .select-dropdown-input-container::after {
+    content: "⌘K";
+    position: absolute;
+    right: 0.5rem;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    line-height: 1.125rem;
+    pointer-events: none;
+}
+
+/* 9. no ring on the field itself. */
+body:has(> .sc-sb) .select-dropdown-input-container .select-dropdown-chevron {
+    display: none;
+}
+
+/* ===================================================================
+ * Command palette
+ *
+ * The overlay a ⌘K is expected to open. The top bar's project switcher
+ * hands focus straight to it, so there is one search in the interface
+ * rather than two that behave differently.
+ * =================================================================== */
+
+.sc-topbar-brand {
+    display: none;
+}
+
+/* Wide enough for the whole name; the short form only appears on a
+ * phone, in the media query below. */
+.sc-topbar-brand-short {
+    display: none;
+}
+
+.sc-topbar-brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: var(--sc-logo) center / contain no-repeat;
+}
+
+.sc-command[hidden] {
+    display: none;
+}
+
+.sc-command {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12vh 1rem 1rem;
+}
+
+.sc-command-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+}
+
+.sc-command-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 34rem;
+    max-height: 70vh;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--popover);
+    color: var(--popover-foreground);
+}
+
+.sc-command-field {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 0 0 auto;
+    padding: 0 0.875rem;
+}
+
+.sc-command-search {
+    flex: 0 0 auto;
+    width: 1.125rem;
+    height: 1.125rem;
+    background-color: var(--muted-foreground);
+    -webkit-mask-image: var(--shadcn-search);
+    mask-image: var(--shadcn-search);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+/* One class deeper than the global input height, which is 2.25rem and
+ * would otherwise win on specificity and leave the bar looking cramped. */
+.sc-command-box .sc-command-field input {
+    flex: 1;
+    width: 100%;
+    height: 3.5rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--foreground);
+    font-size: 1rem;
+}
+
+.sc-command-box .sc-command-field input:focus {
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.sc-command-esc {
+    flex: 0 0 auto;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.sc-command-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.sc-command-group[hidden] {
+    display: none;
+}
+
+.sc-command-group-label {
+    padding: 0.5rem 0.625rem 0.25rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.sc-command-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.sc-command-item[hidden] {
+    display: none;
+}
+
+.sc-command-item .fa {
+    flex: 0 0 auto;
+    color: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.sc-command-item.is-active,
+.sc-command-item:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+.sc-command-empty {
+    margin: 0;
+    padding: 1.5rem 0.625rem;
+    color: var(--muted-foreground);
+    text-align: center;
+}
+
+/* Nothing behind the palette scrolls while it is open. */
+html.sc-command-open,
+html.sc-command-open body {
+    overflow: hidden;
+}
+
+/* The switcher in the bar is now a button that opens the palette. */
+body:has(> .sc-sb) .select-dropdown-input-container input.select-dropdown-input {
+    cursor: pointer;
+}
+
+/* The palette's visible entry point, where the switcher used to be. */
+/* The trigger is a 36px pill inside a 73px row, so as a grid item of its
+ * own it left a hole in the bar's bottom line. The cell is a slot that
+ * fills the row; the pill sits centred inside it. */
+body:has(> .sc-sb) > .sc-command-slot {
+    grid-column: 4;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+}
+
+body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: center;
+    min-width: 14rem;
+    height: 2.25rem;
+    padding: 0 0.5rem 0 0.75rem;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background: var(--surface-neutral);
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger:hover {
+    border-color: var(--primary);
+}
+
+/* The drawer's own trigger. The top bar has one on a desktop, so this is
+ * the phone's only route into the palette — and only the phone's. */
+.sc-command-trigger-sb {
+    display: none;
+}
+
+.sc-command-trigger-search {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--muted-foreground);
+    -webkit-mask-image: var(--shadcn-search);
+    mask-image: var(--shadcn-search);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.sc-command-trigger-label {
+    flex: 1;
+    text-align: left;
+}
+
+.sc-command-trigger kbd {
+    flex: 0 0 auto;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    body:has(> .sc-sb) > .sc-command-slot {
+        display: none;
+    }
+
+    .sc-command-trigger-sb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+        box-sizing: border-box;
+        width: calc(100% - 2 * var(--sc-sb-gutter, 1.25rem));
+        height: 2.25rem;
+        margin: 0 var(--sc-sb-gutter, 1.25rem) 0.5rem;
+        padding: 0 0.75rem;
+        border: 1px solid var(--input);
+        border-radius: var(--radius-md);
+        background: var(--surface-neutral);
+        color: var(--muted-foreground);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .sc-command-trigger-sb .sc-command-trigger-label {
+        flex: 1 1 auto;
+    }
+}
+
+/* Tabs inside the palette — underlined rather than filled, so the strip
+ * reads as one edge with the search above it rather than a second surface
+ * floating between two lines. */
+.sc-command-tabs {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 1.25rem;
+    padding: 0 0.875rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sc-command-tab {
+    padding: 0.5rem 0;
+    border: none;
+    /* Sits on the strip's own line rather than beside it. */
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.sc-command-tab:hover {
+    background: transparent;
+    color: var(--foreground);
+}
+
+.sc-command-tab.is-active {
+    background: transparent;
+    border-bottom-color: var(--primary);
+    color: var(--foreground);
+}
+
+@media (max-width: 768px) {
+    /* The drawer has the screen to itself, so it is not as tight as a rail. */
+    .sc-sb .sc-sb-header,
+    .sc-sb .sc-sb-content,
+    .sc-sb .sc-sb-secondary {
+        padding-left: var(--sc-sb-gutter, 1.25rem);
+        padding-right: var(--sc-sb-gutter, 1.25rem);
+    }
+
+    body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu),
+    .sc-sb-user-meta {
+        padding-left: var(--sc-sb-gutter, 1.25rem);
+        padding-right: var(--sc-sb-gutter, 1.25rem);
+    }
+
+    /* The mark alone — the section name under it is what the breadcrumb
+     * above the content already says. */
+    .sc-sb-brand-sub {
+        display: none;
+    }
+
+    .sc-sb-brand-title {
+        font-size: 1rem;
+    }
+
+    /* A sheet is dismissible, so its head is two columns: the brand takes
+     * the 7, the close control the 3. */
+    .sc-sb .sc-sb-header {
+        display: grid;
+        grid-template-columns: 7fr 3fr;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sc-sb-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        justify-self: end;
+        width: 2.25rem;
+        height: 2.25rem;
+        padding: 0;
+        border: none;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--muted-foreground);
+        cursor: pointer;
+    }
+
+    .sc-sb-close:hover,
+    .sc-sb-close:focus-visible {
+        background: var(--surface-neutral);
+        color: var(--foreground);
+    }
+
+    .sc-sb-close .fa {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+
+    /* The drawer is full width whatever the desktop rail is doing, so the
+     * collapsed footer rules have to be undone here as well — otherwise the
+     * name and address stay hidden and the avatar sits centred on a 18rem
+     * row. */
+    html[data-sc-sidebar="collapsed"] .sc-sb-user-meta {
+        justify-content: flex-start;
+        padding-left: var(--sc-sb-gutter, 1.25rem);
+        padding-right: var(--sc-sb-gutter, 1.25rem);
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-user-text {
+        display: flex;
+    }
+
+    html[data-sc-sidebar="collapsed"] body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) > a {
+        justify-content: flex-start;
+    }
+
+    /* Same again for the body of the drawer. The rail strips its side
+     * padding so the glyphs can sit on its centre line; a sheet has no
+     * centre line to sit on, so the gutter comes back. */
+    html[data-sc-sidebar="collapsed"] .sc-sb .sc-sb-header,
+    html[data-sc-sidebar="collapsed"] .sc-sb .sc-sb-content,
+    html[data-sc-sidebar="collapsed"] .sc-sb .sc-sb-secondary {
+        padding-left: var(--sc-sb-gutter, 1.25rem);
+        padding-right: var(--sc-sb-gutter, 1.25rem);
+    }
+
+    /* The drawer looks the same whichever state the desktop rail was left
+     * in, so the rail's larger glyphs and shorter rows are undone too. */
+    html[data-sc-sidebar="collapsed"] .sc-sb-brand,
+    html[data-sc-sidebar="collapsed"] .sc-sb-item {
+        padding: 0;
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-item {
+        height: var(--sc-sb-item-height);
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-brand {
+        height: 3rem;
+    }
+
+    html[data-sc-sidebar="collapsed"] .sc-sb-item .fa {
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 1.25rem;
+    }
+
+    /* The short name on the phone's bar. This lives at the end of the file
+     * because the base rule that hides it is declared later than the
+     * layout media query above, and would otherwise win on order. */
+    .sc-topbar-brand-full {
+        display: none;
+    }
+
+    .sc-topbar-brand-short {
+        display: inline;
+    }
+}
