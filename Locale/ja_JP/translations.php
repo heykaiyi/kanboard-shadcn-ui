@@ -107,4 +107,9 @@ return array(
     /* The plugin's own description, on Settings → Plugins. */
     'shadcn/ui design language and HugeIcons for the whole Kanboard interface' => 'Kanboard のインターフェイス全体に shadcn/ui のデザイン言語と HugeIcons を',
     'My project management tool' => '私のプロジェクト管理ツール',
+
+    /* Three strings Kanboard's own file for this language leaves out. */
+    '%s\'s activity' => '%s のアクティビティ',
+    'Search task title, description, and comments by default' => '既定でタスクのタイトル・説明・コメントをまとめて検索する',
+    'You don\'t have the permission to move this task' => 'このタスクを移動する権限がありません',
 );

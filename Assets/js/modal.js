@@ -36,6 +36,25 @@
         delete root.dataset[FLAG];
     }
 
+    /* Nothing behind a sheet scrolls while it is open.
+     *
+     * Kanboard leaves the page scrollable under its modal, so a wheel over
+     * the scrim moved the board behind it and the sheet's own scroll handed
+     * off to the page as soon as it reached its end. The class is toggled
+     * from the overlay's presence rather than from an event, because a modal
+     * is destroyed by several paths — the close button, Escape, a click on
+     * the scrim, and a form that replaces itself — and only one of them
+     * announces it. */
+    function lockScroll() {
+        root.classList.toggle('sc-modal-open', document.getElementById('modal-overlay') !== null);
+    }
+
+    if (typeof MutationObserver === 'function') {
+        new MutationObserver(lockScroll).observe(document.documentElement, { childList: true, subtree: true });
+    }
+
+    lockScroll();
+
     if (window.KB && typeof window.KB.on === 'function') {
         window.KB.on('modal.beforeDestroy', clear);
         window.KB.on('modal.close', clear);

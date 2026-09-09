@@ -749,6 +749,23 @@ ul.dropdown-submenu-open {
     min-width: 0;
 }
 
+/* Two items in the board menu put the icon *beside* the link rather than
+ * inside it — `<i class="fa"></i> <a>Compact view</a>` — and a wrapper span
+ * around the pair, which Kanboard swaps for its opposite as the board mode
+ * changes. A block-level <a> after an inline icon takes a line of its own,
+ * which is what dropped those two labels under their glyphs. Inline-flex
+ * keeps the link on the icon's line without touching the wrapper, whose
+ * display is Kanboard's to control. */
+.dropdown-submenu-open li .fa + a {
+    display: inline-flex;
+    flex: 0 1 auto;
+    vertical-align: middle;
+}
+
+.dropdown-submenu-open li .fa:has(+ a) {
+    vertical-align: middle;
+}
+
 .dropdown-submenu-open a:focus {
     text-decoration: none;
 }
@@ -952,6 +969,15 @@ td a.dropdown-menu strong {
  * A phone gets the same box as a bottom drawer (further down), which is
  * the shape a sheet takes when there is no room beside the content.
  * =================================================================== */
+
+/* While a sheet is open the page under it does not scroll, and its
+ * scrollbar goes with it: the sheet is the only thing in play, and a second
+ * bar down the side of the scrim says otherwise. Assets/js/modal.js adds the
+ * class from the overlay's presence. */
+html.sc-modal-open,
+html.sc-modal-open body {
+    overflow: hidden;
+}
 
 /* The scrim scrolls nothing: the sheet inside it is fixed and full height,
  * so core's `overflow: auto` here can only ever add a second scrollbar

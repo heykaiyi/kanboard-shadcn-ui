@@ -106,4 +106,9 @@ return array(
     /* The plugin's own description, on Settings → Plugins. */
     'shadcn/ui design language and HugeIcons for the whole Kanboard interface' => '为整个 Kanboard 界面带来 shadcn/ui 的设计语言与 HugeIcons',
     'My project management tool' => '我的项目管理工具',
+
+    /* Three strings Kanboard's own file for this language leaves out. */
+    '%s\'s activity' => '%s 的动态',
+    'Search task title, description, and comments by default' => '默认同时搜索任务标题、描述与评论',
+    'You don\'t have the permission to move this task' => '你没有权限移动这个任务',
 );

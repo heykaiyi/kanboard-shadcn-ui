@@ -281,4 +281,9 @@ return array(
     'Leave either empty for the theme default.' => '任一欄留白就用佈景主題的預設色。',
     'Text on top of a colour is chosen automatically, whichever of black or white is readable.' => '色塊上的文字會自動在黑與白之間挑一個看得清楚的。',
     'A percentage of the size the theme draws the mark at. The sidebar beside this screen follows the slider.' => '相對於佈景主題原本尺寸的百分比。拉的時候旁邊側邊欄的標誌會跟著變。',
+
+    /* Three strings Kanboard's own file for this language leaves out. */
+    '%s\'s activity' => '%s 的動態',
+    'Search task title, description, and comments by default' => '預設同時搜尋任務標題、描述與留言',
+    'You don\'t have the permission to move this task' => '你沒有權限移動這個任務',
 );
