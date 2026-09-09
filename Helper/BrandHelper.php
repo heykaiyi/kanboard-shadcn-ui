@@ -246,16 +246,7 @@ class BrandHelper extends Base
             return '';
         }
 
-        $model = $this->brandingModel();
-        $rules = array();
-
-        if ($model->hasCustomColor(BrandingModel::DARK)) {
-            $rules = array_merge($rules, $this->getPrimaryRules($model->getColor(BrandingModel::DARK)));
-        }
-
-        if ($model->hasCustomSecondaryColor(BrandingModel::DARK)) {
-            $rules = array_merge($rules, $this->getSecondaryRules($model->getSecondaryColor(BrandingModel::DARK)));
-        }
+        $rules = $this->getColorRules(BrandingModel::DARK);
 
         if ($rules === array()) {
             return '';
@@ -266,46 +257,59 @@ class BrandHelper extends Base
         return $theme === BrandingModel::DARK ? $block : '@media (prefers-color-scheme: dark){'.$block.'}';
     }
 
+    /**
+     * Which custom properties each colour writes.
+     *
+     * --primary alone would leave the sidebar's active item and the badge
+     * fills on the old blue, because tokens.css gave those their own names;
+     * the same is true of every state colour and its badge. `%s` is the
+     * colour, `%f` the foreground computed for it.
+     */
+    private static $tokens = array(
+        'accent' => array(
+            '--primary: %s', '--primary-foreground: %f',
+            '--sidebar-primary: %s', '--sidebar-primary-foreground: %f',
+            '--badge-primary-foreground: %f',
+        ),
+        'secondary' => array('--secondary: %s', '--secondary-foreground: %f'),
+        'sidebar' => array('--sidebar: %s', '--sidebar-foreground: %f'),
+        /* The quiet surface: table-list headers, the neutral chip, and the
+         * wash --surface-subtle is mixed from. */
+        'muted' => array(
+            '--muted: %s', '--muted-foreground: %f',
+            '--surface-neutral: %s', '--badge-neutral: %s',
+        ),
+        /* Where the pointer is: menu items, rows, outline buttons. */
+        'hover' => array(
+            '--accent: %s', '--accent-foreground: %f',
+            '--sidebar-accent: %s', '--sidebar-accent-foreground: %f',
+        ),
+        /* Every hairline in the interface, including the one a field draws
+         * around itself. No foreground: nothing is written on a border. */
+        'border' => array(
+            '--border: %s', '--input: %s', '--sidebar-border: %s',
+        ),
+    );
+
     private function getColorRules($scheme)
     {
         $model = $this->brandingModel();
         $rules = array();
 
-        if ($model->hasCustomColor($scheme)) {
-            $rules = array_merge($rules, $this->getPrimaryRules($model->getColor($scheme)));
-        }
+        foreach (array_keys(BrandingModel::getPalette()) as $key) {
+            if (! $model->hasBrandColor($key, $scheme)) {
+                continue;
+            }
 
-        if ($model->hasCustomSecondaryColor($scheme)) {
-            $rules = array_merge($rules, $this->getSecondaryRules($model->getSecondaryColor($scheme)));
+            $color = $model->getBrandColor($key, $scheme);
+            $foreground = $model->getForegroundColor($color);
+
+            foreach (self::$tokens[$key] as $rule) {
+                $rules[] = str_replace(array('%s', '%f'), array($color, $foreground), $rule);
+            }
         }
 
         return $rules;
-    }
-
-    /**
-     * Only the tokens that carry the brand are touched. --primary alone would
-     * leave the sidebar's active item and the badge fills on the old blue,
-     * because tokens.css gave those their own names.
-     */
-    private function getPrimaryRules($color)
-    {
-        $foreground = $this->brandingModel()->getForegroundColor($color);
-
-        return array(
-            '--primary: '.$color,
-            '--primary-foreground: '.$foreground,
-            '--sidebar-primary: '.$color,
-            '--sidebar-primary-foreground: '.$foreground,
-            '--badge-primary-foreground: '.$foreground,
-        );
-    }
-
-    private function getSecondaryRules($color)
-    {
-        return array(
-            '--secondary: '.$color,
-            '--secondary-foreground: '.$this->brandingModel()->getForegroundColor($color),
-        );
     }
 
     /**
@@ -321,13 +325,37 @@ class BrandHelper extends Base
     {
         switch ($this->getDisplay()) {
             case BrandingModel::DISPLAY_MARK:
-                return '.sc-sb-brand-text, .sc-topbar-brand-name, .sc-auth-brand-title {display: none}';
+                return self::MARK_ONLY_CSS;
             case BrandingModel::DISPLAY_TITLE:
                 return '.sc-sb-brand-sub {display: none}';
             default:
                 return '';
         }
     }
+
+    /**
+     * Mark only: the mark stops being a 2rem square.
+     *
+     * Beside a name it is one element of a row and a square is right. Alone
+     * it *is* the lockup, so it takes the row — a wordmark four times wider
+     * than it is tall was being letterboxed into 32px and came out
+     * unreadable. `contain` keeps the proportions whatever shape the file
+     * is: a wide logo fills the width, a square one fills the height.
+     *
+     * The collapsed rail is the exception. There is no width to give it
+     * there, so the square comes back — two attributes deep, which is what
+     * out-ranks the rules above without !important.
+     *
+     * Kept as CSS rather than a class on the element because the whole
+     * lockup setting is one stylesheet fragment: no JavaScript is needed
+     * for it to work, and Settings → Appearance previews it by swapping
+     * this same text.
+     */
+    const MARK_ONLY_CSS = '.sc-sb-brand-text, .sc-topbar-brand-name, .sc-auth-brand-title {display: none}'
+        .'.sc-sb-brand-mark {flex: 1 1 auto; width: auto; height: calc(2.75rem * var(--sc-brand-scale, 1)); background-position: left center}'
+        .'.sc-topbar-brand-mark {flex: 1 1 auto; width: auto; min-width: 5rem; height: calc(2.25rem * var(--sc-brand-scale, 1)); background-position: left center}'
+        .'.sc-auth-brand-mark {width: 13rem; max-width: 100%; height: calc(2.75rem * var(--sc-brand-scale, 1)); background-position: left center}'
+        .'html[data-sc-sidebar="collapsed"] .sc-sb-brand-mark {flex: 0 0 auto; width: calc(2rem * var(--sc-brand-scale, 1)); height: calc(2rem * var(--sc-brand-scale, 1)); background-position: center}';
 
     /**
      * The model, resolved once per request. Registered by Plugin.php, so

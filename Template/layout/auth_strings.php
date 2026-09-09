@@ -18,6 +18,11 @@ $scPrivacyUrl = defined('PRIVACY_POLICY_URL') ? PRIVACY_POLICY_URL : '';
     --sc-new-label: "<?= $this->text->e(t('New')) ?>";
     --sc-brand-title: "<?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?>";
     --sc-brand-url: "<?= $this->text->e($this->shadcnSidebar->getBrandUrl()) ?>";
+    <?php /* Which palette this request is actually in. Anonymous visitors
+             fall back to "light", which is what the auth screens render as —
+             a third-party widget that follows the OS instead would sit dark
+             on a light page. */ ?>
+    --sc-scheme: "<?= $this->text->e($this->user->getTheme()) ?>";
     --sc-pw-show: "<?= $this->text->e(t('Show password')) ?>";
     --sc-pw-hide: "<?= $this->text->e(t('Hide password')) ?>";
 }</style>

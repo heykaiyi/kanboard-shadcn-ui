@@ -22,14 +22,27 @@
      * candidate of a given type normally wins — but "normally" is not a
      * guarantee across browsers, so the competitors are removed and ours
      * are left as the only ones. Browsers re-evaluate the icon set when
-     * these links change. */
+     * these links change.
+     *
+     * Ours are found by the marker Template/layout/head.php puts on them,
+     * not by their URL: a bundled icon is a file under /plugins/Shadcn/,
+     * but an uploaded one is served by BrandingController and its URL looks
+     * nothing like that. Matching on the path deleted every candidate
+     * including our own, and the browser fell through to /favicon.ico —
+     * which is Kanboard's. */
     function claimFavicon() {
+        var ours = document.querySelectorAll('link[data-sc-icon]');
+
+        /* Nothing of ours to promote: leave the page's icons alone rather
+         * than stripping the set and leaving none. */
+        if (ours.length === 0) {
+            return;
+        }
+
         var links = document.querySelectorAll('link[rel~="icon"], link[rel~="apple-touch-icon"]');
 
         [].forEach.call(links, function (link) {
-            var href = link.getAttribute('href') || '';
-
-            if (href.indexOf('/plugins/Shadcn/') === -1) {
+            if (! link.hasAttribute('data-sc-icon')) {
                 link.parentNode.removeChild(link);
             }
         });

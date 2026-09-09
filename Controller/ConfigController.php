@@ -39,45 +39,59 @@ class ConfigController extends \Kanboard\Controller\ConfigController
     }
 
     /**
-     * The four colour fields, as the screen needs them: two colours, each
-     * answered once for the light palette and once for the dark. The
-     * resolved value is what the swatch shows — a dark field left empty
-     * shows the light colour, which is the colour it will actually be.
+     * The palette, as the screen needs it: every colour answered once for
+     * the light palette and once for the dark. The resolved value is what
+     * the swatch shows — a dark field left empty shows the light colour,
+     * which is the colour it will actually be.
      */
     private function getColorFields()
     {
         $model = $this->shadcnBrandingModel;
 
-        $colors = array(
+        $copy = array(
             'accent' => array(
-                'key' => 'shadcn_brand_color',
                 'label' => t('Accent color'),
                 'help' => t('Buttons, links, the active sidebar item, focus borders and the email header all follow it.'),
-                'default' => BrandingModel::DEFAULT_COLOR,
             ),
             'secondary' => array(
-                'key' => 'shadcn_brand_secondary',
                 'label' => t('Secondary color'),
                 'help' => t('The plate under the quiet controls: the search box and the bell in the top bar, and the chips inside a multi-select.'),
-                'default' => BrandingModel::DEFAULT_SECONDARY,
+            ),
+            'sidebar' => array(
+                'label' => t('Sidebar background'),
+                'help' => t('The sidebar\'s own surface, behind the navigation.'),
+            ),
+            'muted' => array(
+                'label' => t('Muted surface'),
+                'help' => t('The quiet fill: list headers, neutral chips, and the cards a message or an activity entry sits on.'),
+            ),
+            'hover' => array(
+                'label' => t('Hover surface'),
+                'help' => t('Where the pointer is: menu items, rows, and outline buttons.'),
+            ),
+            'border' => array(
+                'label' => t('Border'),
+                'help' => t('Every hairline in the interface, including the one a field draws around itself.'),
             ),
         );
 
-        foreach ($colors as $name => $color) {
+        $colors = array();
+
+        foreach (BrandingModel::getPalette() as $key => $definition) {
+            $colors[$key] = $copy[$key];
+            $colors[$key]['default'] = $definition['default'];
+
             foreach (array(BrandingModel::LIGHT, BrandingModel::DARK) as $scheme) {
-                $value = $name === 'accent'
-                    ? $model->getColor($scheme)
-                    : $model->getSecondaryColor($scheme);
+                $value = $model->getBrandColor($key, $scheme);
 
-                $custom = $name === 'accent'
-                    ? $model->hasCustomColor($scheme)
-                    : $model->hasCustomSecondaryColor($scheme);
-
-                $colors[$name]['schemes'][$scheme] = array(
-                    'name' => $model->colorKey($color['key'], $scheme),
-                    'value' => $custom ? $value : '',
+                $colors[$key]['schemes'][$scheme] = array(
+                    'name' => $model->colorKey($key, $scheme),
+                    'value' => $model->hasBrandColor($key, $scheme) ? $value : '',
                     'resolved' => $value,
                     'foreground' => $model->getForegroundColor($value),
+                    // Each palette's own default, so an empty dark field
+                    // offers the night colour rather than the day one.
+                    'placeholder' => BrandingModel::getDefaultColor($key, $scheme),
                 );
             }
         }
@@ -115,19 +129,17 @@ class ConfigController extends \Kanboard\Controller\ConfigController
 
         $colors = array();
 
-        foreach (array(
-            'shadcn_brand_color',
-            'shadcn_brand_color_dark',
-            'shadcn_brand_secondary',
-            'shadcn_brand_secondary_dark',
-        ) as $field) {
-            $raw = isset($values[$field]) ? $values[$field] : '';
-            $colors[$field] = $this->shadcnBrandingModel->normalizeColor($raw);
+        foreach (array_keys(BrandingModel::getPalette()) as $key) {
+            foreach (array(BrandingModel::LIGHT, BrandingModel::DARK) as $scheme) {
+                $field = $this->shadcnBrandingModel->colorKey($key, $scheme);
+                $raw = isset($values[$field]) ? $values[$field] : '';
+                $colors[$field] = $this->shadcnBrandingModel->normalizeColor($raw);
 
-            if ($colors[$field] === '' && ! empty($raw)) {
-                $this->flash->failure(t('That is not a valid colour. Use a hex value such as #1145af.'));
-                $this->redirectToSettings();
-                return;
+                if ($colors[$field] === '' && ! empty($raw)) {
+                    $this->flash->failure(t('That is not a valid colour. Use a hex value such as #1145af.'));
+                    $this->redirectToSettings();
+                    return;
+                }
             }
         }
 
@@ -140,13 +152,9 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             $display = BrandingModel::DEFAULT_DISPLAY;
         }
 
-        $saved = $this->configModel->save(array(
+        $saved = $this->configModel->save($colors + array(
             'shadcn_brand_title' => isset($values['shadcn_brand_title']) ? trim($values['shadcn_brand_title']) : '',
             'shadcn_brand_subtitle' => isset($values['shadcn_brand_subtitle']) ? trim($values['shadcn_brand_subtitle']) : '',
-            'shadcn_brand_color' => $colors['shadcn_brand_color'],
-            'shadcn_brand_color_dark' => $colors['shadcn_brand_color_dark'],
-            'shadcn_brand_secondary' => $colors['shadcn_brand_secondary'],
-            'shadcn_brand_secondary_dark' => $colors['shadcn_brand_secondary_dark'],
             'shadcn_brand_display' => $display,
             'shadcn_brand_logo_scale' => $this->shadcnBrandingModel->normalizeScale(
                 isset($values['shadcn_brand_logo_scale']) ? $values['shadcn_brand_logo_scale'] : ''
@@ -154,6 +162,11 @@ class ConfigController extends \Kanboard\Controller\ConfigController
         ));
 
         $failures = array();
+
+        $labels = array(
+            BrandingModel::LOGO => t('Logo'),
+            BrandingModel::FAVICON => t('Favicon'),
+        );
 
         foreach (array(BrandingModel::LOGO, BrandingModel::FAVICON) as $type) {
             $file = $this->request->getFileInfo($type.'_file');
@@ -165,10 +178,11 @@ class ConfigController extends \Kanboard\Controller\ConfigController
             try {
                 $this->shadcnBrandingModel->upload($type, $file);
             } catch (RuntimeException $e) {
-                $failures[] = $e->getMessage();
+                $failures[] = $labels[$type].'：'.$e->getMessage();
+                $this->logRefusal($type, $file, $e->getMessage());
             } catch (\Exception $e) {
-                $this->logger->error('Shadcn: '.$e->getMessage());
-                $failures[] = t('Unable to upload files, check the permissions of your data folder.');
+                $failures[] = $labels[$type].'：'.t('Unable to upload files, check the permissions of your data folder.');
+                $this->logRefusal($type, $file, get_class($e).': '.$e->getMessage());
             }
         }
 
@@ -181,6 +195,26 @@ class ConfigController extends \Kanboard\Controller\ConfigController
         }
 
         $this->redirectToSettings();
+    }
+
+    /**
+     * A refused upload, in the log as well as on the screen.
+     *
+     * The flash message is gone on the next click and says nothing about the
+     * file that caused it. Two of the three reasons an upload is refused are
+     * facts about that file — its name and its size — so they are written
+     * down where they can still be read afterwards.
+     */
+    private function logRefusal($type, array $file, $reason)
+    {
+        $this->logger->error(sprintf(
+            'Shadcn: %s upload refused — name=%s size=%s error=%s reason=%s',
+            $type,
+            isset($file['name']) ? $file['name'] : '(none)',
+            isset($file['size']) ? $file['size'] : '(none)',
+            isset($file['error']) ? $file['error'] : '(none)',
+            $reason
+        ));
     }
 
     /**

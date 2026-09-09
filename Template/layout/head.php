@@ -26,19 +26,19 @@ $shadcn_brand_css = $this->shadcnBrand->getThemeCss($shadcn_theme);
        * what was uploaded is a raster. The PNGs are for the clients that
        * ignore SVG icons entirely. */ ?>
 <?php if ($this->shadcnBrand->hasCustomIcon()): ?>
-    <link rel="icon" type="image/svg+xml" href="<?= $this->shadcnBrand->getIconUrl('svg') ?>">
+    <link data-sc-icon rel="icon" type="image/svg+xml" href="<?= $this->shadcnBrand->getIconUrl('svg') ?>">
     <?php if ($this->shadcnBrand->hasRasterIcon()): ?>
-        <link rel="apple-touch-icon" href="<?= $this->shadcnBrand->getIconUrl('raw') ?>">
+        <link data-sc-icon rel="apple-touch-icon" href="<?= $this->shadcnBrand->getIconUrl('raw') ?>">
     <?php else: ?>
         <?php /* apple-touch-icon does not render SVG, so an SVG upload keeps
                  the bundled mark on a home screen. */ ?>
-        <link rel="apple-touch-icon" sizes="180x180" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-180.png">
+        <link data-sc-icon rel="apple-touch-icon" sizes="180x180" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-180.png">
     <?php endif ?>
 <?php else: ?>
-    <link rel="icon" type="image/svg+xml" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-32.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-512.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-180.png">
+    <link data-sc-icon rel="icon" type="image/svg+xml" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo.svg">
+    <link data-sc-icon rel="icon" type="image/png" sizes="32x32" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-32.png">
+    <link data-sc-icon rel="icon" type="image/png" sizes="512x512" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-512.png">
+    <link data-sc-icon rel="apple-touch-icon" sizes="180x180" href="<?= $this->url->dir() ?>plugins/Shadcn/Assets/img/logo-180.png">
 <?php endif ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">

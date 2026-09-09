@@ -50,7 +50,13 @@ class BrandingModel extends Base
      */
     const LIGHT = 'light';
     const DARK = 'dark';
-    const DEFAULT_TITLE = '陳愷翊 Kaiyi Chen';
+    /**
+     * The name an instance carries before anyone has answered. Kanboard's
+     * own, because a theme should not put its author's name on someone
+     * else's board — an instance that wants a different one says so in
+     * Settings → Appearance.
+     */
+    const DEFAULT_TITLE = 'Kanboard';
 
     /**
      * How much of the lockup is drawn.
@@ -217,20 +223,84 @@ class BrandingModel extends Base
     }
 
     /**
-     * The two colours, in the two palettes.
+     * The palette an instance is allowed to answer.
      *
-     * A colour that reads well on white is not always the one that reads
-     * well at night, so each of them can be answered twice. The dark answer
-     * is optional and falls back to the light one, which is what every
-     * instance had before there were two — so an untouched instance renders
-     * exactly what it did.
+     * Six of shadcn's own tokens, and only six: the two that carry the brand,
+     * and the four surfaces the interface is actually built out of. The state
+     * colours — success, warning, danger, info — are deliberately not here:
+     * they mean something, and an instance that recolours "overdue" has not
+     * branded itself, it has broken a signal.
      *
+     * Each is answered twice — once for the light palette, once for the dark
+     * — because a colour that reads well on white is not always the one that
+     * reads well at night; the dark answer is optional and falls back to the
+     * light one, which is what every instance had before there were two.
+     *
+     * The defaults are the theme's own values written in hex — one per
+     * palette, because tokens.css and theme-dark.css do not agree about any
+     * surface — so the swatch shows what the screen is actually drawing
+     * rather than a placeholder.
+     */
+    private static $palette = array(
+        'accent'    => array('setting' => 'shadcn_brand_color',     'default' => self::DEFAULT_COLOR,     'dark' => self::DEFAULT_COLOR),
+        'secondary' => array('setting' => 'shadcn_brand_secondary', 'default' => self::DEFAULT_SECONDARY, 'dark' => '#434343'),
+        'sidebar'   => array('setting' => 'shadcn_brand_sidebar',   'default' => '#ffffff',               'dark' => '#171717'),
+        'muted'     => array('setting' => 'shadcn_brand_muted',     'default' => '#f5f5f5',               'dark' => '#434343'),
+        'hover'     => array('setting' => 'shadcn_brand_hover',     'default' => '#f5f5f5',               'dark' => '#434343'),
+        'border'    => array('setting' => 'shadcn_brand_border',    'default' => '#e5e5e5',               'dark' => '#2b2b2b'),
+    );
+
+    public static function getPalette()
+    {
+        return self::$palette;
+    }
+
+    public static function getDefaultColor($key, $scheme = self::LIGHT)
+    {
+        if (! isset(self::$palette[$key])) {
+            return self::DEFAULT_COLOR;
+        }
+
+        return $scheme === self::DARK ? self::$palette[$key]['dark'] : self::$palette[$key]['default'];
+    }
+
+    /**
      * `$scheme` is 'light' or 'dark'; anything else is treated as light,
      * because a wrong scheme should give a colour rather than an error.
      */
+    public function getBrandColor($key, $scheme = self::LIGHT)
+    {
+        if (! isset(self::$palette[$key])) {
+            return self::DEFAULT_COLOR;
+        }
+
+        $value = $this->storedColor($key, $scheme);
+
+        /* A dark field left empty means "the same colour at night", which is
+         * only true once a light one has been answered. With neither
+         * answered the palette is the theme's own, and at night that is a
+         * different colour from the one the light row shows. */
+        if ($value === '' && $scheme === self::DARK) {
+            $value = $this->storedColor($key, self::LIGHT);
+        }
+
+        return $value ?: self::getDefaultColor($key, $scheme);
+    }
+
+    public function hasBrandColor($key, $scheme = self::LIGHT)
+    {
+        return $this->storedColor($key, $scheme) !== '';
+    }
+
+    /** The accent, and the quiet colour, by the names the templates use. */
     public function getColor($scheme = self::LIGHT)
     {
-        return $this->color('shadcn_brand_color', $scheme, self::DEFAULT_COLOR);
+        return $this->getBrandColor('accent', $scheme);
+    }
+
+    public function hasCustomColor($scheme = self::LIGHT)
+    {
+        return $this->hasBrandColor('accent', $scheme);
     }
 
     /**
@@ -242,32 +312,12 @@ class BrandingModel extends Base
      */
     public function getSecondaryColor($scheme = self::LIGHT)
     {
-        return $this->color('shadcn_brand_secondary', $scheme, self::DEFAULT_SECONDARY);
-    }
-
-    public function hasCustomColor($scheme = self::LIGHT)
-    {
-        return $this->storedColor('shadcn_brand_color', $scheme) !== '';
+        return $this->getBrandColor('secondary', $scheme);
     }
 
     public function hasCustomSecondaryColor($scheme = self::LIGHT)
     {
-        return $this->storedColor('shadcn_brand_secondary', $scheme) !== '';
-    }
-
-    /**
-     * What the palette actually resolves to: the scheme's own answer, then
-     * the light one, then the theme's default.
-     */
-    private function color($key, $scheme, $default)
-    {
-        $value = $this->storedColor($key, $scheme);
-
-        if ($value === '' && $scheme === self::DARK) {
-            $value = $this->storedColor($key, self::LIGHT);
-        }
-
-        return $value ?: $default;
+        return $this->hasBrandColor('secondary', $scheme);
     }
 
     private function storedColor($key, $scheme)
@@ -275,9 +325,16 @@ class BrandingModel extends Base
         return $this->normalizeColor($this->configModel->get($this->colorKey($key, $scheme), ''));
     }
 
+    /**
+     * The settings row a colour lives in. Light keeps the original name so
+     * an instance that answered before there were two palettes keeps its
+     * answer.
+     */
     public function colorKey($key, $scheme)
     {
-        return $scheme === self::DARK ? $key.'_dark' : $key;
+        $setting = isset(self::$palette[$key]) ? self::$palette[$key]['setting'] : $key;
+
+        return $scheme === self::DARK ? $setting.'_dark' : $setting;
     }
 
     public function getTitle()

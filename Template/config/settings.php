@@ -82,10 +82,10 @@ $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_su
                                     <input type="text" name="<?= $scField['name'] ?>" id="form-<?= $scField['name'] ?>"
                                            class="sc-brand-hex"
                                            value="<?= $this->text->e($scField['value']) ?>"
-                                           placeholder="<?= $this->text->e($scColorField['default']) ?>"
+                                           placeholder="<?= $this->text->e($scField['placeholder']) ?>"
                                            autocomplete="off" spellcheck="false" maxlength="7">
                                     <button type="button" class="btn sc-brand-reset"
-                                            data-default="<?= $this->text->e($scColorField['default']) ?>"><?= t('Reset') ?></button>
+                                            data-default="<?= $this->text->e($scField['placeholder']) ?>"><?= t('Reset') ?></button>
                                 </div>
                             </div>
                         <?php endforeach ?>
@@ -103,14 +103,35 @@ $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_su
 
             <div class="sc-brand-previews">
                 <?php foreach (array('light' => t('Light'), 'dark' => t('Dark')) as $scScheme => $scSchemeLabel): ?>
+                    <?php
+                    /* Every colour on the surfaces it actually reaches, in
+                       both palettes. The custom properties are set inline
+                       here and rewritten by branding.js as the fields
+                       change, so the row answers before the save does. */
+                    $scVars = array();
+
+                    foreach ($branding['colors'] as $scPreviewKey => $scPreviewField) {
+                        $scVars[] = '--sc-brand-'.$scPreviewKey.': '.$scPreviewField['schemes'][$scScheme]['resolved'];
+                        $scVars[] = '--sc-brand-'.$scPreviewKey.'-fg: '.$scPreviewField['schemes'][$scScheme]['foreground'];
+                    }
+                    ?>
                     <div class="sc-brand-preview sc-brand-preview-<?= $scScheme ?>"
                          data-sc-brand-preview-scheme="<?= $scScheme ?>"
-                         style="--sc-brand-accent: <?= $this->text->e($branding['colors']['accent']['schemes'][$scScheme]['resolved']) ?>; --sc-brand-accent-fg: <?= $this->text->e($branding['colors']['accent']['schemes'][$scScheme]['foreground']) ?>; --sc-brand-secondary: <?= $this->text->e($branding['colors']['secondary']['schemes'][$scScheme]['resolved']) ?>; --sc-brand-secondary-fg: <?= $this->text->e($branding['colors']['secondary']['schemes'][$scScheme]['foreground']) ?>;">
+                         style="<?= $this->text->e(implode('; ', $scVars)) ?>">
                         <span class="sc-brand-preview-label"><?= $this->text->e($scSchemeLabel) ?></span>
                         <span class="sc-brand-preview-btn"><?= t('Save') ?></span>
                         <span class="sc-brand-preview-btn-2"><?= t('cancel') ?></span>
                         <span class="sc-brand-preview-badge"><?= t('Active') ?></span>
                         <span class="sc-brand-preview-link"><?= t('A link') ?></span>
+                        <?php /* The four surfaces, as the colours they are —
+                                 there is no component to show them on that is
+                                 not the screen around this row. */ ?>
+                        <span class="sc-brand-preview-surfaces">
+                            <?php foreach (array('sidebar', 'muted', 'hover', 'border') as $scSurface): ?>
+                                <span class="sc-brand-preview-swatch sc-brand-preview-<?= $scSurface ?>"
+                                      title="<?= $this->text->e($branding['colors'][$scSurface]['label']) ?>"></span>
+                            <?php endforeach ?>
+                        </span>
                     </div>
                 <?php endforeach ?>
             </div>
@@ -188,7 +209,10 @@ $scSubtitle = isset($values['shadcn_brand_subtitle']) ? $values['shadcn_brand_su
     <section class="sc-brand-card">
         <div class="sc-brand-card-head">
             <h3><?= t('Favicon') ?></h3>
-            <p><?= t('PNG, JPG, GIF, WebP or SVG, up to %d KB. Square, and legible at 16 pixels.', $branding['max_size'] / 1024) ?></p>
+            <p>
+                <?= t('PNG, JPG, GIF, WebP or SVG, up to %d KB. Square, and legible at 16 pixels.', $branding['max_size'] / 1024) ?>
+                <?= t('No .ico: a browser handed both an ICO and the SVG Kanboard declares takes the SVG, so an ICO here would never be the icon you see.') ?>
+            </p>
         </div>
 
         <div class="sc-brand-card-body">

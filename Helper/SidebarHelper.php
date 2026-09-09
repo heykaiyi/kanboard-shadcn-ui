@@ -91,6 +91,7 @@ class SidebarHelper extends Base
         return $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
     }
 
+
     /**
      * Same test as AppHelper::checkMenuSelection(), returning a boolean so the
      * template can compose a class list rather than an attribute string.

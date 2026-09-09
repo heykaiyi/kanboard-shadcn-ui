@@ -19,6 +19,60 @@
         return value.replace(/^["']|["']$/g, '');
     }
 
+    /* The Turnstile challenge.
+     *
+     * The plugin renders it on `template:auth:login-form:after`, which is
+     * outside </form> — so it arrives under the Sign-in button, which is
+     * past the point anyone is still reading. It is moved in front of the
+     * action, told to fill the column, and given the palette this page is
+     * actually in rather than the operating system's.
+     *
+     * This runs while the document is still parsing, before Cloudflare's
+     * async script has rendered anything, so the attributes are read at
+     * render time. If it has already rendered, the node is still moved and
+     * the attributes are left alone rather than fighting a live widget.
+     */
+    function placeChallenge() {
+        var widget = document.querySelector('.form-login .cf-turnstile');
+
+        if (widget === null) {
+            return false;
+        }
+
+        if (widget.children.length === 0) {
+            var scheme = prop('--sc-scheme');
+
+            widget.setAttribute('data-size', 'flexible');
+            widget.setAttribute('data-theme', scheme === 'dark' || scheme === 'auto' ? scheme : 'light');
+        }
+
+        var actions = document.querySelector('.form-login form .form-actions');
+
+        if (actions !== null && widget.parentNode !== actions.parentNode) {
+            actions.parentNode.insertBefore(widget, actions);
+        }
+
+        return true;
+    }
+
+    /* This script is in <head>, so the widget does not exist yet — and
+     * Cloudflare's own script is `async`, so waiting for DOMContentLoaded
+     * would be a race against it. An observer catches the element the moment
+     * it is parsed, which is long before a network fetch can return. */
+    if (! placeChallenge() && typeof MutationObserver === 'function') {
+        var challengeObserver = new MutationObserver(function () {
+            if (placeChallenge()) {
+                challengeObserver.disconnect();
+            }
+        });
+
+        challengeObserver.observe(document.documentElement, { childList: true, subtree: true });
+        document.addEventListener('DOMContentLoaded', function () {
+            placeChallenge();
+            challengeObserver.disconnect();
+        });
+    }
+
     function link(label, href) {
         var node = document.createElement(href === '' ? 'span' : 'a');
 

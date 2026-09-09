@@ -296,8 +296,10 @@ body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-
     overflow: hidden;
     transition: width 0.2s ease;
     border-right: 1px solid var(--border);
-    /* One surface with the page rather than a tinted rail. */
-    background: var(--background);
+    /* One surface with the page rather than a tinted rail — --sidebar is
+     * defined as --background, so this is the same colour until Settings →
+     * Appearance says otherwise, and then it is the only thing that moves. */
+    background: var(--sidebar);
     color: var(--sidebar-foreground);
 }
 
@@ -894,16 +896,15 @@ body:has(> .sc-sb) > header > .menus-container > .notification > a {
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
-    border: 1px solid var(--input);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--secondary);
     color: var(--secondary-foreground);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease;
 }
 
 body:has(> .sc-sb) > header > .menus-container > .notification > a:hover {
     background: color-mix(in oklab, var(--secondary) 92%, var(--foreground));
-    border-color: var(--input);
     color: var(--secondary-foreground);
     text-decoration: none;
 }
@@ -1561,11 +1562,13 @@ body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger {
     min-width: 14rem;
     height: 2.25rem;
     padding: 0 0.5rem 0 0.75rem;
-    border: 1px solid var(--input);
+    border: none;
     border-radius: var(--radius-md);
-    /* The same plate the bell beside it takes. Its label is that plate's own
-     * ink, thinned toward the plate rather than fixed to grey, so it stays
-     * legible whatever colour the secondary is set to. */
+    /* The same plate the bell beside it takes — and, like the bell, no
+     * border: one bordered control between two plain ones reads as a
+     * mistake. Its label is that plate's own ink, thinned toward the plate
+     * rather than fixed to grey, so it stays legible whatever colour the
+     * secondary is set to. */
     background: var(--secondary);
     color: color-mix(in oklab, var(--secondary-foreground) 65%, var(--secondary));
     font-family: inherit;
@@ -1579,7 +1582,7 @@ body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger .sc-command-trigger-
 }
 
 body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger:hover {
-    border-color: var(--primary);
+    background: color-mix(in oklab, var(--secondary) 92%, var(--foreground));
 }
 
 /* The drawer's own trigger. The top bar has one on a desktop, so this is

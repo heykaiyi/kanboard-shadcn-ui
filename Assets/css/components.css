@@ -532,9 +532,13 @@ input[type="radio"]:disabled {
  * that exact shape is present the label takes the asterisk and the stray
  * span is dropped; anywhere the shape does not hold, the original span is
  * left alone. */
+/* `.sc-pw` is the wrapper password.js puts around a password field, which
+ * breaks the three-sibling shape below — without it the marker was left
+ * stranded on a line of its own under the field. */
 label:has(+ input + .form-required)::after,
 label:has(+ select + .form-required)::after,
-label:has(+ textarea + .form-required)::after {
+label:has(+ textarea + .form-required)::after,
+label:has(+ .sc-pw + .form-required)::after {
     content: "*";
     margin-left: 0.25rem;
     color: var(--primary);
@@ -542,7 +546,8 @@ label:has(+ textarea + .form-required)::after {
 
 label + input + .form-required,
 label + select + .form-required,
-label + textarea + .form-required {
+label + textarea + .form-required,
+label + .sc-pw + .form-required {
     display: none;
 }
 
@@ -2302,12 +2307,22 @@ a i.web-notification-icon:hover {
     transition: box-shadow 0.15s ease;
 }
 
+/* colorCss() writes the shorthand border-color, so overriding three
+ * longhands leaves the task colour on the fourth edge alone — the top for
+ * a card, which is where a shadcn Card carries an accent. */
 .task-board[class*="color-"],
-.task-summary-container[class*="color-"],
 .task-board-collapsed[class*="color-"] {
     background-color: var(--card);
-    /* colorCss() writes the shorthand border-color, so overriding three
-     * longhands leaves the task colour on the left edge alone. */
+    border-right-color: var(--border);
+    border-bottom-color: var(--border);
+    border-left-color: var(--border);
+}
+
+/* The task's own summary panel keeps the accent on its left edge: it is a
+ * page-wide block, not a card in a column, and a 3px line across the top of
+ * it would read as a rule under the title above. */
+.task-summary-container[class*="color-"] {
+    background-color: var(--card);
     border-top-color: var(--border);
     border-right-color: var(--border);
     border-bottom-color: var(--border);
@@ -3750,16 +3765,30 @@ body:has(> .form-login) {
     max-width: 100%;
 }
 
-/* The challenge is rendered by a hook after </form>, so it is a sibling of
- * the form rather than a child — without this it takes the column's width
- * instead of the form's and nothing lines up. */
+/* The challenge is rendered by a hook after </form>, so it arrives as a
+ * sibling of the form. Assets/js/auth.js moves it inside, in front of the
+ * action, because a challenge you have to scroll past the Sign-in button to
+ * find is a challenge nobody sees. Ordered rather than positioned, so it
+ * still lands correctly if the move does not happen. */
 .form-login .cf-turnstile {
+    order: 5;
+    box-sizing: border-box;
     width: 100%;
     max-width: 20rem;
     margin: 0.875rem auto 0;
 }
 
+/* Inside the form it is one of the column's own rows. */
+.form-login form .cf-turnstile {
+    max-width: none;
+    margin: 0.875rem 0 0;
+}
+
+/* data-size="flexible" makes the widget fill its container; auth.js sets it
+ * before Cloudflare's script renders. The iframe is capped anyway, so a
+ * version of Turnstile that does not know that value still fits. */
 .form-login .cf-turnstile iframe {
+    width: 100% !important;
     max-width: 100%;
 }
 
@@ -3790,7 +3819,7 @@ body:has(> .form-login) {
 
 .form-login .form-actions {
     display: block;
-    order: 5;
+    order: 6;
     padding-top: 1rem;
 }
 
@@ -3894,26 +3923,29 @@ body:has(> .form-login) {
     background: var(--background);
 }
 
+/* Button, variant="secondary": the quiet plate and no border, at the same
+ * height as the action above it so the two read as one stack. */
 .form-login > ul li a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     width: 100%;
-    height: 2.25rem;
+    height: 2.75rem;
     padding: 0 1rem;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
-    color: var(--foreground);
-    font-size: 0.9375rem;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    font-size: 1rem;
     font-weight: 500;
     text-decoration: none;
     transition: background-color 0.15s ease;
 }
 
 .form-login > ul li a:hover {
-    background: var(--accent);
-    color: var(--accent-foreground);
+    background: color-mix(in oklab, var(--secondary) 92%, var(--foreground));
+    color: var(--secondary-foreground);
     text-decoration: none;
 }
 
@@ -4023,23 +4055,30 @@ a.board-swimlane-toggle:focus {
  * Board — the card, and the chrome around it
  *
  * The task card is the same neutral surface as a stat tile: no hairline,
- * one fill. The colour a task carries stays as the left accent, because
- * it is user data and the only thing on the card that encodes meaning.
+ * one fill. The colour a task carries is the accent across its top, because
+ * it is user data and the only thing on the card that encodes meaning —
+ * and a line along the top is read before the card's own content, which is
+ * the order a label should arrive in.
+ *
+ * The top corners are square so the accent runs the full width of the card
+ * rather than tapering away at both ends; the bottom two keep the radius,
+ * which is what makes it read as a card with a band on it rather than as a
+ * rectangle.
  * =================================================================== */
 
 .task-board {
-    border-width: 0 0 0 3px;
+    border-width: 3px 0 0;
     border-style: solid;
-    border-radius: var(--radius-lg);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     background: var(--surface-neutral);
 }
 
 .task-board[class*="color-"],
 .task-board-collapsed[class*="color-"] {
     background: var(--surface-neutral);
-    border-top-color: transparent;
     border-right-color: transparent;
     border-bottom-color: transparent;
+    border-left-color: transparent;
 }
 
 /* A board row is not a button. */
@@ -4342,42 +4381,39 @@ td.board-column-task-collapsed:hover,
  * form.css pins onto text fields.
  * =================================================================== */
 
+/* Sections rather than cards: no plate, no border, no inset — the screen
+ * is already inside the settings column, and a card drawn inside a card is
+ * two frames around one thing. What separates one section from the next is
+ * the space between them. */
 .sc-brand {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    max-width: 46rem;
+    gap: 2.5rem;
 }
 
 .sc-brand-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--card);
-    color: var(--card-foreground);
+    border: none;
+    background: none;
+    color: inherit;
 }
 
-/* Title and the sentence that explains it share a row and wrap onto two
- * when there is no room for both — a shadcn CardHeader with the
- * description beside the title rather than under it, because these
- * descriptions are one line each. */
+/* The sentence that explains the section sits under its title, the way a
+ * field's help text sits under its field. */
 .sc-brand-card-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-    padding: 1.25rem 1.5rem 0;
+    display: block;
+    padding: 0;
 }
 
 .sc-brand-card-head h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.0625rem;
     font-weight: 600;
     line-height: 1.4;
 }
 
 .sc-brand-card-head p {
-    flex: 1 1 20rem;
-    margin: 0;
+    max-width: 46rem;
+    margin: 0.375rem 0 0;
     color: var(--muted-foreground);
     font-size: 0.875rem;
     line-height: 1.55;
@@ -4387,7 +4423,7 @@ td.board-column-task-collapsed:hover,
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    padding: 1.25rem 1.5rem 1.5rem;
+    padding: 1.25rem 0 0;
 }
 
 .sc-brand-field {
@@ -4554,6 +4590,39 @@ input[type="text"].sc-brand-hex {
     font-weight: 500;
 }
 
+/* A surface has no component of its own to be shown on — the screen around
+ * this row is the only one — so the four are shown as what they are. Each
+ * keeps a hairline of its own, or a near-white swatch would be invisible on
+ * the light row. */
+.sc-brand-preview-surfaces {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.sc-brand-preview-swatch {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--sc-brand-border) 70%, var(--sc-brand-accent-fg));
+    border-radius: var(--radius-sm);
+}
+
+.sc-brand-preview-sidebar {
+    background: var(--sc-brand-sidebar);
+}
+
+.sc-brand-preview-muted {
+    background: var(--sc-brand-muted);
+}
+
+.sc-brand-preview-hover {
+    background: var(--sc-brand-hover);
+}
+
+.sc-brand-preview-border {
+    background: var(--sc-brand-border);
+}
+
 .sc-brand-preview-link {
     color: var(--sc-brand-accent);
     font-size: 0.875rem;
@@ -4682,8 +4751,7 @@ input[type="text"].sc-brand-hex {
     display: flex;
     flex-wrap: wrap;
     gap: 1.25rem 2rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
 }
 
 .sc-brand-choice {
@@ -4801,12 +4869,12 @@ input[type="text"].sc-brand-hex {
 }
 
 @media (max-width: 640px) {
-    .sc-brand-card-head {
-        padding: 1.125rem 1.125rem 0;
+    .sc-brand {
+        gap: 2rem;
     }
 
     .sc-brand-card-body {
-        padding: 1.125rem;
+        padding-top: 1rem;
     }
 }
 

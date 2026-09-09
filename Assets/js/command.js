@@ -65,18 +65,26 @@
         highlight(0);
     }
 
-    function open() {
+    /* `groupName` opens the palette already narrowed to one group. Nothing
+     * in the theme passes one today — the top bar has no switcher of its own
+     * — but the tabs are built from the groups, so this is the one place
+     * that would answer such a control. */
+    function open(groupName) {
         if (root === null && ! collect()) {
             return;
         }
+
+        var target = groupName
+            ? root.querySelector('.sc-command-tab[data-group="' + groupName.replace(/"/g, '\\"') + '"]')
+            : null;
 
         lastFocus = document.activeElement;
         root.hidden = false;
         document.documentElement.classList.add('sc-command-open');
         input.value = '';
-        group = '';
+        group = target === null ? '' : groupName;
         [].forEach.call(root.querySelectorAll('.sc-command-tab'), function (tab, i) {
-            tab.classList.toggle('is-active', i === 0);
+            tab.classList.toggle('is-active', target === null ? i === 0 : tab === target);
         });
         filter('');
         input.focus();
@@ -178,7 +186,7 @@
             trigger.addEventListener('click', function (event) {
                 event.preventDefault();
                 document.documentElement.removeAttribute('data-sc-sidebar-mobile');
-                open();
+                open(trigger.getAttribute('data-sc-command-group') || '');
             });
         });
     }

@@ -265,7 +265,9 @@ Shadcn/
 │   ├── LayoutClient.php              wraps every outgoing mail in one shell
 │   ├── LoggingSmtpTransport.php      logs the messages the server refuses
 │   └── SendLogger.php
-├── Locale/zh_TW/translations.php     the strings this plugin introduces
+├── Locale/                           zh_TW, zh_CN, ja_JP — the strings this
+│                                     plugin introduces; anything else falls
+│                                     back to the English source
 ├── Template/
 │   ├── config/settings.php           the Appearance screen
 │   ├── config/sidebar.php            its entry in the settings menu
@@ -468,13 +470,21 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 - **The rule under a dialog title is the `h2`'s own border**, so the room for
   the close button has to be padding on the `h2`. Putting it on `.page-header`
   instead stopped the rule 2.5rem short of the dialog's edge.
-- **Traditional Chinese.** `Locale/zh_TW` covers the strings this plugin
-  introduces — the sidebar's own labels, plus `Calendar` and `Gantt`, which
-  the sidebar renders itself and which core has no entry for. Everything else
-  comes from Kanboard's own `zh_TW`, which is complete and uses Taiwanese
-  vocabulary (專案, 儲存, 看板). The Calendar and Gantt plugins ship
-  Simplified Chinese only, so their own settings screens need a `zh_TW` file
-  of their own — that lives in those plugins, not here.
+- **The theme speaks whatever Kanboard speaks.** Every string goes through
+  `t()` and `Plugin::onStartup()` loads `Locale/<language>` for the language
+  of the request, so the plugin follows each user's own **Settings → My
+  profile → Language** — and, for anonymous visitors on the login screen,
+  the instance's default. Dictionaries ship for `zh_TW`, `zh_CN` and `ja_JP`,
+  covering the ~80 strings this plugin introduces; everything else on screen
+  comes from Kanboard's own translation of that language. A language with no
+  file here falls back to the English source, which is how Kanboard treats
+  every untranslated string — so nothing is ever blank or mixed with a
+  language the reader did not choose. Traditional Chinese uses Taiwanese
+  vocabulary (專案, 儲存, 看板) and Simplified Chinese the mainland one
+  (项目, 保存, 看板), because each has to read as one interface with
+  Kanboard's own file. The Calendar and Gantt plugins ship Simplified
+  Chinese only, so their own settings screens need a `zh_TW` file of their
+  own — that lives in those plugins, not here.
 - **The theme is flat.** Every drop shadow is gone: elevation is carried by
   borders and surface colour alone. The `--shadow-*` scale is kept in
   `tokens.css` but defined as `none`, so restoring depth is a four-line change
