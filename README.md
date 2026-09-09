@@ -24,7 +24,7 @@ whichever way it gets there.
 
 ```
 cd /path/to/kanboard/plugins
-git clone https://github.com/kaiyichen0421/kanboard-shadcn-ui.git Shadcn
+git clone https://github.com/heykaiyi/kanboard-shadcn-ui.git Shadcn
 ```
 
 `git -C plugins/Shadcn pull` later takes the next version.

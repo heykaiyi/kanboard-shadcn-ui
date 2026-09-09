@@ -129,13 +129,13 @@
      * therefore states the whole answer — what is shown as well as what is
      * hidden — rather than relying on what the page happened to load with.
      */
-    var SHOW = '.sc-sb-brand-text{display:grid}'
-        + '.sc-sb-brand-sub,.sc-topbar-brand-name,.sc-auth-brand-title{display:block}'
+    var SHOW = '.sc-sb-brand-text,.sc-auth-brand-text{display:grid}'
+        + '.sc-sb-brand-sub,.sc-auth-brand-sub,.sc-topbar-brand-name,.sc-auth-brand-title{display:block}'
         /* Mark-only widens the mark; the other two put the square back. */
         + '.sc-sb-brand-mark,.sc-topbar-brand-mark{flex:0 0 auto;width:calc(2rem * var(--sc-brand-scale,1));'
         + 'height:calc(2rem * var(--sc-brand-scale,1));background-position:center}';
 
-    var MARK_ONLY = '.sc-sb-brand-text,.sc-topbar-brand-name,.sc-auth-brand-title{display:none}'
+    var MARK_ONLY = '.sc-sb-brand-text,.sc-topbar-brand-name,.sc-auth-brand-text{display:none}'
         + '.sc-sb-brand-mark{flex:1 1 auto;width:auto;height:calc(2.75rem * var(--sc-brand-scale,1));background-position:left center}'
         + '.sc-topbar-brand-mark{flex:1 1 auto;width:auto;min-width:5rem;'
         + 'height:calc(2.25rem * var(--sc-brand-scale,1));background-position:left center}'
@@ -144,7 +144,7 @@
 
     var LOCKUPS = {
         full: SHOW,
-        title: SHOW + '.sc-sb-brand-sub{display:none}',
+        title: SHOW + '.sc-sb-brand-sub,.sc-auth-brand-sub{display:none}',
         mark: SHOW + MARK_ONLY
     };
 

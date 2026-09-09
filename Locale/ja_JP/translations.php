@@ -23,6 +23,7 @@ return array(
     'Calendar' => 'カレンダー',
     'Gantt' => 'ガント',
     'Wiki' => 'Wiki',
+    'Passkeys' => 'パスキー',
 
     /* The dashboard's welcome row. */
     'Welcome back, %s' => 'おかえりなさい、%s',

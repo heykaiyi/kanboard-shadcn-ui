@@ -13,6 +13,7 @@ return array(
     'Breadcrumb' => '麵包屑導覽',
     'Close' => '關閉',
     'Wiki' => '知識庫',
+    'Passkeys' => '通行密鑰',
     'Toggle navigation' => '切換導覽列',
     'More' => '更多',
     'Calendar' => '行事曆',

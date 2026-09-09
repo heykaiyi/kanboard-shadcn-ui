@@ -3595,6 +3595,20 @@ body:has(> .form-login) {
     text-decoration: none;
 }
 
+/* Name over tagline, the same two lines the sidebar draws. */
+.sc-auth-brand-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.sc-auth-brand-sub {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
 /* The password-reset screens have no hook to render the brand into — they
  * are no_layout pages and Kanboard fires nothing inside their body. So on
  * those two the mark is drawn instead: the tile is body::before (the cover
@@ -3680,7 +3694,7 @@ body:has(> .form-login) {
 .form-login h2 {
     width: 100%;
     max-width: 20rem;
-    margin-top: auto;
+    margin-top: 0;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 1.5rem;
@@ -3728,19 +3742,46 @@ body:has(> .form-login) {
     min-width: 0;
 }
 
-/* The stack is centred by giving the slack to whatever ends it — the form,
- * a social row, or (when auth.js has run) the legal line, which is pinned to
- * the bottom instead so the rest stays centred above it. */
-.form-login > :last-child {
-    margin-bottom: auto;
+/* The stack is centred in the panel, and the two things that belong to the
+ * panel's corners rather than to the stack — the brand and the legal line —
+ * are taken out of the flow and pinned there.
+ *
+ * The slack used to be handed to `:nth-last-child(2)` as a margin, which
+ * only works while that child is something. An auth plugin drops hidden
+ * <div>s into .form-login (a passkey button's mount point, its error slot),
+ * and `display: none` cannot carry a margin — so the bottom slack silently
+ * disappeared and the whole stack sat on the floor of the panel. Centring
+ * the container instead cannot be moved by a sibling that is not drawn. */
+.form-login {
+    position: relative;
+    justify-content: center;
+}
+
+.form-login > .sc-auth-brand {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
 }
 
 .form-login > .sc-auth-legal {
-    margin-bottom: 0;
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    margin: 0;
 }
 
-.form-login:has(> .sc-auth-legal) > :nth-last-child(2) {
-    margin-bottom: auto;
+@media (min-width: 768px) {
+    .form-login > .sc-auth-brand {
+        top: 2.5rem;
+        left: 2.5rem;
+    }
+
+    .form-login > .sc-auth-legal {
+        right: 2.5rem;
+        bottom: 2.5rem;
+        left: 2.5rem;
+    }
 }
 
 .form-login label {

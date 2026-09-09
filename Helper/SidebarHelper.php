@@ -16,6 +16,13 @@ use Kanboard\Core\Base;
 class SidebarHelper extends Base
 {
     /**
+     * Sections registered by other plugins, keyed by plugin and controller.
+     *
+     * @var array
+     */
+    private static $sections = array();
+
+    /**
      * Number of projects listed before the "More" link takes over.
      */
     const PROJECT_LIMIT = 6;
@@ -431,15 +438,82 @@ class SidebarHelper extends Base
     }
 
     /**
-     * A label for wherever we currently are, keyed off the route so it stays
-     * in step with the sidebar's own active state.
+     * Where a plugin's own pages sit in the trail.
+     *
+     * The map below is keyed by core controller, which is all it can be —
+     * a plugin ships its controllers after this file was written, and one of
+     * them may even be called ConfigController, like core's. So a plugin
+     * names its own pages instead, from its initialize():
+     *
+     *     SidebarHelper::registerSection('PasskeyController', t('Passkeys'), 'users');
+     *     SidebarHelper::registerSection('ConfigController', t('Passkeys'), 'settings', 'Passkey');
+     *
+     * $group is 'settings', 'users', or empty for a page that is a section in
+     * its own right. $plugin disambiguates a controller whose short name is
+     * already taken by core.
+     *
+     * @param  string $controller  Short class name, as the router reports it
+     * @param  string $label
+     * @param  string $group
+     * @param  string $plugin      The plugin the controller belongs to
      */
+    public static function registerSection($controller, $label, $group = '', $plugin = '')
+    {
+        self::$sections[self::sectionKey($plugin, $controller)] = array(
+            'label' => $label,
+            'group' => $group,
+        );
+    }
+
+    private static function sectionKey($plugin, $controller)
+    {
+        return strtolower($plugin).'|'.strtolower($controller);
+    }
+
+    /**
+     * The registration covering the current route, most specific first.
+     *
+     * @return array
+     */
+    private function getRegisteredSection()
+    {
+        $controller = $this->router->getController();
+        $plugin = $this->router->getPlugin();
+
+        foreach (array(self::sectionKey($plugin, $controller), self::sectionKey('', $controller)) as $key) {
+            if (isset(self::$sections[$key])) {
+                return self::$sections[$key];
+            }
+        }
+
+        return array();
+    }
+
     /**
      * The section an inner page belongs to, so the trail carries a type and
      * not just a title. Empty when the page is a section in its own right.
      */
     private function getSectionGroup()
     {
+        $registered = $this->getRegisteredSection();
+
+        if (! empty($registered['group'])) {
+            $groups = array(
+                'settings' => array(
+                    'label' => t('Settings'),
+                    'url'   => $this->helper->url->href('ConfigController', 'index'),
+                ),
+                'users' => array(
+                    'label' => t('Users'),
+                    'url'   => $this->helper->url->href('UserListController', 'show'),
+                ),
+            );
+
+            if (isset($groups[$registered['group']])) {
+                return $groups[$registered['group']];
+            }
+        }
+
         $settings = array(
             'userlistcontroller', 'grouplistcontroller', 'plugincontroller',
             'linkcontroller', 'currencycontroller', 'tagcontroller',
@@ -491,8 +565,18 @@ class SidebarHelper extends Base
         return array('BoardViewController', 'show');
     }
 
+    /**
+     * A label for wherever we currently are, keyed off the route so it stays
+     * in step with the sidebar's own active state.
+     */
     private function getSectionLabel()
     {
+        $registered = $this->getRegisteredSection();
+
+        if (! empty($registered['label'])) {
+            return $registered['label'];
+        }
+
         $map = array(
             'DashboardController' => t('Dashboard'),
             'ProjectOverviewController' => t('Overview'),

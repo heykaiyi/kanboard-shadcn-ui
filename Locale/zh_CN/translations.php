@@ -22,6 +22,7 @@ return array(
     'Calendar' => '日历',
     'Gantt' => '甘特图',
     'Wiki' => '知识库',
+    'Passkeys' => '通行密钥',
 
     /* The dashboard's welcome row. */
     'Welcome back, %s' => '欢迎回来，%s',

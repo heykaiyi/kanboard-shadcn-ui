@@ -13,9 +13,16 @@
        * style-src allows 'unsafe-inline', script-src does not. */ ?>
 <style>:root { --sc-or-label: "<?= $this->text->e(t('Or continue with')) ?>"; }</style>
 
+<?php /* The same three spans the sidebar renders, so the lockup setting
+         means the same thing here: mark, mark and name, or mark, name and
+         tagline. Which of them are drawn is one stylesheet fragment from
+         BrandHelper::getDisplayCss(). */ ?>
 <a class="sc-auth-brand" href="<?= $this->shadcnSidebar->getBrandUrl() ?>" aria-label="<?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?>">
     <span class="sc-auth-brand-mark" aria-hidden="true"></span>
-    <span class="sc-auth-brand-title"><?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?></span>
+    <span class="sc-auth-brand-text">
+        <span class="sc-auth-brand-title"><?= $this->text->e($this->shadcnSidebar->getBrandTitle()) ?></span>
+        <span class="sc-auth-brand-sub"><?= $this->text->e($this->shadcnSidebar->getBrandSubtitle()) ?></span>
+    </span>
 </a>
 
 <div class="sc-auth-head">

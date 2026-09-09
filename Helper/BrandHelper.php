@@ -327,7 +327,7 @@ class BrandHelper extends Base
             case BrandingModel::DISPLAY_MARK:
                 return self::MARK_ONLY_CSS;
             case BrandingModel::DISPLAY_TITLE:
-                return '.sc-sb-brand-sub {display: none}';
+                return '.sc-sb-brand-sub, .sc-auth-brand-sub {display: none}';
             default:
                 return '';
         }
@@ -351,7 +351,7 @@ class BrandHelper extends Base
      * for it to work, and Settings → Appearance previews it by swapping
      * this same text.
      */
-    const MARK_ONLY_CSS = '.sc-sb-brand-text, .sc-topbar-brand-name, .sc-auth-brand-title {display: none}'
+    const MARK_ONLY_CSS = '.sc-sb-brand-text, .sc-topbar-brand-name, .sc-auth-brand-text {display: none}'
         .'.sc-sb-brand-mark {flex: 1 1 auto; width: auto; height: calc(2.75rem * var(--sc-brand-scale, 1)); background-position: left center}'
         .'.sc-topbar-brand-mark {flex: 1 1 auto; width: auto; min-width: 5rem; height: calc(2.25rem * var(--sc-brand-scale, 1)); background-position: left center}'
         .'.sc-auth-brand-mark {width: 13rem; max-width: 100%; height: calc(2.75rem * var(--sc-brand-scale, 1)); background-position: left center}'

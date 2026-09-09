@@ -20,7 +20,7 @@ Kanboard 外掛就是 `plugins/` 底下的一個資料夾，而資料夾名稱�
 
 ```
 cd /path/to/kanboard/plugins
-git clone https://github.com/kaiyichen0421/kanboard-shadcn-ui.git Shadcn
+git clone https://github.com/heykaiyi/kanboard-shadcn-ui.git Shadcn
 ```
 
 之後 `git -C plugins/Shadcn pull` 就能拿到下一版。
