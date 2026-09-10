@@ -1273,8 +1273,18 @@ html.sc-modal-open body {
  * so the title stays put without being sticky, and "mark all as read" —
  * which Kanboard renders inside the header's menu — moves to the foot as
  * the one action the panel offers. */
+/* Narrower than a form sheet, but never wider than the screen: this rule
+ * carries an id and an attribute, so the drawer's own `width: auto` further
+ * down cannot out-rank it — on a phone the panel stood 448px wide inside a
+ * 390px window and pushed the page sideways. */
 html[data-sc-modal="sheet"] #modal-box {
-    width: 28rem !important;
+    width: min(28rem, 100vw) !important;
+}
+
+@media (max-width: 768px) {
+    html[data-sc-modal="sheet"] #modal-box {
+        width: auto !important;
+    }
 }
 
 html[data-sc-modal="sheet"] #modal-content {
@@ -3783,30 +3793,34 @@ body:has(> .form-login) {
     justify-content: center;
 }
 
+/* On a phone the panel is the whole page: the brand leads, the legal line
+ * closes, and the lot scrolls. Nothing is pinned, because a form taller
+ * than the window would then run underneath both of them. */
 .form-login > .sc-auth-brand {
-    position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .form-login > .sc-auth-legal {
-    position: absolute;
-    right: 1.5rem;
-    bottom: 1.5rem;
-    left: 1.5rem;
-    margin: 0;
+    margin: 2.5rem 0 0;
 }
 
-@media (min-width: 768px) {
+/* Corners, once there is slack to pin them against — width for the column
+ * and height for the gap above and below it. A landscape phone has the
+ * first and not the second, which is why both are asked for. */
+@media (min-width: 768px) and (min-height: 640px) {
     .form-login > .sc-auth-brand {
+        position: absolute;
         top: 2.5rem;
         left: 2.5rem;
+        margin: 0;
     }
 
     .form-login > .sc-auth-legal {
+        position: absolute;
         right: 2.5rem;
         bottom: 2.5rem;
         left: 2.5rem;
+        margin: 0;
     }
 }
 
