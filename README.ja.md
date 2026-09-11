@@ -10,6 +10,8 @@ Kanboard のインターフェイス全体を [shadcn/ui](https://ui.shadcn.com)
 このテーマの下で問題なくアップグレードできます。ほとんどはスタイルシートだけで、唯一の例外が
 サイドバー — Kanboard が元から用意しているフックへプラグインが描き込むマークアップです。
 
+![ダッシュボード: ブランドのロックアップ付きサイドバー、パンくず、コマンド検索、統計タイル、プロジェクト一覧](docs/screenshots/dashboard.jpg)
+
 ---
 
 ## インストール
@@ -138,7 +140,7 @@ Kanboard は `<i class="fa fa-cog">` を出力し、アイコンフォントで�
 マークアップも JavaScript なしでスタイルが当たります。対応表にない `fa-*` クラスはそのままに
 してあり、元のフォントで描画され続けるので、アイコンが消えることはありません。
 
-対応させたアイコンは 135 個。コアが使うものすべてに加えて、サードパーティのプラグインが
+対応させたアイコンは 138 個。コアが使うものすべてに加えて、サードパーティのプラグインが
 よく使う Font Awesome 4 の名前も含みます。
 
 ---
@@ -161,6 +163,8 @@ Kanboard は `<i class="fa fa-cog">` を出力し、アイコンフォントで�
 すべて任意です。空欄は同梱の既定値を意味するので、「リセット」と「一度も設定していない」は
 同じ状態です。
 
+![設定 → 外観: アプリケーション名、タグライン、各色のライトとダークの値](docs/screenshots/appearance-name-colors.jpg)
+
 この画面は保存より先に答えを返します: スウォッチと 16 進数の欄は一つの値の二つの見え方で、
 プレビュー行はその色をボタン、バッジ、リンクとして見せます — テーマが計算する黒か白かの
 ラベル色も含めて。選んだ画像はアップロード前にその台座の中に描かれます。ロックアップと
@@ -168,6 +172,8 @@ Kanboard は `<i class="fa fa-cog">` を出力し、アイコンフォントで�
 プレビューで、ラジオとスライダーに合わせてその場で変わります。これらはすべて
 `Assets/js/branding.js` によるもので、どれも必須ではありません。JavaScript がなければ
 スウォッチは単に送信されない二つ目の入力欄になるだけです。
+
+![設定 → 外観: ライトとダークのライブプレビュー行、ロゴのロックアップとサイズ、ファビコン](docs/screenshots/appearance-logo-favicon.jpg)
 
 ### ロックアップとサイズ
 
@@ -259,6 +265,7 @@ Shadcn/
 │   ├── layout/auth_strings.php       認証画面が CSS 経由で必要とする文字列
 │   ├── auth/header.php               ログイン画面の見出し
 │   ├── dashboard/welcome.php         挨拶と四つの数字
+│   ├── board/task_progress.php       ボードのカードのサブタスク進捗バー
 │   ├── mail/layout.php               メールの外枠
 │   └── notification/footer.php       すべてのメール共通の行動喚起
 ├── Tools/generate-icons.mjs          アイコン資産二つを再生成する
@@ -267,19 +274,20 @@ Shadcn/
     │   ├── tokens.css                shadcn トークン + Kanboard ブリッジ
     │   ├── components.css            コンポーネントの作業
     │   ├── sidebar.css               ページグリッドとサイドバーの外枠
-    │   ├── icons.css                 生成物 — 135 個の HugeIcons マスク
+    │   ├── icons.css                 生成物 — 138 個の HugeIcons マスク
     │   ├── theme-dark.css            ダークトークン
     │   └── theme-auto.css            prefers-color-scheme 越しのダークトークン
     ├── js/
     │   ├── sidebar.js                折りたたみ、ドロワー、Cmd/Ctrl-B
     │   ├── modal.js                  通知シートと、閉じる操作
     │   ├── password.js               パスワード欄の表示／非表示コントロール
+    │   ├── widgets.js                二要素認証のスロットとショートカットの Kbd
     │   ├── command.js                コマンドパレット
     │   ├── navigation.js             ページ読み込みの進捗、統一したタイトル書式
     │   ├── auth.js                   認証画面のフッターの法的リンク
     │   └── branding.js               設定 → 外観 のライブプレビュー
     ├── img/                          同梱のマーク、四サイズ
-    └── icons/hugeicons.svg           生成物 — 同じ 135 個のスプライト
+    └── icons/hugeicons.svg           生成物 — 同じ 138 個のスプライト
 ```
 
 ### パレットごと差し替える
@@ -307,15 +315,15 @@ node Tools/generate-icons.mjs
 ## コンポーネント対応状況
 
 shadcn レジストリの各コンポーネントと、それが対応する Kanboard の画面。
-✅ 完了 · ◐ 部分的 · ➖ ボード／タスクの回に持ち越し · — Kanboard に相当物なし。
+✅ 完了 · — Kanboard に相当物なし。
 
 | shadcn | Kanboard の画面 | |
 |---|---|---|
 | Accordion | `.accordion-title` / `.accordion-content` | ✅ |
 | Alert | `.alert`、`.alert-success/error/info/normal` | ✅ |
 | Alert Dialog | `#modal-box` 内の確認画面 | ✅ |
-| Aspect Ratio | `.thumbnails`、ファイルプレビュー | ➖ |
-| Attachment | ファイルアップロードのドロップゾーン | ➖ |
+| Aspect Ratio | `.file-thumbnails` — 添付画像を 4:3 に揃えて切り抜く | ✅ |
+| Attachment | アップロードシートの `#file-dropzone` と `#file-list` | ✅ |
 | Avatar | `.avatar`、`.avatar-letter`、`.avatar-20/48` | ✅ |
 | Badge | カテゴリ、優先度、見積／実績のチップ | ✅ |
 | Breadcrumb | ルートから再構築し、トップバーに配置 | ✅ |
@@ -324,7 +332,7 @@ shadcn レジストリの各コンポーネントと、それが対応する Kan
 | Button Group | `.form-actions`、`.buttons-header` | ✅ |
 | Calendar | fullcalendar のビュー | ✅ |
 | Card | `.panel`、`.form-login`、`.table-list`、`.task-board` | ✅ |
-| Carousel | `.slideshow` スクリーンショットビューア | ➖ 独自の暗い外装のまま |
+| Carousel | `.image-slideshow-overlay` — 暗いスクリム上の丸いアイコンボタン | ✅ |
 | Chart | c3 の分析チャート canvas | ✅ |
 | Checkbox | `input[type=checkbox]` — チェック済みと不確定 | ✅ |
 | Collapsible | `.accordion`、`.board-column-collapsed` | ✅ |
@@ -332,19 +340,19 @@ shadcn レジストリの各コンポーネントと、それが対応する Kan
 | Command | `#suggest-menu`（@メンション、フィルタ候補） | ✅ |
 | Context Menu | テーブル行の `.dropdown-submenu-open` | ✅ |
 | Data Table | `table.table-striped`、`.table-fixed`、`.table-list`、`.subtasks-table` | ✅ |
-| Date Picker | jQuery UI のデートピッカー | ➖ ベンダーのウィジェット |
+| Date Picker | jQuery UI のデートピッカーとタイムピッカーアドオン | ✅ |
 | Dialog | `#modal-box` — Sheet として提示、下記参照 | ✅ |
-| Direction | `<html>` の `dir="rtl"` | ◐ 継承のみ。論理プロパティ対応は未着手 |
+| Direction | `<html>` の `dir="rtl"` — シェル、シート、コントロールを鏡映 | ✅ |
 | Drawer | 768px 未満での同じシート、下端にドック | ✅ |
 | Dropdown Menu | `.dropdown`、`ul.dropdown-submenu-open` | ✅ |
-| Empty | 「あなたに割り当てられたものはありません。」 | ◐ Alert として描画 |
+| Empty | 修飾クラスのない `.alert` — 「表示するものはありません」のすべて | ✅ |
 | Field | `label` + input + `.form-help` + `.form-errors` | ✅ |
 | Hover Card | `#tooltip-container` | ✅ |
 | Input | `input[type=text\|email\|password\|number\|date]` — パスワード欄は表示／非表示つき | ✅ |
 | Input Group | `.input-addon`、`.input-addon-item` | ✅ |
-| Input OTP | 二要素認証のコード欄 | ◐ ただの Input |
+| Input OTP | 二要素認証のコード欄 — 透明な本物の input を六つのスロットに重ねる | ✅ |
 | Item | `.table-list-row`、`.sidebar > ul li`、サブタスク行 | ✅ |
-| Kbd | ショートカット一覧 | ➖ |
+| Kbd | `kbd` と、キーボードショートカット一覧のキー | ✅ |
 | Label | `label` | ✅ |
 | Marker | — | — |
 | Menubar | `.page-header ul`、`.menu-inline` | ✅ |
@@ -354,7 +362,7 @@ shadcn レジストリの各コンポーネントと、それが対応する Kan
 | Navigation Menu | `header .menus-container` | ✅ |
 | Pagination | `.pagination` | ✅ |
 | Popover | `#tooltip-container` と各種メニュー面 | ✅ |
-| Progress | ガントバーの塗り | ◐ コアに progress 要素がない |
+| Progress | アップロードシートの `progress` と、ボードのカードのサブタスク進捗バー | ✅ |
 | Questionnaire | — | — |
 | Radio Group | `input[type=radio]` — 着色ではなく描画 | ✅ |
 | Resizable | — | — |
@@ -363,15 +371,15 @@ shadcn レジストリの各コンポーネントと、それが対応する Kan
 | Separator | `hr`、`fieldset`/`legend`、`.page-header h2` の罫線 | ✅ |
 | Sheet | Kanboard が開くすべてのダイアログ、および 768px 未満のオフキャンバスサイドバー | ✅ |
 | Sidebar | このプラグインが同梱する sidebar-07 の外枠、および `.sidebar` | ✅ |
-| Skeleton | `#app-loading-icon` | ◐ 浮動インジケータ |
-| Slider | `input[type=range]` | ➖ |
+| Skeleton | ドラッグ後に保存中のカード、読み込み中の `#external-task-view` | ✅ |
+| Slider | `input[type=range]`、jQuery UI の `.ui-slider` | ✅ |
 | Spinner | `.fa-spinner.fa-spin` → HugeIcons `Loading03` | ✅ |
-| Switch | ネイティブのスイッチはなく `toggle-on`/`toggle-off` アイコン | ◐ アイコンの階層まで |
+| Switch | `toggle-on`／`toggle-off` のグリフをトラックとノブとして描く | ✅ |
 | Table | `table`、`th`、`td` | ✅ |
 | Tabs | `.views` ビュー切替 | ✅ |
 | Textarea | `textarea` | ✅ |
 | Toast | `.alert-fade-out` のフラッシュメッセージ | ✅ |
-| Toggle | `.board-swimlane-toggle` | ◐ |
+| Toggle | `.board-swimlane-toggle` — スイムレーンを畳んでいる間は押された状態 | ✅ |
 | Toggle Group | `.views` | ✅ |
 | Tooltip | `.tooltip`、`#tooltip-container` | ✅ |
 | Typography | `h1`–`h4`、`.markdown` | ✅ |
@@ -509,6 +517,31 @@ shadcn レジストリの各コンポーネントと、それが対応する Kan
   幅を要素に直接書き込みます。シートの幅はシートが決めるもので、そのサイズのダイアログなら
   こうだったはずの幅ではありません。だからインラインの値には負けてもらう必要があり、それに
   勝てるのは `width: … !important` だけです。
+- **第 5 回でコンポーネント表を埋め切った。** デートピッカーとタイムピッカーは shadcn の
+  Calendar に。アップロードシートには本物のドロップゾーンとファイルごとの行。添付画像は 4:3 の
+  グリッドに、スライドショーの操作は丸いアイコンボタンに。修飾クラスのない `.alert` は Empty に。
+  ショートカット一覧は Kbd のキーを表示し、二要素認証のコードは六つのスロットに。`toggle-on`／
+  `toggle-off` はスイッチとして描き、サブタスクのあるカードには進捗バー、ドラッグ後に保存中の
+  カードはスピナーではなくシマーに。うち二つはスタイルシートでは作れないマークアップが要るので、
+  `Assets/js/widgets.js` がその場で組み立てます — OTP のスロットは元の input の*下*に敷くだけで、
+  送信も自動入力も貼り付けも、受けるのはその input のままです。
+- **右から左は変換ではなく鏡映。** Kanboard はアラビア語とペルシア語で `dir="rtl"` を設定します。
+  コアのスタイルシートは物理プロパティで書かれているので、コアの `margin-left` の代わりに論理
+  プロパティの `margin-inline-start` を置くと、RTL では右に付き、コアのものは左に残ります。
+  `sidebar.css` 末尾のブロックは代わりに物理的な両側を設定し、詳細度を足さない
+  `:where([dir="rtl"])` の下に置いています。鏡映ルールは元のルールと同じ詳細度なので、元を
+  上書きしていたものは鏡映も上書きします。意図して物理のままにしたのは、時間と軸がどの言語でも
+  左から右に流れるカレンダー・ガントチャート・チャート、jQuery UI が自分で鏡映するデートピッカー、
+  そして矢印キーに従うスライドショーの前へ／次へボタン。タスク概要の色の辺だけは論理プロパティが
+  正解です — コアはその色を四辺すべてに書くので、残る一辺が読む向きに従います。追従できないのは
+  リスト行の色の帯で、コアはタスク自身の色で `border-left` として書き、読めない色をスタイルシートが
+  動かすことはできません。
+- **ページタイトルにはアプリケーション名が入る。** すべてのタイトルの末尾は **設定 → 外観** で
+  設定した名前になり、コアが単に「Kanboard」とだけ書いていた画面ではその名前に置き換わります。
+- **アイコンのパッケージは先へ進んでいる。** `@hugeicons/core-free-icons` 4.3.2 は、このテーマが
+  出荷しているアイコンのうち十二個（user、users、home、link、copy など）を描き直しているため、
+  それでジェネレーターを回すとそれらが変わります。第 5 回で必要になった三つのクラスは、コミット
+  済みのセットの横に、既存の絵を流用して追加しました。
 - `color-mix()` と `oklch()` を全体で使っています。どちらも 2023 年以降のブラウザが必要です
   （Chrome 111+、Safari 16.4+、Firefox 113+）。`:has()` の役割は今やもっと大きく、ページの
   グリッド全体が `body:has(> .sc-sb)` にぶら下がっているため、Firefox 121 未満ではサイドバーが

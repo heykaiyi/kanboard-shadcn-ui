@@ -9,6 +9,8 @@ Font Awesome 圖示換成 [HugeIcons](https://hugeicons.com)。亮色與暗色�
 **不改任何核心檔案，也不覆寫任何模板**，所以 Kanboard 可以在它底下乾淨地升級。幾乎全部都是
 樣式表；唯一的例外是側邊欄，那是外掛自己畫進 Kanboard 既有 hook 的一段標記。
 
+![儀表板：帶品牌標誌的側邊欄、麵包屑、指令搜尋、統計卡片與專案列表](docs/screenshots/dashboard.jpg)
+
 ---
 
 ## 安裝
@@ -127,7 +129,7 @@ Kanboard 吐出 `<i class="fa fa-cog">` 然後用圖示字型畫它。那些 cla
 `fa-spin`、`fa-rotate-90`、`fa-inverse`），而後來被 Ajax 插進來的標記完全不需要 JavaScript
 就有樣式。沒有對應的 `fa-*` class 一律不動，繼續用原本的字型渲染，所以不會有東西憑空消失。
 
-一共對應了 135 個圖示：核心用到的每一個，加上第三方外掛常拿來用的 Font Awesome 4 名稱。
+一共對應了 138 個圖示：核心用到的每一個，加上第三方外掛常拿來用的 Font Awesome 4 名稱。
 
 ---
 
@@ -148,11 +150,15 @@ Kanboard 吐出 `<i class="fa fa-cog">` 然後用圖示字型畫它。那些 cla
 
 全部都是選填；欄位留白就等於內建預設值，所以「重設」跟「從沒設過」是同一個狀態。
 
+![設定 → 外觀：網站名稱、副標題，以及每個顏色的亮色與暗色值](docs/screenshots/appearance-name-colors.jpg)
+
 這個畫面會在你按下儲存之前就先回答你：色票和十六進位欄位是同一個值的兩種樣子，預覽列把顏色
 畫成按鈕、徽章與連結——連佈景會替它算出來的黑字或白字都算好了——而選好的圖片在上傳之前就已經
 畫在它的底板裡。顯示方式與標誌大小的預覽更直接：站在畫面旁邊的那條側邊欄*就是*預覽，會跟著
 radio 與滑桿即時變。這些全都出自 `Assets/js/branding.js`，而且沒有一項是必要的：沒有
 JavaScript 的話，色票就只是一個不會被送出的第二個輸入欄。
+
+![設定 → 外觀：亮色與暗色的即時預覽列、標誌的顯示方式與大小，以及網站圖示](docs/screenshots/appearance-logo-favicon.jpg)
 
 ### 顯示方式與大小
 
@@ -232,6 +238,7 @@ Shadcn/
 │   ├── layout/auth_strings.php       認證畫面需要透過 CSS 拿到的字串
 │   ├── auth/header.php               登入頁抬頭
 │   ├── dashboard/welcome.php         問候語與四個數字
+│   ├── board/task_progress.php       看板卡片上的子任務進度條
 │   ├── mail/layout.php               信件外殼
 │   └── notification/footer.php       每封信共用的行動呼籲
 ├── Tools/generate-icons.mjs          重新產生兩個圖示資產
@@ -240,19 +247,20 @@ Shadcn/
     │   ├── tokens.css                shadcn token + Kanboard 橋接
     │   ├── components.css            元件的部分
     │   ├── sidebar.css               頁面 grid 與側邊欄外殼
-    │   ├── icons.css                 產生的 — 135 個 HugeIcons 遮罩
+    │   ├── icons.css                 產生的 — 138 個 HugeIcons 遮罩
     │   ├── theme-dark.css            暗色 token
     │   └── theme-auto.css            包在 prefers-color-scheme 後的暗色 token
     ├── js/
     │   ├── sidebar.js                收合、抽屜、Cmd/Ctrl-B
     │   ├── modal.js                  通知 sheet，以及關閉方式
     │   ├── password.js               密碼欄位的顯示／隱藏控制
+    │   ├── widgets.js                兩階段驗證的六格、快捷鍵的 Kbd
     │   ├── command.js                命令面板
     │   ├── navigation.js             換頁進度條、統一的標題格式
     │   ├── auth.js                   認證畫面的法務頁尾
     │   └── branding.js               設定 → 外觀 的即時預覽
     ├── img/                          內建標誌，四種尺寸
-    └── icons/hugeicons.svg           產生的 — 同樣那 135 個，做成 sprite
+    └── icons/hugeicons.svg           產生的 — 同樣那 138 個，做成 sprite
 ```
 
 ### 換整套配色
@@ -279,15 +287,15 @@ node Tools/generate-icons.mjs
 ## 元件覆蓋範圍
 
 shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介面。
-✅ 完成 · ◐ 部分 · ➖ 留到看板／任務那一輪 · — Kanboard 裡沒有對應的東西。
+✅ 完成 · — Kanboard 裡沒有對應的東西。
 
 | shadcn | Kanboard 介面 | |
 |---|---|---|
 | Accordion | `.accordion-title` / `.accordion-content` | ✅ |
 | Alert | `.alert`、`.alert-success/error/info/normal` | ✅ |
 | Alert Dialog | `#modal-box` 裡的確認畫面 | ✅ |
-| Aspect Ratio | `.thumbnails`、檔案預覽 | ➖ |
-| Attachment | 檔案上傳拖放區 | ➖ |
+| Aspect Ratio | `.file-thumbnails` — 每張附加圖片固定成 4:3，裁切填滿 | ✅ |
+| Attachment | 上傳 sheet 裡的 `#file-dropzone` 與 `#file-list` | ✅ |
 | Avatar | `.avatar`、`.avatar-letter`、`.avatar-20/48` | ✅ |
 | Badge | 分類、優先權，以及預估／已花費的標籤 | ✅ |
 | Breadcrumb | 從路由重建，放在頂端列 | ✅ |
@@ -296,7 +304,7 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 | Button Group | `.form-actions`、`.buttons-header` | ✅ |
 | Calendar | fullcalendar 檢視 | ✅ |
 | Card | `.panel`、`.form-login`、`.table-list`、`.task-board` | ✅ |
-| Carousel | `.slideshow` 截圖檢視器 | ➖ 保留它自己的深色外觀 |
+| Carousel | `.image-slideshow-overlay` — 深色遮罩上的圓形圖示按鈕 | ✅ |
 | Chart | c3 的分析圖 canvas | ✅ |
 | Checkbox | `input[type=checkbox]` — 勾選與不定狀態 | ✅ |
 | Collapsible | `.accordion`、`.board-column-collapsed` | ✅ |
@@ -304,19 +312,19 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 | Command | `#suggest-menu`（@提及、篩選建議） | ✅ |
 | Context Menu | 表格列上的 `.dropdown-submenu-open` | ✅ |
 | Data Table | `table.table-striped`、`.table-fixed`、`.table-list`、`.subtasks-table` | ✅ |
-| Date Picker | jQuery UI 的日期選擇器 | ➖ 第三方元件 |
+| Date Picker | jQuery UI 的日期選擇器與時間選擇器外掛 | ✅ |
 | Dialog | `#modal-box` — 以 Sheet 呈現，見下方 | ✅ |
-| Direction | `<html>` 上的 `dir="rtl"` | ◐ 繼承而已；還沒做邏輯屬性那一輪 |
+| Direction | `<html>` 上的 `dir="rtl"` — 外殼、sheet 與控制項都會鏡像 | ✅ |
 | Drawer | 768px 以下的同一張 sheet，靠在底部邊緣 | ✅ |
 | Dropdown Menu | `.dropdown`、`ul.dropdown-submenu-open` | ✅ |
-| Empty | 「目前沒有指派給你的東西。」 | ◐ 用 Alert 呈現 |
+| Empty | 沒有修飾類別的 `.alert` — 每一句「目前沒有可顯示的內容」 | ✅ |
 | Field | `label` + input + `.form-help` + `.form-errors` | ✅ |
 | Hover Card | `#tooltip-container` | ✅ |
 | Input | `input[type=text\|email\|password\|number\|date]` — 密碼欄位帶顯示／隱藏控制 | ✅ |
 | Input Group | `.input-addon`、`.input-addon-item` | ✅ |
-| Input OTP | 兩階段驗證的驗證碼欄位 | ◐ 就是普通 Input |
+| Input OTP | 兩階段驗證的驗證碼欄位 — 透明的真正 input 疊在六格上面 | ✅ |
 | Item | `.table-list-row`、`.sidebar > ul li`、子任務列 | ✅ |
-| Kbd | 快捷鍵說明 | ➖ |
+| Kbd | `kbd`，以及快捷鍵說明裡的按鍵 | ✅ |
 | Label | `label` | ✅ |
 | Marker | — | — |
 | Menubar | `.page-header ul`、`.menu-inline` | ✅ |
@@ -326,7 +334,7 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 | Navigation Menu | `header .menus-container` | ✅ |
 | Pagination | `.pagination` | ✅ |
 | Popover | `#tooltip-container` 與各種選單表面 | ✅ |
-| Progress | 甘特圖長條的填色 | ◐ 核心沒有 progress 元素 |
+| Progress | 上傳 sheet 裡的 `progress`，以及看板卡片上的子任務進度條 | ✅ |
 | Questionnaire | — | — |
 | Radio Group | `input[type=radio]` — 用畫的，不是上色 | ✅ |
 | Resizable | — | — |
@@ -335,15 +343,15 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 | Separator | `hr`、`fieldset`/`legend`、`.page-header h2` 的分隔線 | ✅ |
 | Sheet | Kanboard 開的每一個 dialog，加上 768px 以下的側滑側邊欄 | ✅ |
 | Sidebar | 這個外掛附的 sidebar-07 外殼，加上 `.sidebar` | ✅ |
-| Skeleton | `#app-loading-icon` | ◐ 浮動指示器 |
-| Slider | `input[type=range]` | ➖ |
+| Skeleton | 拖曳後正在儲存的卡片、載入中的 `#external-task-view` | ✅ |
+| Slider | `input[type=range]`、jQuery UI 的 `.ui-slider` | ✅ |
 | Spinner | `.fa-spinner.fa-spin` → HugeIcons `Loading03` | ✅ |
-| Switch | 沒有原生開關；用 `toggle-on`/`toggle-off` 圖示 | ◐ 只到圖示層級 |
+| Switch | `toggle-on`／`toggle-off` 圖示，畫成軌道與圓鈕 | ✅ |
 | Table | `table`、`th`、`td` | ✅ |
 | Tabs | `.views` 檢視切換器 | ✅ |
 | Textarea | `textarea` | ✅ |
 | Toast | `.alert-fade-out` 快閃訊息 | ✅ |
-| Toggle | `.board-swimlane-toggle` | ◐ |
+| Toggle | `.board-swimlane-toggle` — 泳道收合時呈按下狀態 | ✅ |
 | Toggle Group | `.views` | ✅ |
 | Tooltip | `.tooltip`、`#tooltip-container` | ✅ |
 | Typography | `h1`–`h4`、`.markdown` | ✅ |
@@ -373,7 +381,7 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 - **行事曆事件與甘特圖長條保留任務顏色**，跟看板一模一樣。兩者都來自 inline style，所以只重新
   處理幾何與標籤——標籤從 FullCalendar 的白色改成深色墨，這才是 Kanboard 那組粉彩任務色真正
   需要的。
-- **第四輪加了側邊欄** — shadcn 的 `sidebar-07`，可收合成圖示，而頂端列在只剩麵包屑與三個選單
+- **第三輪加了側邊欄** — shadcn 的 `sidebar-07`，可收合成圖示，而頂端列在只剩麵包屑與三個選單
   之後放大了。Checkbox 與 Radio Group 不再靠 `accent-color`，改成真正畫出來的控制項；Dialog
   在兩個軸上置中，768px 以下靠到底部邊緣成為 Drawer。
 - **側邊欄是 fixed，不是 grid item。** 在文件流裡它會跟文件一樣高，所以任何比視窗高的頁面都會
@@ -413,7 +421,7 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
   才會輸出它們——見 `config.php`。`KANBOARD_URL` 必須一起設，因為 `UrlHelper::dir()` 否則會從
   `dirname(PHP_SELF)` 猜基底路徑，而當路徑本身*就是*一條路由時那就猜錯了。這是站台設定，
   不是外掛的一部分。
-- **第五輪處理了入口。** 登入與密碼重置畫面變成 shadcn 的 `login-02` — 兩欄、品牌標誌、置中的
+- **第四輪處理了入口。** 登入與密碼重置畫面變成 shadcn 的 `login-02` — 兩欄、品牌標誌、置中的
   表單、在 `lg` 以下會消失的封面欄。Kanboard 用 `no_layout` 渲染它們，所以 `<body>` 裡除了
   `.form-login` 什麼都沒有，整個版面就掛在它上面；封面欄是 `body::after`，不需要任何標記。
   抬頭來自 `template:auth:login-form:before` 上的一個模板，而不是 CSS `content()`，所以它會
@@ -452,6 +460,26 @@ shadcn registry 裡的每一個元件，對照它在 Kanboard 上落在哪個介
 - **圖表以外只有一個 `!important`。** `core/modal.js` 量了視窗然後把對話框寬度直接寫在元素上。
   一張 sheet 的寬度由 sheet 決定，不是由那個尺寸的對話框原本會有多寬決定，所以那個 inline 值
   必須輸——而只有 `width: … !important` 打得贏它。
+- **第五輪把元件表做完了。** 日期與時間選擇器變成 shadcn 的 Calendar；上傳 sheet 有了真正的
+  拖放區，每個檔案一列；附加圖片變成 4:3 的格狀排列，輪播的控制項變成圓形圖示按鈕；沒有修飾
+  類別的 `.alert` 變成 Empty；快捷鍵說明印出 Kbd 按鍵；兩階段驗證碼是六格；`toggle-on`／
+  `toggle-off` 畫成開關；有子任務的看板卡片帶一條進度條；拖曳後儲存中的卡片改成微光閃動而不是
+  轉圈。其中兩項需要樣式表做不出來的標記，所以由 `Assets/js/widgets.js` 就地建立——而 OTP 的
+  六格是墊在原本那個 input *底下*，送出、自動填入、貼上用的仍然是它。
+- **由右至左是鏡像，不是轉換。** Kanboard 會對阿拉伯文與波斯文設定 `dir="rtl"`。核心自己的
+  樣式表是實體方向寫法，所以拿邏輯屬性 `margin-inline-start` 取代核心的 `margin-left`，在 RTL
+  下會落在右邊，而核心那條還留在左邊。`sidebar.css` 最後那一段改成兩邊實體方向都設定，並包在
+  `:where([dir="rtl"])` 底下——它不增加權重，所以鏡像規則跟被鏡像的規則同一級，原本蓋得過原規則
+  的，照樣蓋得過鏡像。刻意保持實體方向的：行事曆、甘特圖與圖表，它們的時間與座標軸在任何語言
+  下都是由左往右；日期選擇器，jQuery UI 會自己鏡像；以及輪播的上一張／下一張按鈕，它們跟著
+  方向鍵走。任務摘要的顏色邊是唯一適合用邏輯屬性的地方——核心把那個顏色寫在四個邊上，留下
+  來的那一邊自然跟著閱讀方向。跟不上的是列表列上的顏色條：核心用任務自己的顏色寫成
+  `border-left`，而樣式表沒辦法搬動一個它讀不到的顏色。
+- **頁面標題帶的是網站名稱。** 每個標題的結尾都是 **設定 → 外觀** 裡設定的名稱；核心在沒有
+  更好的標題時只寫「Kanboard」的那些畫面，改由這個名稱取代。
+- **圖示套件已經改版了。** `@hugeicons/core-free-icons` 4.3.2 重畫了這個佈景用到的十二個圖示
+  ——user、users、home、link、copy 都在其中——所以用它重跑產生器，那些圖示會跟著變。第五輪
+  需要的三個類別是加在已提交的那一組旁邊，而且各自沿用裡面已有的圖。
 - `color-mix()` 與 `oklch()` 到處都在用。兩者都需要 2023 年以後的瀏覽器（Chrome 111+、
   Safari 16.4+、Firefox 113+）。`:has()` 現在扛的更多：整個頁面 grid 都掛在
   `body:has(> .sc-sb)` 上，所以在 Firefox 121 之前，側邊欄會渲染成頁面上方的一個普通區塊——

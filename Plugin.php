@@ -117,6 +117,12 @@ class Plugin extends Base
             'template' => 'plugins/Shadcn/Assets/js/password.js',
         ));
 
+        // 5g. Two controls Kanboard prints as plain markup: the two-factor
+        //     code drawn as six slots, and the shortcut sheet's keys as Kbd.
+        $this->hook->on('template:layout:js', array(
+            'template' => 'plugins/Shadcn/Assets/js/widgets.js',
+        ));
+
         $this->template->hook->attach('template:layout:head', 'shadcn:layout/auth_strings');
 
         // 6. Dark tokens, chosen from the user's own Kanboard theme setting.
@@ -132,6 +138,10 @@ class Plugin extends Base
 
         // 6b. The dashboard opens with a greeting and four real numbers.
         $this->template->hook->attach('template:dashboard:show:before-filter-box', 'shadcn:dashboard/welcome');
+
+        // 6c. A progress bar on board cards that have sub-tasks — the ratio
+        //     the card's footer already prints as "33% (1/3)", drawn.
+        $this->template->hook->attach('template:board:task:footer', 'shadcn:board/task_progress');
 
         // 7. The login screen's heading, so login-02 has something to head it
         //    with that still goes through t().
@@ -196,7 +206,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '0.34.3';
+        return '0.35.0';
     }
 
     public function getPluginHomepage()

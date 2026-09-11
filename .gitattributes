@@ -1,0 +1,4 @@
+# README screenshots are for GitHub, not for a Kanboard install. Kept out of
+# `git archive` (and GitHub's source zip), so a plugin installed from an
+# archive does not carry them into plugins/Shadcn.
+docs export-ignore

@@ -12,6 +12,8 @@ upgrades cleanly underneath it. Almost all of it is stylesheets; the one
 exception is the sidebar, which is markup the plugin renders into a hook
 Kanboard already provides.
 
+![The dashboard: sidebar with the brand lockup, breadcrumb, command search, stat tiles and the project list](docs/screenshots/dashboard.jpg)
+
 ---
 
 ## Install
@@ -146,7 +148,7 @@ Icons inherit `color` and `font-size`, every Font Awesome modifier keeps working
 later by Ajax is styled with no JavaScript at all. Unmapped `fa-*` classes are
 left alone and still render the original font, so nothing can go missing.
 
-135 icons are mapped: every one core uses, plus the common Font Awesome 4 names
+138 icons are mapped: every one core uses, plus the common Font Awesome 4 names
 third-party plugins reach for.
 
 ---
@@ -170,6 +172,8 @@ deliberately only eight:
 Everything is optional; an empty field means the bundled default, so
 "reset" and "never set" are the same state.
 
+![Settings → Appearance: application name, tagline, and the light and dark values of each colour](docs/screenshots/appearance-name-colors.jpg)
+
 The screen answers before the save does: the swatch and the hex field are two
 views of one value, a preview row shows the colour as a button, a badge and a
 link — including the black-or-white label the theme will compute for it — and
@@ -178,6 +182,8 @@ mark size have a better preview still: the sidebar standing beside the screen
 *is* the preview, and it follows the radio and the slider live. All of that is
 `Assets/js/branding.js`, and none of it is required: without JavaScript the
 swatch is simply a second input that is not submitted.
+
+![Settings → Appearance: the live light and dark preview row, the logo with its lockup and size, and the favicon](docs/screenshots/appearance-logo-favicon.jpg)
 
 ### Lockup and size
 
@@ -277,6 +283,7 @@ Shadcn/
 │   ├── layout/auth_strings.php       strings the auth screens need in CSS
 │   ├── auth/header.php               the login heading
 │   ├── dashboard/welcome.php         the greeting and four numbers
+│   ├── board/task_progress.php       the sub-task bar on a board card
 │   ├── mail/layout.php               the mail shell
 │   └── notification/footer.php       one call to action for every mail
 ├── Tools/generate-icons.mjs          regenerates the two icon assets
@@ -285,19 +292,20 @@ Shadcn/
     │   ├── tokens.css                shadcn tokens + the Kanboard bridge
     │   ├── components.css            the component work
     │   ├── sidebar.css               the page grid and the sidebar shell
-    │   ├── icons.css                 generated — 135 HugeIcons masks
+    │   ├── icons.css                 generated — 138 HugeIcons masks
     │   ├── theme-dark.css            dark tokens
     │   └── theme-auto.css            dark tokens behind prefers-color-scheme
     ├── js/
     │   ├── sidebar.js                collapse, drawer, Cmd/Ctrl-B
     │   ├── modal.js                  the notification sheet, and dismissal
     │   ├── password.js               the show/hide control on a password field
+    │   ├── widgets.js                the two-factor slots, and Kbd keys
     │   ├── command.js                the command palette
     │   ├── navigation.js             page-load progress, one title format
     │   ├── auth.js                   the auth screens' legal footer
     │   └── branding.js               live previews on Settings → Appearance
     ├── img/                          the bundled mark, at four sizes
-    └── icons/hugeicons.svg           generated — the same 135 as a sprite
+    └── icons/hugeicons.svg           generated — the same 138 as a sprite
 ```
 
 ### Re-theming
@@ -327,15 +335,15 @@ directory.
 ## Component coverage
 
 Every component in the shadcn registry, against the Kanboard surface it maps to.
-✅ done · ◐ partial · ➖ deferred to the board/task pass · — no counterpart in Kanboard.
+✅ done · — no counterpart in Kanboard.
 
 | shadcn | Kanboard surface | |
 |---|---|---|
 | Accordion | `.accordion-title` / `.accordion-content` | ✅ |
 | Alert | `.alert`, `.alert-success/error/info/normal` | ✅ |
 | Alert Dialog | confirmation views inside `#modal-box` | ✅ |
-| Aspect Ratio | `.thumbnails`, file previews | ➖ |
-| Attachment | file upload dropzone | ➖ |
+| Aspect Ratio | `.file-thumbnails` — each attached image held at 4:3 and cropped to fill | ✅ |
+| Attachment | `#file-dropzone` and `#file-list` in the upload sheet | ✅ |
 | Avatar | `.avatar`, `.avatar-letter`, `.avatar-20/48` | ✅ |
 | Badge | category, priority and the estimate/spent chips | ✅ |
 | Breadcrumb | rebuilt from the route, in the top bar | ✅ |
@@ -344,7 +352,7 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 | Button Group | `.form-actions`, `.buttons-header` | ✅ |
 | Calendar | the fullcalendar view | ✅ |
 | Card | `.panel`, `.form-login`, `.table-list`, `.task-board` | ✅ |
-| Carousel | `.slideshow` screenshot viewer | ➖ keeps its own dark chrome |
+| Carousel | `.image-slideshow-overlay` — round icon buttons over a dark scrim | ✅ |
 | Chart | the c3 analytics canvases | ✅ |
 | Checkbox | `input[type=checkbox]` — checked and indeterminate | ✅ |
 | Collapsible | `.accordion`, `.board-column-collapsed` | ✅ |
@@ -352,19 +360,19 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 | Command | `#suggest-menu` (@mentions, filter suggestions) | ✅ |
 | Context Menu | `.dropdown-submenu-open` on table rows | ✅ |
 | Data Table | `table.table-striped`, `.table-fixed`, `.table-list`, `.subtasks-table` | ✅ |
-| Date Picker | the jQuery UI datepicker | ➖ vendor widget |
+| Date Picker | the jQuery UI datepicker and the timepicker addon | ✅ |
 | Dialog | `#modal-box` — presented as a Sheet, see below | ✅ |
-| Direction | `dir="rtl"` on `<html>` | ◐ inherits; no logical-property pass yet |
+| Direction | `dir="rtl"` on `<html>` — the shell, the sheet and the controls mirror | ✅ |
 | Drawer | the same sheet below 768px, docked to the bottom edge | ✅ |
 | Dropdown Menu | `.dropdown`, `ul.dropdown-submenu-open` | ✅ |
-| Empty | "There is nothing assigned to you." | ◐ rendered as Alert |
+| Empty | a bare `.alert` — every "There is nothing to show." | ✅ |
 | Field | `label` + input + `.form-help` + `.form-errors` | ✅ |
 | Hover Card | `#tooltip-container` | ✅ |
 | Input | `input[type=text\|email\|password\|number\|date]` — a password field carries a show/hide control | ✅ |
 | Input Group | `.input-addon`, `.input-addon-item` | ✅ |
-| Input OTP | the 2FA code field | ◐ plain Input |
+| Input OTP | the 2FA code field — six slots under the real, transparent input | ✅ |
 | Item | `.table-list-row`, `.sidebar > ul li`, sub-task rows | ✅ |
-| Kbd | keyboard shortcut reference | ➖ |
+| Kbd | `kbd`, and the keys on the keyboard-shortcut sheet | ✅ |
 | Label | `label` | ✅ |
 | Marker | — | — |
 | Menubar | `.page-header ul`, `.menu-inline` | ✅ |
@@ -374,7 +382,7 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 | Navigation Menu | `header .menus-container` | ✅ |
 | Pagination | `.pagination` | ✅ |
 | Popover | `#tooltip-container` and the menu surfaces | ✅ |
-| Progress | the gantt bar's fill | ◐ core has no progress element |
+| Progress | `progress` in the upload sheet, and a sub-task bar on board cards | ✅ |
 | Questionnaire | — | — |
 | Radio Group | `input[type=radio]` — drawn, not tinted | ✅ |
 | Resizable | — | — |
@@ -383,15 +391,15 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
 | Separator | `hr`, `fieldset`/`legend`, the `.page-header h2` rule | ✅ |
 | Sheet | every dialog Kanboard opens, plus the off-canvas sidebar below 768px | ✅ |
 | Sidebar | the sidebar-07 shell this plugin ships, plus `.sidebar` | ✅ |
-| Skeleton | `#app-loading-icon` | ◐ floating indicator |
-| Slider | `input[type=range]` | ➖ |
+| Skeleton | a card saving after a drag, `#external-task-view` while it loads | ✅ |
+| Slider | `input[type=range]`, jQuery UI's `.ui-slider` | ✅ |
 | Spinner | `.fa-spinner.fa-spin` → HugeIcons `Loading03` | ✅ |
-| Switch | no native switch; `toggle-on`/`toggle-off` icons | ◐ icon level only |
+| Switch | the `toggle-on` / `toggle-off` glyphs, drawn as a track and a knob | ✅ |
 | Table | `table`, `th`, `td` | ✅ |
 | Tabs | `.views` view switcher | ✅ |
 | Textarea | `textarea` | ✅ |
 | Toast | `.alert-fade-out` flash message | ✅ |
-| Toggle | `.board-swimlane-toggle` | ◐ |
+| Toggle | `.board-swimlane-toggle` — pressed while the swimlane is collapsed | ✅ |
 | Toggle Group | `.views` | ✅ |
 | Tooltip | `.tooltip`, `#tooltip-container` | ✅ |
 | Typography | `h1`–`h4`, `.markdown` | ✅ |
@@ -554,6 +562,41 @@ Every component in the shadcn registry, against the Kanboard surface it maps to.
   and writes the dialog width straight onto the element. A sheet is as wide as
   the sheet decides, not as wide as a dialog of that size would have been, so
   the inline value has to lose — and only `width: … !important` can beat it.
+- **Round 5 finished the component table.** The date picker and the
+  timepicker became shadcn's Calendar; the upload sheet got a real dropzone
+  and one row per file; attached images became a 4:3 grid and the
+  slideshow's controls round icon buttons; a bare `.alert` became an Empty
+  state; the keyboard-shortcut sheet prints Kbd keys; the two-factor code is
+  six slots; `toggle-on` / `toggle-off` are drawn as switches; a board card
+  with sub-tasks carries a progress bar; a card saving after a drag
+  shimmers instead of spinning. Two of those needed markup a stylesheet
+  cannot produce, so `Assets/js/widgets.js` builds it where the field and
+  the list stand — and the OTP slots sit *under* the original input, which
+  stays the one that submits, autofills and takes a paste.
+- **Right-to-left is mirrored, not converted.** Kanboard sets `dir="rtl"`
+  for Arabic and Persian. Core's own stylesheet is physical, so a logical
+  `margin-inline-start` standing in for core's `margin-left` would land on
+  the right in RTL while core's stayed on the left. The block at the end of
+  `sidebar.css` sets both physical sides instead, under
+  `:where([dir="rtl"])`, which adds no specificity: a mirror ranks exactly
+  like the rule it mirrors, and whatever overrode the original still
+  overrides it. Left physical on purpose: the calendar, the gantt chart and
+  the charts, whose axes run left to right in any language; the date
+  picker, which jQuery UI mirrors itself; and the slideshow's
+  previous / next buttons, which follow the arrow keys. The task summary's
+  colour edge is the one place logical longhands are right — core writes
+  that colour on all four sides, so the edge left showing follows the
+  reading direction. What cannot follow is the colour stripe on a list row:
+  core writes it as `border-left` in the task's own colour, and no
+  stylesheet can move a colour it cannot read.
+- **The page title carries the application name.** Every title ends in the
+  name set on **Settings → Appearance**; on the screens core titles with the
+  bare word "Kanboard", the name replaces it.
+- **The icon package has moved on.** `@hugeicons/core-free-icons` 4.3.2
+  redraws twelve of the icons this theme ships — user, users, home, link,
+  copy among them — so running the generator against it changes those. The
+  three classes round 5 needed were added beside the committed set instead,
+  each reusing a drawing already in it.
 - `color-mix()` and `oklch()` are used throughout. Both need a 2023-or-later
   browser (Chrome 111+, Safari 16.4+, Firefox 113+). `:has()` carries more weight
   now: the whole page grid hangs off `body:has(> .sc-sb)`, so on Firefox before

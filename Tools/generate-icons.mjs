@@ -36,6 +36,8 @@ const MAP = {
   'check-square-o':      'CheckmarkSquare02Icon',
   'chevron-circle-down': 'CircleArrowDown02Icon',
   'chevron-circle-up':   'CircleArrowUp02Icon',
+  'chevron-circle-left': 'ArrowLeft01Icon',
+  'chevron-circle-right': 'ArrowRight01Icon',
   'clock-o':             'Clock01Icon',
   'cloud':               'CloudIcon',
   'code-fork':           'GitBranchIcon',
@@ -139,6 +141,7 @@ const MAP = {
   'table':               'Table01Icon',
   'tag':                 'Tag01Icon',
   'times':               'Cancel01Icon',
+  'window-close':        'Cancel01Icon',
   'trash':               'Delete02Icon',
   'upload':              'Upload04Icon',
 

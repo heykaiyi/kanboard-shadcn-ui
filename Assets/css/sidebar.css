@@ -1809,3 +1809,378 @@ body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger:hover {
         display: inline;
     }
 }
+
+/* ===================================================================
+ * Right-to-left
+ *
+ * Kanboard puts dir="rtl" on <html> for Arabic and Persian. The page grid,
+ * every flex row and all running text already follow it. What does not is
+ * whatever this theme pins to a physical side: the fixed sidebar and its
+ * rail, the sheet, the insets that line the top bar up with the page, the
+ * off-canvas transforms, and a handful of margins and text alignments.
+ *
+ * Mirrored rather than rewritten as logical properties, because core's own
+ * stylesheet is physical: a margin-inline-start standing in for core's
+ * margin-left would land on the right in RTL while core's stayed on the
+ * left. Every rule here sets both physical sides, which neutralises core's
+ * as well. `:where([dir="rtl"])` adds no specificity, so a mirror ranks
+ * exactly like the rule it mirrors — it wins by coming last, and anything
+ * that used to override the original still overrides the mirror.
+ *
+ * A mirror whose original has a phone override is scoped to wider screens,
+ * so the phone value is not overtaken by order.
+ *
+ * Left physical on purpose: the calendar, the gantt chart and the charts,
+ * whose time and axes run left to right in any language; the date picker,
+ * which jQuery UI mirrors itself through .ui-datepicker-rtl; and the
+ * slideshow's previous/next buttons, which stay with the arrow keys.
+ * =================================================================== */
+
+/* ---- Top bar ---- */
+
+:where([dir="rtl"]) body:has(> .sc-sb) > .sc-sb-trigger {
+    padding-right: 1.5rem;
+    padding-left: 0;
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) > header > .menus-container > .header-creation-menu {
+    padding-right: 0;
+    padding-left: 1.5rem;
+}
+
+/* The chevron between crumbs points the way the trail reads. */
+:where([dir="rtl"]) .sc-crumbs li + li::before {
+    transform: scaleX(-1);
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) > .sc-command-slot > .sc-command-trigger {
+    padding: 0 0.75rem 0 0.5rem;
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) .select-dropdown-input-container input.select-dropdown-input,
+:where([dir="rtl"]) body:has(> .sc-sb) .select-dropdown-input-container input.select-dropdown-input:focus {
+    padding: 0 2.25rem 0 3.25rem;
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) .select-dropdown-input-container::before {
+    right: 0.625rem;
+    left: auto;
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) .select-dropdown-input-container::after {
+    right: auto;
+    left: 0.5rem;
+}
+
+:where([dir="rtl"]) .select-dropdown-input-container input.select-dropdown-input,
+:where([dir="rtl"]) .select-dropdown-input-container input.select-dropdown-input:focus {
+    padding: 0 0.75rem 0 2rem;
+}
+
+:where([dir="rtl"]) .select-dropdown-input-container .select-dropdown-chevron,
+:where([dir="rtl"]) .select-dropdown-input-container .select-loading-icon {
+    right: auto;
+    left: 0.625rem;
+}
+
+@media (min-width: 769px) {
+    :where([dir="rtl"]) body:has(> .sc-sb) > .sc-crumbs {
+        padding: 0 0.25rem 0 1.5rem;
+    }
+}
+
+/* ---- The sidebar ---- */
+
+:where([dir="rtl"]) .sc-sb {
+    right: 0;
+    left: auto;
+    border-right: 0;
+    border-left: 1px solid var(--border);
+}
+
+:where([dir="rtl"]) body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu) {
+    right: 0;
+    left: auto;
+    border-right: 0;
+    border-left: 1px solid var(--border);
+}
+
+:where([dir="rtl"]) .sc-sb-user-meta {
+    right: 0;
+    left: auto;
+}
+
+:where([dir="rtl"]) .sc-sb-rail {
+    right: var(--sc-sb-width);
+    left: auto;
+    margin-right: -0.5rem;
+    margin-left: 0;
+    cursor: e-resize;
+}
+
+html:where([dir="rtl"])[data-sc-sidebar="collapsed"] .sc-sb-item::after {
+    right: calc(100% + 0.75rem);
+    left: auto;
+}
+
+:where([dir="rtl"]) .sc-verified {
+    margin-right: 0.25rem;
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) .sc-progress {
+    right: 0;
+    left: auto;
+}
+
+:where([dir="rtl"]) .sc-command-item-note {
+    margin-right: auto;
+    margin-left: 0;
+    padding-right: 0.5rem;
+    padding-left: 0;
+}
+
+:where([dir="rtl"]) .sc-sb-brand-text,
+:where([dir="rtl"]) .sc-sb-user-text,
+:where([dir="rtl"]) .sc-menu-user-text,
+:where([dir="rtl"]) .sc-command-trigger-label,
+:where([dir="rtl"]) .sc-command-trigger-sb {
+    text-align: right;
+}
+
+/* ---- The sheet ---- */
+
+@media (min-width: 769px) {
+    :where([dir="rtl"]) #modal-box {
+        right: auto;
+        left: 0;
+        border-right: 1px solid var(--border);
+        border-left: none;
+        animation-name: shadcn-sheet-in-rtl;
+    }
+}
+
+@keyframes shadcn-sheet-in-rtl {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+:where([dir="rtl"]) #modal-header {
+    right: auto;
+    left: var(--sc-dialog-pad-side);
+}
+
+html:where([dir="rtl"])[data-sc-modal="sheet"] #modal-header {
+    right: auto;
+    left: 1.25rem;
+}
+
+:where([dir="rtl"]) #modal-content .page-header h2 {
+    padding-right: 0;
+    padding-left: 2.5rem;
+}
+
+:where([dir="rtl"]) #modal-content .form-actions > button,
+:where([dir="rtl"]) #modal-content .form-actions > #modal-confirm-button {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+/* ---- Forms and controls ---- */
+
+:where([dir="rtl"]) a .fa {
+    margin-right: 0;
+    margin-left: 0.375rem;
+}
+
+:where([dir="rtl"]) select {
+    padding: 0.375rem 0.75rem 0.375rem 2rem;
+    background-position: left 0.5rem center;
+}
+
+:where([dir="rtl"]) input[type="checkbox"],
+:where([dir="rtl"]) input[type="radio"] {
+    margin: 0 0 0 0.375rem;
+}
+
+:where([dir="rtl"]) label:has(+ input + .form-required)::after,
+:where([dir="rtl"]) label:has(+ select + .form-required)::after,
+:where([dir="rtl"]) label:has(+ textarea + .form-required)::after,
+:where([dir="rtl"]) label:has(+ .sc-pw + .form-required)::after,
+:where([dir="rtl"]) label:has(+ img + input + .form-required)::after {
+    margin-right: 0.25rem;
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) input[type="file"]::file-selector-button {
+    margin-right: 0;
+    margin-left: 0.75rem;
+}
+
+:where([dir="rtl"]) .form-inline label {
+    margin: 0 0 0 0.5rem;
+}
+
+:where([dir="rtl"]) .form-columns .form-column {
+    margin-right: 0;
+    margin-left: 1.5rem;
+}
+
+:where([dir="rtl"]) .input-addon-field:first-child,
+:where([dir="rtl"]) .input-addon-item:first-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+:where([dir="rtl"]) .input-addon-field:last-child,
+:where([dir="rtl"]) .input-addon-item:last-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+:where([dir="rtl"]) .sc-pw > input[type="password"],
+:where([dir="rtl"]) .sc-pw > input[type="text"] {
+    padding-right: 0.75rem;
+    padding-left: 2.5rem;
+}
+
+:where([dir="rtl"]) .sc-pw-toggle {
+    right: auto;
+    left: 0;
+}
+
+/* ---- Page furniture ---- */
+
+:where([dir="rtl"]) .page-header .dropdown {
+    padding-right: 0;
+    padding-left: 0.5rem;
+}
+
+:where([dir="rtl"]) .views {
+    margin: 0 0 0 0.75rem;
+}
+
+:where([dir="rtl"]) .project-header .views {
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) .pagination-showing {
+    margin: 0 0 0 0.5rem;
+    padding-right: 0;
+    padding-left: 0.75rem;
+    border-right: 0;
+    border-left: 1px solid var(--border);
+}
+
+:where([dir="rtl"]) .avatar-inline {
+    margin-right: 0;
+    margin-left: 0.25rem;
+}
+
+:where([dir="rtl"]) #app-loading-icon {
+    right: auto;
+    left: 1rem;
+}
+
+:where([dir="rtl"]) .alert li {
+    margin-right: 1.125rem;
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) .alert-fade-out {
+    right: auto;
+    left: 1rem;
+    text-align: right;
+}
+
+@media (min-width: 769px) {
+    :where([dir="rtl"]) .sidebar {
+        padding-right: 0;
+        padding-left: 1.25rem;
+    }
+}
+
+:where([dir="rtl"]) .activity-date {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) .activity-description ul {
+    margin-right: 1.25rem;
+    margin-left: 0;
+}
+
+:where([dir="rtl"]) .subtask-cell {
+    border-right: 1px solid var(--border);
+    border-left: 0;
+}
+
+:where([dir="rtl"]) .wikisidebar > a,
+:where([dir="rtl"]) .page-header.wikicontent > a {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+:where([dir="rtl"]) .project-overview-column {
+    text-align: right;
+}
+
+/* ---- Sign-in screens ---- */
+
+:where([dir="rtl"]) .sc-auth-brand-text,
+:where([dir="rtl"]) .sc-auth-legal,
+:where([dir="rtl"]) .sc-auth-head,
+:where([dir="rtl"]) .form-login h2 {
+    text-align: right;
+}
+
+:where([dir="rtl"]) body:has(> .form-login):not(:has(.sc-auth-brand))::before {
+    right: 1.5rem;
+    left: auto;
+}
+
+:where([dir="rtl"]) .form-login:not(:has(.sc-auth-brand))::before {
+    right: 4.375rem;
+    left: auto;
+}
+
+:where([dir="rtl"]) .form-login .reset-password {
+    margin-right: auto;
+    margin-left: 0;
+    text-align: left;
+}
+
+@media (min-width: 768px) {
+    :where([dir="rtl"]) body:has(> .form-login):not(:has(.sc-auth-brand))::before {
+        right: 2.5rem;
+    }
+
+    :where([dir="rtl"]) .form-login:not(:has(.sc-auth-brand))::before {
+        right: 5.375rem;
+    }
+}
+
+@media (min-width: 768px) and (min-height: 640px) {
+    :where([dir="rtl"]) .form-login > .sc-auth-brand {
+        right: 2.5rem;
+        left: auto;
+    }
+}
+
+/* ---- Phones ---- */
+
+@media (max-width: 768px) {
+    :where([dir="rtl"]) body:has(> .sc-sb) > .sc-topbar-brand {
+        padding: 0 0.875rem 0 0.25rem;
+    }
+
+    /* Off-canvas to the right, the side the drawer opens from. The open
+     * state's translateX(0) out-ranks these. */
+    :where([dir="rtl"]) .sc-sb,
+    :where([dir="rtl"]) body:has(> .sc-sb) > header > .menus-container > .dropdown:not(.header-creation-menu),
+    :where([dir="rtl"]) .sc-sb-user-meta {
+        transform: translateX(100%);
+    }
+}

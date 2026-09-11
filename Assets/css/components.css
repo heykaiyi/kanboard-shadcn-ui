@@ -2354,14 +2354,17 @@ a i.web-notification-icon:hover {
     border-left-color: var(--border);
 }
 
-/* The task's own summary panel keeps the accent on its left edge: it is a
- * page-wide block, not a card in a column, and a 3px line across the top of
- * it would read as a rule under the title above. */
+/* The task's own summary panel keeps the accent on its starting edge: it is
+ * a page-wide block, not a card in a column, and a 3px line across the top
+ * of it would read as a rule under the title above. Logical longhands on
+ * purpose — core writes the colour with the border-color shorthand, so all
+ * four sides carry it, and neutralising block-start, block-end and
+ * inline-end leaves it on the left in LTR and on the right in RTL. */
 .task-summary-container[class*="color-"] {
     background-color: var(--card);
-    border-top-color: var(--border);
-    border-right-color: var(--border);
-    border-bottom-color: var(--border);
+    border-block-start-color: var(--border);
+    border-inline-end-color: var(--border);
+    border-block-end-color: var(--border);
 }
 
 .task-board:hover {
@@ -4886,9 +4889,11 @@ input[type="text"].sc-brand-hex {
     font-variant-numeric: tabular-nums;
 }
 
-/* Slider, drawn rather than left to the platform: a bare range input is
- * the one control on this screen that would still look like 2009. */
-.sc-brand-scale input[type="range"] {
+/* Slider — every range input, drawn rather than left to the platform: a
+ * bare one is the control that would still look like 2009. Kanboard itself
+ * emits none; the mark-size control on Appearance is the one in the theme,
+ * and a plugin's range input picks the same look up for free. */
+input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -4899,19 +4904,19 @@ input[type="text"].sc-brand-hex {
     cursor: pointer;
 }
 
-.sc-brand-scale input[type="range"]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track {
     height: 0.375rem;
     border-radius: 9999px;
     background: var(--muted);
 }
 
-.sc-brand-scale input[type="range"]::-moz-range-track {
+input[type="range"]::-moz-range-track {
     height: 0.375rem;
     border-radius: 9999px;
     background: var(--muted);
 }
 
-.sc-brand-scale input[type="range"]::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 1.125rem;
@@ -4923,7 +4928,7 @@ input[type="text"].sc-brand-hex {
     box-shadow: var(--shadow-xs);
 }
 
-.sc-brand-scale input[type="range"]::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
     width: 1.125rem;
     height: 1.125rem;
     border: 1px solid var(--border);
@@ -4931,15 +4936,15 @@ input[type="text"].sc-brand-hex {
     background: var(--background);
 }
 
-.sc-brand-scale input[type="range"]:focus-visible {
+input[type="range"]:focus-visible {
     outline: none;
 }
 
-.sc-brand-scale input[type="range"]:focus-visible::-webkit-slider-thumb {
+input[type="range"]:focus-visible::-webkit-slider-thumb {
     border-color: var(--ring);
 }
 
-.sc-brand-scale input[type="range"]:focus-visible::-moz-range-thumb {
+input[type="range"]:focus-visible::-moz-range-thumb {
     border-color: var(--ring);
 }
 
@@ -5055,4 +5060,1082 @@ input[type="text"].sc-brand-hex {
 .sc-pw > input::-ms-reveal,
 .sc-pw > input::-ms-clear {
     display: none;
+}
+
+/* ===================================================================
+ * Date Picker — jQuery UI's datepicker, and the timepicker addon
+ *
+ * Kanboard binds `.form-date` to a plain datepicker and `.form-datetime`
+ * to the timepicker addon with `controlType: 'select'`, so the time is
+ * picked from <select>s rather than sliders. Both render into one
+ * #ui-datepicker-div appended to <body>. Every rule is scoped to that id:
+ * it outranks the vendor theme's `.ui-widget-content .ui-state-*` chains
+ * on specificity alone, whichever stylesheet happens to load last.
+ *
+ * The element's `display` is never set here — jQuery UI shows and hides
+ * the picker by writing it inline.
+ * =================================================================== */
+
+/* A fixed width, like the vendor's own 17em. `auto` does not shrink here:
+ * the day grid is table-layout: fixed at 100%, which asks its container
+ * for all the room there is, and the picker grew to the page's width. */
+#ui-datepicker-div {
+    box-sizing: border-box;
+    width: 18rem;
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+/* Month and year centred, the two steppers pinned to the corners. */
+#ui-datepicker-div .ui-datepicker-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+}
+
+#ui-datepicker-div .ui-datepicker-title {
+    margin: 0 2.5rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 2rem;
+}
+
+#ui-datepicker-div .ui-datepicker-prev,
+#ui-datepicker-div .ui-datepicker-next {
+    position: absolute;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+/* jQuery UI nudges a hovered stepper 1px outward; the rules below pin both
+ * states to the same corner. */
+#ui-datepicker-div .ui-datepicker-prev {
+    left: 0;
+    right: auto;
+}
+
+#ui-datepicker-div .ui-datepicker-next {
+    right: 0;
+    left: auto;
+}
+
+#ui-datepicker-div .ui-datepicker-prev-hover,
+#ui-datepicker-div .ui-datepicker-next-hover {
+    top: 0;
+    border-color: var(--border);
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* The stock arrows are a PNG sprite. Drawn instead from the same chevron
+ * the breadcrumb uses, so they take the ink colour and scale cleanly. */
+#ui-datepicker-div .ui-datepicker-prev .ui-icon,
+#ui-datepicker-div .ui-datepicker-next .ui-icon {
+    position: static;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    overflow: hidden;
+    text-indent: -9999px;
+    background-image: none;
+    background-color: currentColor;
+    -webkit-mask: var(--shadcn-crumb-chevron) center / contain no-repeat;
+    mask: var(--shadcn-crumb-chevron) center / contain no-repeat;
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon {
+    transform: rotate(180deg);
+}
+
+/* Right-to-left: jQuery UI marks the picker itself, so the steppers swap
+ * corners and the arrows point the other way. */
+#ui-datepicker-div.ui-datepicker-rtl .ui-datepicker-prev {
+    right: 0;
+    left: auto;
+}
+
+#ui-datepicker-div.ui-datepicker-rtl .ui-datepicker-next {
+    left: 0;
+    right: auto;
+}
+
+#ui-datepicker-div.ui-datepicker-rtl .ui-datepicker-prev .ui-icon {
+    transform: none;
+}
+
+#ui-datepicker-div.ui-datepicker-rtl .ui-datepicker-next .ui-icon {
+    transform: rotate(180deg);
+}
+
+/* The grid. The theme's own table rules — borders, stripes, padding —
+ * would otherwise land on it, so everything a table carries is reset. */
+#ui-datepicker-div table.ui-datepicker-calendar {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 0 0.125rem;
+    background: none;
+    font-size: 0.8125rem;
+    table-layout: fixed;
+}
+
+#ui-datepicker-div .ui-datepicker-calendar th {
+    padding: 0 0 0.375rem;
+    border: 0;
+    background: none;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-align: center;
+}
+
+#ui-datepicker-div .ui-datepicker-calendar td {
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: center;
+}
+
+#ui-datepicker-div .ui-datepicker-calendar td a,
+#ui-datepicker-div .ui-datepicker-calendar td span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0 auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--foreground);
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+}
+
+#ui-datepicker-div .ui-datepicker-calendar td a:hover,
+#ui-datepicker-div .ui-datepicker-calendar td a.ui-state-hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+/* showOtherMonths and selectOtherMonths are both on: the days either side
+ * of the month are real, clickable days, just quieter. */
+#ui-datepicker-div .ui-datepicker-calendar td.ui-datepicker-other-month a {
+    color: var(--muted-foreground);
+}
+
+#ui-datepicker-div .ui-datepicker-calendar td.ui-state-disabled {
+    opacity: 0.5;
+}
+
+/* Today. */
+#ui-datepicker-div .ui-datepicker-calendar td a.ui-state-default.ui-state-highlight {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font-weight: 600;
+}
+
+/* The chosen day — last, so it wins over today and over another month. */
+#ui-datepicker-div .ui-datepicker-calendar td a.ui-state-default.ui-state-active {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 500;
+}
+
+/* The timepicker's rows: a label and a <select> per unit, as a two-column
+ * grid instead of the addon's floats and 40% margins. */
+#ui-datepicker-div .ui-timepicker-div {
+    margin: 0.75rem 0 0;
+    padding: 0.75rem 0 0;
+    border-top: 1px solid var(--border);
+}
+
+#ui-datepicker-div .ui-timepicker-div .ui-widget-header {
+    margin: 0 0 0.5rem;
+}
+
+#ui-datepicker-div .ui-timepicker-div dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+}
+
+#ui-datepicker-div .ui-timepicker-div dl dt {
+    float: none;
+    clear: none;
+    margin: 0;
+    padding: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+#ui-datepicker-div .ui-timepicker-div dl dd {
+    margin: 0;
+}
+
+#ui-datepicker-div .ui-timepicker-div .ui_tpicker_unit_hide {
+    display: none;
+}
+
+/* The read-out of the chosen time is text, not a field to type in. */
+#ui-datepicker-div .ui-timepicker-div .ui_tpicker_time .ui_tpicker_time_input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+#ui-datepicker-div .ui-timepicker-div .ui-timepicker-select {
+    width: 100%;
+    min-height: 2rem;
+    font-size: 0.8125rem;
+}
+
+/* "Now" on the left, "Done" on the right as the primary action. */
+#ui-datepicker-div .ui-datepicker-buttonpane {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+    padding: 0.75rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    background: none;
+}
+
+#ui-datepicker-div .ui-datepicker-buttonpane button {
+    float: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 2rem;
+    margin: 0;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    opacity: 1;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+#ui-datepicker-div .ui-datepicker-buttonpane button:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+#ui-datepicker-div .ui-datepicker-buttonpane button.ui-datepicker-close {
+    margin-inline-start: auto;
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+#ui-datepicker-div .ui-datepicker-buttonpane button.ui-datepicker-close:hover {
+    background: color-mix(in oklab, var(--primary) 90%, transparent);
+    color: var(--primary-foreground);
+}
+
+/* jQuery UI's own slider. The timepicker bundles it; Kanboard asks for
+ * <select>s instead, but a plugin that opts into sliders gets this rather
+ * than the vendor's grey bevel. One class deeper than the vendor's
+ * `.ui-widget-content .ui-state-default` so it wins regardless of order. */
+.ui-slider.ui-widget-content {
+    position: relative;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--muted);
+}
+
+.ui-slider-horizontal.ui-widget-content {
+    height: 0.375rem;
+}
+
+.ui-slider.ui-widget-content .ui-slider-range {
+    border-radius: 9999px;
+    background: var(--primary);
+}
+
+.ui-slider.ui-widget-content .ui-slider-handle {
+    box-sizing: border-box;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background: var(--background);
+    box-shadow: none;
+    cursor: grab;
+}
+
+.ui-slider-horizontal.ui-widget-content .ui-slider-handle {
+    top: -0.375rem;
+    margin-left: -0.5625rem;
+}
+
+.ui-slider.ui-widget-content .ui-slider-handle.ui-state-focus,
+.ui-slider.ui-widget-content .ui-slider-handle:focus-visible {
+    outline: none;
+    border-color: var(--ring);
+}
+
+/* ===================================================================
+ * Kbd — keyboard keys
+ *
+ * `kbd` wherever it appears (markdown can carry one), and the keyboard
+ * shortcut list: its template prints `Label = <strong>v o</strong>`, which
+ * Assets/js/widgets.js turns into a label and one <kbd> per key.
+ * =================================================================== */
+
+kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 1.375rem;
+    height: 1.375rem;
+    padding: 0 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    vertical-align: middle;
+    white-space: nowrap;
+    /* A key is a literal, read left to right in any language. Without this
+     * an RTL page reorders "⌘K" into "K⌘". */
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.sc-kbd-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.sc-shortcuts ul {
+    margin: 0 0 1.25rem;
+    padding: 0;
+    list-style: none;
+}
+
+.sc-shortcuts ul:last-child {
+    margin-bottom: 0;
+}
+
+/* One row per shortcut: what it does on the left, the keys on the right. */
+.sc-shortcuts .sc-shortcut {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    list-style: none;
+}
+
+.sc-shortcuts .sc-shortcut:last-child {
+    border-bottom: 0;
+}
+
+.sc-shortcut-label {
+    min-width: 0;
+}
+
+.sc-shortcut-keys {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+/* ===================================================================
+ * Input OTP — the two-factor code
+ *
+ * Kanboard renders one plain text field. widgets.js leaves that field in
+ * place — it is still the one that submits, autofills and takes a paste —
+ * lays it transparently over six drawn slots, and writes each digit into
+ * its slot as it is typed. The same arrangement shadcn's InputOTP uses.
+ * =================================================================== */
+
+.sc-otp {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+/* `[type]` matches core's `input[type="text"]:not(.input-addon-field)
+ * .form-numeric`, which pins the field to 70px — at equal specificity the
+ * plugin's stylesheet, loaded after core's, wins. Without it the field
+ * covered only the first slot and a tap on the others did nothing. */
+.sc-otp > input[type][data-sc-otp] {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+    box-shadow: none;
+    letter-spacing: 0;
+    cursor: text;
+}
+
+.sc-otp > input[type][data-sc-otp]::selection {
+    background: transparent;
+}
+
+.sc-otp > input[type][data-sc-otp]::placeholder {
+    color: transparent;
+}
+
+.sc-otp-slots {
+    display: flex;
+}
+
+.sc-otp-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.75rem;
+    height: 3rem;
+    margin-inline-start: -1px;
+    border: 1px solid var(--input);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 1.125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.sc-otp-slot:first-child {
+    margin-inline-start: 0;
+    border-start-start-radius: var(--radius-md);
+    border-end-start-radius: var(--radius-md);
+}
+
+.sc-otp-slot:last-child {
+    border-start-end-radius: var(--radius-md);
+    border-end-end-radius: var(--radius-md);
+}
+
+/* The slot the next digit goes into. Raised so its accent border is not
+ * half-covered by the neighbour it overlaps by a pixel. */
+.sc-otp-slot.is-active {
+    z-index: 1;
+    border-color: var(--ring);
+}
+
+.sc-otp-slot.is-active:empty::after {
+    content: "";
+    width: 1px;
+    height: 1.25rem;
+    background: var(--foreground);
+    animation: sc-otp-caret 1s steps(1) infinite;
+}
+
+@keyframes sc-otp-caret {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sc-otp-slot.is-active:empty::after {
+        animation: none;
+    }
+}
+
+/* ===================================================================
+ * Progress
+ *
+ * Kanboard's one native <progress> is the per-file bar in the upload
+ * sheet. The board card gets a second — its sub-task ratio, which the
+ * footer already prints as "33% (1/3)" — rendered on
+ * template:board:task:footer by Template/board/task_progress.php.
+ * =================================================================== */
+
+progress {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 0.5rem;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--muted);
+    color: var(--primary);
+    overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+    border-radius: 9999px;
+    background: var(--muted);
+}
+
+progress::-webkit-progress-value {
+    border-radius: 9999px;
+    background: var(--primary);
+    transition: width 0.2s ease;
+}
+
+progress::-moz-progress-bar {
+    border-radius: 9999px;
+    background: var(--primary);
+}
+
+.sc-task-progress {
+    height: 0.25rem;
+    margin: 0.625rem 0 0;
+}
+
+/* ===================================================================
+ * Toggle — the swimlane collapse control
+ *
+ * A ghost square that reads as pressed while the swimlane is collapsed.
+ * Kanboard shows that state by swapping which of its two chevrons is
+ * display:none, so the pressed style keys off the "expand" chevron being
+ * the visible one.
+ * =================================================================== */
+
+a.board-swimlane-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-inline-end: 0.375rem;
+    border-radius: var(--radius-md);
+    color: var(--muted-foreground);
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+a.board-swimlane-toggle:hover,
+a.board-swimlane-toggle:focus-visible {
+    background: var(--accent);
+    color: var(--accent-foreground);
+    text-decoration: none;
+}
+
+a.board-swimlane-toggle:has(> [class*="show-icon-swimlane"]:not([style*="none"])) {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+a.board-swimlane-toggle .fa {
+    font-size: 1rem;
+}
+
+/* ===================================================================
+ * Empty — "There is nothing to show."
+ *
+ * Kanboard prints every empty list as a bare `.alert`, with no modifier.
+ * Those become shadcn's Empty: centred, dashed, quiet, under an inbox
+ * glyph. A modifier (`alert-info`, `alert-error`, the fading flash) keeps
+ * the Alert look, and so does a bare alert inside a form — there it is an
+ * instruction about the form, not the absence of something.
+ * =================================================================== */
+
+.alert:not([class*="alert-"]):not(form .alert) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    margin: 0.75rem 0 1rem;
+    padding: 2.5rem 1.5rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    text-align: center;
+}
+
+.alert:not([class*="alert-"]):not(form .alert)::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 1.75rem;
+    height: 1.75rem;
+    background-color: currentColor;
+    opacity: 0.7;
+    -webkit-mask: var(--shadcn-empty) center / contain no-repeat;
+    mask: var(--shadcn-empty) center / contain no-repeat;
+}
+
+/* ===================================================================
+ * Switch — Kanboard's toggle-on / toggle-off glyphs
+ *
+ * They name the action a menu row takes ("Disable", "Enable"), so each is
+ * drawn as the switch in the state that action leads to: a track and a
+ * knob, the track in the accent when on. icons.css masks the element into
+ * a glyph; the mask comes off here and the knob is the ::before. `i.` is
+ * one element deeper than icons.css's `.fa.fa-fw`, which loads later.
+ * =================================================================== */
+
+i.fa.fa-toggle-on,
+i.fa.fa-toggle-off {
+    position: relative;
+    box-sizing: border-box;
+    width: 1.75rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background-color: var(--input);
+    -webkit-mask-image: none;
+    mask-image: none;
+    vertical-align: middle;
+}
+
+i.fa.fa-toggle-on {
+    background-color: var(--primary);
+}
+
+i.fa.fa-toggle-on::before,
+i.fa.fa-toggle-off::before {
+    content: "";
+    position: absolute;
+    top: 0.125rem;
+    inset-inline-start: 0.125rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    background: var(--background);
+}
+
+i.fa.fa-toggle-on::before {
+    inset-inline-start: 0.875rem;
+}
+
+/* ===================================================================
+ * Attachment — the upload sheet's dropzone and its file list
+ *
+ * components/file-upload.js builds #file-dropzone with the instructions
+ * absolutely positioned at 48% from the bottom. The zone becomes a flex
+ * column that centres an upload glyph over the copy instead; once files
+ * are chosen it holds their list, one bordered row each.
+ * =================================================================== */
+
+#file-dropzone,
+#screenshot-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-height: 12rem;
+    margin: 0 0 1rem;
+    padding: 2rem 1.5rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-neutral);
+    color: var(--muted-foreground);
+    text-align: center;
+    overflow: auto;
+}
+
+#file-dropzone:not(:has(> #file-list))::before,
+#screenshot-zone:not(:has(img))::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    background-color: currentColor;
+    opacity: 0.7;
+    -webkit-mask: var(--shadcn-upload) center / contain no-repeat;
+    mask: var(--shadcn-upload) center / contain no-repeat;
+}
+
+#file-dropzone-inner,
+#screenshot-inner {
+    position: static;
+    width: auto;
+    max-width: 22rem;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+#file-dropzone-inner a,
+#screenshot-inner a {
+    color: var(--foreground);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+#file-dropzone:has(> #file-list) {
+    display: block;
+    min-height: 0;
+    padding: 0.5rem;
+    border-style: solid;
+    background: var(--background);
+    text-align: start;
+}
+
+#file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* The file name is a bare text node, so it is the first, anonymous flex
+ * item. The percentage follows it, the remove control is pushed to the
+ * far end, and the bar and any error take a row of their own. */
+#file-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    list-style: none;
+}
+
+#file-list li > [id^="file-percentage-"] {
+    order: 1;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+}
+
+#file-list li > [id^="file-delete-"] {
+    order: 2;
+    margin-inline-start: auto;
+}
+
+#file-list li > [id^="file-delete-"] a {
+    display: inline-flex;
+    color: var(--muted-foreground);
+}
+
+#file-list li > [id^="file-delete-"] a:hover {
+    color: var(--destructive);
+}
+
+#file-list li > progress {
+    order: 3;
+    flex-basis: 100%;
+    height: 0.375rem;
+}
+
+#file-list li > .file-error {
+    order: 4;
+    flex-basis: 100%;
+    color: var(--destructive);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* ===================================================================
+ * Aspect Ratio — attached images as a grid of cards
+ *
+ * Kanboard floats 250px boxes with a drop shadow. The thumbnails become a
+ * responsive grid; each image is held at 4:3 and cropped to fill it, so a
+ * row of screenshots and photos lines up however each was shot.
+ * =================================================================== */
+
+.file-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+}
+
+.file-thumbnail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    box-shadow: none;
+}
+
+.file-thumbnail img {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 0;
+    background: var(--muted);
+    cursor: zoom-in;
+}
+
+.file-thumbnail img:hover {
+    opacity: 0.85;
+}
+
+.file-thumbnail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    padding: 0.625rem 0.75rem 0.75rem;
+}
+
+.file-thumbnail-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-thumbnail-description {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+}
+
+/* ===================================================================
+ * Carousel — the image slideshow
+ *
+ * A photo reads best on black, so the scrim stays dark in both palettes;
+ * what changes is everything laid over it. The four controls become round
+ * outline icon buttons. icons.css turns a mapped glyph's element into the
+ * mask itself, which would clip a border and a plate away — so here the
+ * element is the button and the glyph moves to ::before, masked by the
+ * same --hi-icon the element carries.
+ *
+ * core JS caps the image at the window height minus 50px, inline; the
+ * vertical padding is exactly those 50px, so the image never scrolls.
+ * =================================================================== */
+
+.image-slideshow-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 25px 4.5rem;
+    background: color-mix(in oklab, #000 92%, transparent);
+}
+
+.image-slideshow-overlay figure {
+    margin: 0;
+}
+
+.image-slideshow-overlay img {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: var(--radius-lg);
+}
+
+.image-slideshow-overlay figcaption {
+    position: absolute;
+    right: auto;
+    bottom: 1rem;
+    left: 50%;
+    max-width: calc(100% - 10rem);
+    overflow: hidden;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 60%);
+    color: #fff;
+    opacity: 1;
+    font-size: 0.8125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.image-slideshow-overlay .slideshow-icon.fa {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgb(255 255 255 / 20%);
+    border-radius: 9999px;
+    background-color: rgb(255 255 255 / 8%);
+    -webkit-mask-image: none;
+    mask-image: none;
+    color: #fff;
+    font-size: 1rem;
+    opacity: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.image-slideshow-overlay .slideshow-icon.fa:hover {
+    background-color: rgb(255 255 255 / 18%);
+    opacity: 1;
+}
+
+.image-slideshow-overlay .slideshow-icon.fa::before {
+    content: "";
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+    background-color: currentColor;
+    -webkit-mask: var(--hi-icon) center / contain no-repeat;
+    mask: var(--hi-icon) center / contain no-repeat;
+}
+
+.image-slideshow-overlay .slideshow-close-icon.fa {
+    top: 1rem;
+    right: 1rem;
+    left: auto;
+}
+
+.image-slideshow-overlay .slideshow-download-icon.fa {
+    top: 1rem;
+    right: 4rem;
+    left: auto;
+}
+
+.image-slideshow-overlay .slideshow-previous-icon.fa {
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+}
+
+.image-slideshow-overlay .slideshow-next-icon.fa {
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+}
+
+/* ===================================================================
+ * Skeleton — a card saving after a drag, and a task view still loading
+ *
+ * Kanboard shows a spinner centred in a card while its new position is
+ * saved, and another inside #external-task-view until the view arrives.
+ * Both become shadcn's Skeleton: the spinner is hidden and a slow shimmer
+ * runs across the space instead.
+ * =================================================================== */
+
+.task-board-saving-icon {
+    inset: 0;
+    z-index: 1;
+    width: auto;
+    margin: 0;
+    border-radius: inherit;
+    background:
+        linear-gradient(90deg, transparent 0%, color-mix(in oklab, var(--foreground) 7%, transparent) 50%, transparent 100%) 0 0 / 200% 100% no-repeat,
+        color-mix(in oklab, var(--card) 55%, transparent);
+    pointer-events: none;
+    animation: sc-shimmer 1.2s ease-in-out infinite;
+}
+
+.task-board-saving-icon .fa {
+    display: none;
+}
+
+#external-task-view:has(> .fa-spinner:only-child) {
+    min-height: 6rem;
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklab, var(--muted) 45%, var(--background)) 50%, var(--muted) 100%) 0 0 / 200% 100%;
+    animation: sc-shimmer 1.2s ease-in-out infinite;
+}
+
+#external-task-view > .fa-spinner:only-child {
+    display: none;
+}
+
+@keyframes sc-shimmer {
+    from {
+        background-position: 150% 0, 0 0;
+    }
+
+    to {
+        background-position: -50% 0, 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .task-board-saving-icon,
+    #external-task-view {
+        animation: none;
+    }
 }

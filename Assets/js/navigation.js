@@ -12,7 +12,6 @@
 (function () {
     'use strict';
 
-    var APP_NAME = 'Kanboard';
     var SEPARATOR = ' › ';
 
     /* --------------------------------------------------------- favicon */
@@ -50,14 +49,25 @@
 
     /* ---------------------------------------------------------- title */
 
+    /* The instance's own name, from Settings → Appearance. It comes down as
+     * the --sc-brand-title custom property — an inline <style> is allowed by
+     * the content security policy and an inline <script> is not. The
+     * template HTML-escapes it, and a <style> element does not decode
+     * entities, so a textarea does that here. */
+    function appName() {
+        var value = getComputedStyle(document.documentElement)
+            .getPropertyValue('--sc-brand-title').trim().replace(/^["']|["']$/g, '');
+        var decoder = document.createElement('textarea');
+
+        decoder.innerHTML = value;
+
+        return decoder.value.trim() === '' ? 'Kanboard' : decoder.value.trim();
+    }
+
     function setTitle() {
+        var name = appName();
         /* The home crumb is the root, not part of the page's name. */
         var crumbs = document.querySelectorAll('.sc-crumbs li:not(.sc-crumb-home)');
-
-        if (crumbs.length === 0) {
-            return;
-        }
-
         var parts = [];
 
         crumbs.forEach(function (li) {
@@ -68,12 +78,23 @@
             }
         });
 
-        if (parts.length === 0) {
+        if (parts.length > 0) {
+            /* Deepest first: a browser tab shows the front of the string. */
+            document.title = parts.reverse().join(SEPARATOR) + ' — ' + name;
             return;
         }
 
-        /* Deepest first: a browser tab shows the front of the string. */
-        document.title = parts.reverse().join(SEPARATOR) + ' — ' + APP_NAME;
+        /* No trail: the login and password-reset screens, a public board.
+         * core/layout.php titles those with the page's own name, or — with
+         * nothing else to say — the bare word "Kanboard", which is the one
+         * place the product name stood in for the site's. */
+        var current = document.title.replace(/\s+/g, ' ').trim();
+
+        if (current === '' || current === 'Kanboard') {
+            document.title = name;
+        } else if (current.slice(-name.length) !== name) {
+            document.title = current + ' — ' + name;
+        }
     }
 
     /* -------------------------------------------------------- progress */
